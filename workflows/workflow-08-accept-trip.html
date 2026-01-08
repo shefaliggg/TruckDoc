@@ -1,1 +1,855 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Accept Trip (Driver) - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>Accept Trip (Driver)</h1><p>Driver views and accepts assigned trips</p></div><div class='section'><h2> Workflow Goal</h2><p>Driver views and accepts assigned trips</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Accept Trip - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        header h1 { font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        header p { color: var(--text-secondary); font-size: 1.1rem; }
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--secondary-color); }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .section h3 { color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .feature-list li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .api-endpoint {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        .api-endpoint code { color: var(--secondary-color); font-weight: 600; }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: Courier New, monospace;
+            font-size: 0.9rem;
+        }
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .wireframe {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .wireframe-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .mobile-mockup {
+            width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 600px;
+            position: relative;
+        }
+        .mobile-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mobile-content {
+            padding: 1rem;
+            background: #f8fafc;
+            min-height: 500px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        .btn-outline {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid var(--warning-color);
+        }
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid var(--primary-color);
+        }
+        .timer {
+            background: var(--warning-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link"> Back to Index</a>
+            <h1> Driver Accept/Reject Trip</h1>
+            <p>Driver receives notification and decides whether to accept or reject trip assignment</p>
+        </header>
+
+        <section class="section">
+            <h2> Workflow Goal</h2>
+            <p>After admin assigns a driver to a booking, driver receives push notification and must accept or reject the trip within deadline (default 2 hours). Driver can view complete trip details including pickup/delivery locations, distance, estimated earnings, and special instructions before making decision. Acceptance confirms driver commitment and starts trip journey.</p>
+        </section>
+
+        <section class="section">
+            <h2> Frontend Pages</h2>
+            <h3>TruckDriver Mobile App</h3>
+            <ul class="feature-list">
+                <li><strong>Push Notification:</strong> Immediate alert when trip assigned</li>
+                <li><strong>Trip Request Screen:</strong> Full details of assigned trip with countdown timer</li>
+                <li><strong>Accept Confirmation:</strong> Confirm acceptance and start preparation</li>
+                <li><strong>Reject Modal:</strong> Select rejection reason from predefined options</li>
+                <li><strong>Trip Queue:</strong> View pending and accepted trips</li>
+                <li><strong>Earnings Calculator:</strong> Show estimated earnings for trip</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> API Endpoints</h2>
+            
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/driver/trips/pending</code>
+                <p>Get trips assigned to driver awaiting acceptance</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/driver/trips/:tripId/accept</code>
+                <p>Driver accepts assigned trip</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/driver/trips/:tripId/reject</code>
+                <p>Driver rejects assigned trip with reason</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/driver/trips/:tripId/details</code>
+                <p>Get detailed trip information</p>
+            </div>
+
+            <h3>Request Example: Accept Trip</h3>
+            <div class="code-block">
+POST /api/driver/trips/65a1b2c3d4e5f6789012999/accept
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
+Body: {
+  "acceptedAt": "2026-01-08T15:30:00Z",
+  "currentLocation": {
+    "latitude": 19.0760,
+    "longitude": 72.8777
+  },
+  "estimatedArrivalAtPickup": "2026-01-09T09:00:00Z"
+}
+            </div>
+
+            <h3>Response Example</h3>
+            <div class="code-block">
+{
+  "success": true,
+  "message": "Trip accepted successfully",
+  "data": {
+    "_id": "65a1b2c3d4e5f6789012999",
+    "bookingId": "65a1b2c3d4e5f6789012345",
+    "status": "accepted",
+    "acceptedAt": "2026-01-08T15:30:00Z",
+    "pickup": {
+      "address": "Warehouse A, Mumbai",
+      "contactPerson": "Raj Kumar",
+      "phone": "+91 98765 43210",
+      "scheduledTime": "2026-01-09T10:00:00Z"
+    },
+    "delivery": {
+      "address": "Depot 5, Pune",
+      "contactPerson": "Amit Shah",
+      "phone": "+91 97654 32109",
+      "scheduledTime": "2026-01-09T16:00:00Z"
+    },
+    "distance": 245,
+    "estimatedDuration": 360,
+    "estimatedEarnings": 4500,
+    "customerName": "ABC Logistics",
+    "specialInstructions": "Fragile items - handle with care"
+  }
+}
+            </div>
+
+            <h3>Request Example: Reject Trip</h3>
+            <div class="code-block">
+POST /api/driver/trips/65a1b2c3d4e5f6789012999/reject
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
+Body: {
+  "rejectionReason": "Vehicle maintenance scheduled",
+  "rejectedAt": "2026-01-08T15:25:00Z",
+  "additionalNotes": "Truck servicing appointment today"
+}
+
+Response: {
+  "success": true,
+  "message": "Trip rejected. Admin will be notified to assign another driver.",
+  "data": {
+    "tripId": "65a1b2c3d4e5f6789012999",
+    "status": "rejected",
+    "rejectedAt": "2026-01-08T15:25:00Z",
+    "rejectionReason": "Vehicle maintenance scheduled"
+  }
+}
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Database Models</h2>
+            
+            <h3>Trip Model (Acceptance/Rejection Fields)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>status</td>
+                        <td>String</td>
+                        <td>pending_acceptance | accepted | rejected | in_progress | completed</td>
+                    </tr>
+                    <tr>
+                        <td>acceptedAt</td>
+                        <td>Date</td>
+                        <td>Timestamp when driver accepted</td>
+                    </tr>
+                    <tr>
+                        <td>rejectedAt</td>
+                        <td>Date</td>
+                        <td>Timestamp when driver rejected</td>
+                    </tr>
+                    <tr>
+                        <td>rejectionReason</td>
+                        <td>String</td>
+                        <td>enum: ['vehicle_issue', 'health_issue', 'personal_emergency', 'schedule_conflict', 'other']</td>
+                    </tr>
+                    <tr>
+                        <td>rejectionNotes</td>
+                        <td>String</td>
+                        <td>Additional notes from driver</td>
+                    </tr>
+                    <tr>
+                        <td>acceptanceDeadline</td>
+                        <td>Date</td>
+                        <td>Deadline for driver response</td>
+                    </tr>
+                    <tr>
+                        <td>notificationsSent</td>
+                        <td>Array</td>
+                        <td>Log of all notifications sent to driver</td>
+                    </tr>
+                    <tr>
+                        <td>estimatedArrivalAtPickup</td>
+                        <td>Date</td>
+                        <td>Driver's ETA at pickup location</td>
+                    </tr>
+                    <tr>
+                        <td>driverCurrentLocation</td>
+                        <td>Object</td>
+                        <td>{ latitude, longitude } at acceptance time</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Notification Model</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>recipientId</td>
+                        <td>ObjectId</td>
+                        <td>Driver receiving notification (ref: Driver)</td>
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>String</td>
+                        <td>enum: ['trip_assignment', 'deadline_reminder', 'trip_cancelled']</td>
+                    </tr>
+                    <tr>
+                        <td>title</td>
+                        <td>String</td>
+                        <td>Notification title</td>
+                    </tr>
+                    <tr>
+                        <td>body</td>
+                        <td>String</td>
+                        <td>Notification message</td>
+                    </tr>
+                    <tr>
+                        <td>data</td>
+                        <td>Object</td>
+                        <td>Additional payload (tripId, bookingId, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td>isRead</td>
+                        <td>Boolean</td>
+                        <td>Whether notification has been read</td>
+                    </tr>
+                    <tr>
+                        <td>sentAt</td>
+                        <td>Date</td>
+                        <td>Notification sent timestamp</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section">
+            <h2> Screen Wireframes</h2>
+            
+            <div class="wireframe-grid">
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Trip Notification</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span></span>
+                            <h3 style="font-size: 1rem;">Trip Assignment</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div class="alert alert-warning">
+                                <strong> New Trip Assigned!</strong><br>
+                                You have been assigned a new trip. Please accept or reject within the deadline.
+                            </div>
+
+                            <div class="timer">
+                                1:45:32 Remaining
+                            </div>
+
+                            <div class="card">
+                                <h4 style="margin-bottom: 1rem;">Trip #BK2601001</h4>
+                                
+                                <div style="background: #dcfce7; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+                                    <div style="font-size: 0.75rem; color: #166534; margin-bottom: 0.25rem;">PICKUP</div>
+                                    <div style="font-weight: 600; color: #166534;"> Warehouse A, Mumbai</div>
+                                    <div style="font-size: 0.875rem; color: #166534;">Jan 9, 2026  10:00 AM</div>
+                                </div>
+
+                                <div style="text-align: center; color: var(--text-secondary); margin: 0.5rem 0;">
+                                     245 km  6 hours
+                                </div>
+
+                                <div style="background: #fef3c7; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+                                    <div style="font-size: 0.75rem; color: #92400e; margin-bottom: 0.25rem;">DELIVERY</div>
+                                    <div style="font-weight: 600; color: #92400e;"> Depot 5, Pune</div>
+                                    <div style="font-size: 0.875rem; color: #92400e;">Jan 9, 2026  4:00 PM</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <span class="info-label">Customer</span>
+                                    <span class="info-value">ABC Logistics</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Truck Type</span>
+                                    <span class="info-value">14ft Container</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Estimated Earnings</span>
+                                    <span class="info-value" style="color: var(--success-color);">₹4,500</span>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-success" style="margin-bottom: 0.75rem;"> Accept Trip</button>
+                            <button class="btn btn-danger"> Reject Trip</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Trip Details</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Back</span>
+                            <h3 style="font-size: 1rem;">Trip Details</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div class="card">
+                                <h4 style="margin-bottom: 1rem;">Complete Trip Information</h4>
+                                
+                                <h5 style="margin: 1rem 0 0.5rem; color: var(--primary-color);">Pickup Details</h5>
+                                <div class="info-row">
+                                    <span class="info-label">Location</span>
+                                    <span class="info-value">Warehouse A, Mumbai</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Contact Person</span>
+                                    <span class="info-value">Raj Kumar</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">+91 98765 43210</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Time</span>
+                                    <span class="info-value">Jan 9, 10:00 AM</span>
+                                </div>
+
+                                <h5 style="margin: 1rem 0 0.5rem; color: var(--primary-color);">Delivery Details</h5>
+                                <div class="info-row">
+                                    <span class="info-label">Location</span>
+                                    <span class="info-value">Depot 5, Pune</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Contact Person</span>
+                                    <span class="info-value">Amit Shah</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">+91 97654 32109</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Time</span>
+                                    <span class="info-value">Jan 9, 4:00 PM</span>
+                                </div>
+
+                                <h5 style="margin: 1rem 0 0.5rem; color: var(--primary-color);">Trip Information</h5>
+                                <div class="info-row">
+                                    <span class="info-label">Distance</span>
+                                    <span class="info-value">245 km</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Est. Duration</span>
+                                    <span class="info-value">6 hours</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Earnings</span>
+                                    <span class="info-value" style="color: var(--success-color);">₹4,500</span>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <strong> Special Instructions:</strong><br>
+                                Fragile items - handle with care. Call customer before pickup.
+                            </div>
+
+                            <button class="btn btn-success">Accept This Trip</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Reject Reason</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Cancel</span>
+                            <h3 style="font-size: 1rem;">Reject Trip</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                Please select a reason for rejecting this trip. This helps us improve our service.
+                            </p>
+
+                            <div style="background: white; border: 2px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="radio" name="reason" style="margin-right: 0.75rem;" checked>
+                                    <span style="font-weight: 600;"> Vehicle Issue</span>
+                                </label>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 1.75rem; margin-top: 0.25rem;">
+                                    Truck breakdown or maintenance required
+                                </p>
+                            </div>
+
+                            <div style="background: white; border: 2px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="radio" name="reason" style="margin-right: 0.75rem;">
+                                    <span style="font-weight: 600;"> Health Issue</span>
+                                </label>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 1.75rem; margin-top: 0.25rem;">
+                                    Not feeling well or medical emergency
+                                </p>
+                            </div>
+
+                            <div style="background: white; border: 2px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="radio" name="reason" style="margin-right: 0.75rem;">
+                                    <span style="font-weight: 600;"> Personal Emergency</span>
+                                </label>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 1.75rem; margin-top: 0.25rem;">
+                                    Family or personal urgent matter
+                                </p>
+                            </div>
+
+                            <div style="background: white; border: 2px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="radio" name="reason" style="margin-right: 0.75rem;">
+                                    <span style="font-weight: 600;"> Schedule Conflict</span>
+                                </label>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 1.75rem; margin-top: 0.25rem;">
+                                    Already committed to another job
+                                </p>
+                            </div>
+
+                            <div style="background: white; border: 2px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="radio" name="reason" style="margin-right: 0.75rem;">
+                                    <span style="font-weight: 600;"> Other Reason</span>
+                                </label>
+                            </div>
+
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Additional Notes (Optional)</label>
+                            <textarea style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-family: inherit; resize: vertical; min-height: 80px;" placeholder="Provide more details..."></textarea>
+
+                            <button class="btn btn-danger" style="margin-top: 1rem;">Confirm Rejection</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Acceptance Success</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header" style="background: var(--success-color);">
+                            <span></span>
+                            <h3 style="font-size: 1rem;">Trip Accepted</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div style="text-align: center; padding: 2rem 1rem;">
+                                <div style="width: 80px; height: 80px; background: var(--success-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;"></div>
+                                <h3 style="color: var(--success-color); margin-bottom: 1rem;">Trip Accepted!</h3>
+                                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                                    Customer and admin have been notified. Prepare your truck for pickup.
+                                </p>
+                            </div>
+
+                            <div class="card">
+                                <h4 style="margin-bottom: 1rem;">Next Steps</h4>
+                                <ul style="margin-left: 1.5rem; color: var(--text-secondary); line-height: 2;">
+                                    <li>Inspect your truck and ensure it's ready</li>
+                                    <li>Arrive at pickup location by 10:00 AM</li>
+                                    <li>Call customer 30 mins before arrival</li>
+                                    <li>Start trip from the app when loading begins</li>
+                                </ul>
+                            </div>
+
+                            <div class="card" style="background: #dcfce7; border-color: var(--success-color);">
+                                <div class="info-row" style="border-bottom: none;">
+                                    <span class="info-label">Pickup Location</span>
+                                    <span class="info-value">Warehouse A, Mumbai</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none;">
+                                    <span class="info-label">Pickup Time</span>
+                                    <span class="info-value">Jan 9, 10:00 AM</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none;">
+                                    <span class="info-label">Contact</span>
+                                    <span class="info-value">Raj Kumar<br>+91 98765 43210</span>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" style="margin-bottom: 0.75rem;"> Navigate to Pickup</button>
+                            <button class="btn btn-outline"> Call Customer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Implementation Flow</h2>
+            
+            <h3>Trip Assignment Notification Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Admin assigns driver to booking</li>
+                <li>System creates Trip record with status 'pending_acceptance'</li>
+                <li>System calculates acceptance deadline (current time + 2 hours)</li>
+                <li>Push notification sent to driver's mobile app</li>
+                <li>SMS notification sent as backup</li>
+                <li>Driver opens app and views trip request</li>
+                <li>App displays countdown timer showing time remaining</li>
+                <li>Driver can view full trip details before deciding</li>
+            </ol>
+
+            <h3>Acceptance Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Driver clicks "Accept Trip" button</li>
+                <li>App captures current location and ETA</li>
+                <li>POST request sent to /api/driver/trips/:tripId/accept</li>
+                <li>System updates trip status to 'accepted'</li>
+                <li>System records acceptedAt timestamp</li>
+                <li>Driver availability set to false</li>
+                <li>Push notification sent to customer: "Driver assigned"</li>
+                <li>Email notification sent to admin with acceptance confirmation</li>
+                <li>Driver sees success screen with next steps</li>
+                <li>Trip moves to "Active Trips" in driver app</li>
+            </ol>
+
+            <h3>Rejection Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Driver clicks "Reject Trip" button</li>
+                <li>App shows rejection reason selection screen</li>
+                <li>Driver selects reason and adds optional notes</li>
+                <li>Driver confirms rejection</li>
+                <li>POST request sent to /api/driver/trips/:tripId/reject</li>
+                <li>System updates trip status to 'rejected'</li>
+                <li>System records rejectedAt timestamp and reason</li>
+                <li>Driver availability remains true for reassignment</li>
+                <li>Admin receives immediate notification of rejection</li>
+                <li>System triggers reassignment workflow for admin</li>
+                <li>Booking status reverts to 'awaiting_driver_assignment'</li>
+            </ol>
+
+            <h3>Deadline Expiry Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Cron job runs every 5 minutes checking pending trips</li>
+                <li>If acceptanceDeadline passed and status still 'pending_acceptance'</li>
+                <li>System auto-rejects trip with reason 'deadline_expired'</li>
+                <li>Admin receives notification of expired assignment</li>
+                <li>System marks driver as 'unresponsive' (impacts future assignments)</li>
+                <li>Booking returns to unassigned queue for admin reassignment</li>
+            </ol>
+        </section>
+
+        <section class="section">
+            <h2> Business Rules & Validation</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Acceptance Deadline:</strong> Driver must respond within 2 hours (configurable)</li>
+                <li><strong>One Response Only:</strong> Once accepted/rejected, cannot change decision</li>
+                <li><strong>Location Verification:</strong> Driver's current location captured at acceptance</li>
+                <li><strong>Concurrent Trip Prevention:</strong> Cannot accept new trip if already on active trip</li>
+                <li><strong>Deadline Reminder:</strong> Push notification sent 30 mins before deadline</li>
+                <li><strong>Auto Rejection:</strong> Trip auto-rejected if deadline expires</li>
+                <li><strong>Rejection Impact:</strong> High rejection rate affects future trip assignments</li>
+                <li><strong>Customer Notification:</strong> Customer notified immediately on acceptance</li>
+                <li><strong>Earnings Preview:</strong> Estimated earnings shown before acceptance</li>
+                <li><strong>Special Instructions:</strong> Driver must acknowledge special instructions</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Security Considerations</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Driver Authentication:</strong> Only assigned driver can accept/reject trip</li>
+                <li><strong>JWT Verification:</strong> Valid token required for all trip actions</li>
+                <li><strong>Timestamp Validation:</strong> Accept/reject timestamp verified server-side</li>
+                <li><strong>Rate Limiting:</strong> Max 5 trip actions per minute per driver</li>
+                <li><strong>Location Verification:</strong> GPS location validated against known patterns</li>
+                <li><strong>Action Logging:</strong> All acceptance/rejection logged with device info</li>
+                <li><strong>Notification Security:</strong> Trip details only sent via secure channels</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Notification Templates</h2>
+            
+            <h3>Trip Assignment Push Notification</h3>
+            <div class="code-block">
+{
+  "title": " New Trip Assigned!",
+  "body": "Mumbai  Pune | ₹4,500 | Accept within 2 hours",
+  "data": {
+    "tripId": "65a1b2c3d4e5f6789012999",
+    "bookingId": "65a1b2c3d4e5f6789012345",
+    "route": "Mumbai  Pune",
+    "earnings": 4500,
+    "deadline": "2026-01-08T17:00:00Z"
+  },
+  "priority": "high",
+  "sound": "default"
+}
+            </div>
+
+            <h3>Deadline Reminder Notification</h3>
+            <div class="code-block">
+{
+  "title": " Trip Acceptance Deadline Approaching",
+  "body": "Only 30 minutes left to accept trip #BK2601001",
+  "data": {
+    "tripId": "65a1b2c3d4e5f6789012999",
+    "minutesRemaining": 30
+  },
+  "priority": "high"
+}
+            </div>
+
+            <h3>SMS Notification</h3>
+            <div class="code-block">
+VCG Transport: New trip assigned! MumbaiPune, ₹4,500. 
+Accept within 2 hours. Open app to view details.
+Trip ID: BK2601001
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

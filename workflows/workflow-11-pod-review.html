@@ -1,1 +1,332 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>POD Review & Approval - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>POD Review & Approval</h1><p>Admin reviews and approves POD</p></div><div class='section'><h2> Workflow Goal</h2><p>Admin reviews and approves POD</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>POD Review & Approval - VCG Transport</title>
+	<style>
+		:root {
+			--primary-color: #2563eb;
+			--secondary-color: #1e40af;
+			--success-color: #10b981;
+			--warning-color: #f59e0b;
+			--danger-color: #ef4444;
+			--border-color: #e5e7eb;
+			--text-primary: #111827;
+			--text-secondary: #6b7280;
+			--light-bg: #f9fafb;
+			--card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		}
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+			line-height: 1.6;
+			color: var(--text-primary);
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+			padding: 2rem 1rem;
+		}
+		.container { max-width: 1400px; margin: 0 auto; }
+		header {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(10px);
+			border-radius: 16px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: var(--card-shadow);
+		}
+		header h1 { font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+		header p { color: var(--text-secondary); font-size: 1.1rem; }
+		.back-link {
+			display: inline-block;
+			color: var(--primary-color);
+			text-decoration: none;
+			margin-bottom: 1rem;
+			font-weight: 500;
+			transition: color 0.3s;
+		}
+		.back-link:hover { color: var(--secondary-color); }
+		.section {
+			background: white;
+			border-radius: 16px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: var(--card-shadow);
+		}
+		.section h2 {
+			color: var(--primary-color);
+			border-bottom: 3px solid var(--primary-color);
+			padding-bottom: 0.75rem;
+			margin-bottom: 1.5rem;
+			font-size: 1.5rem;
+		}
+		.section h3 { color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+		.feature-list { list-style: none; padding: 0; }
+		.feature-list li {
+			padding: 0.75rem 0;
+			padding-left: 2rem;
+			position: relative;
+			border-bottom: 1px solid var(--border-color);
+		}
+		.feature-list li:before {
+			content: "";
+			position: absolute;
+			left: 0;
+			color: var(--success-color);
+			font-weight: bold;
+			font-size: 1.2rem;
+		}
+		.api-endpoint {
+			background: var(--light-bg);
+			border-radius: 8px;
+			padding: 1rem;
+			margin: 1rem 0;
+			font-family: monospace;
+			color: var(--secondary-color);
+		}
+		.wireframe {
+			background: var(--light-bg);
+			border: 1px dashed var(--border-color);
+			border-radius: 8px;
+			padding: 1.5rem;
+			margin: 1rem 0;
+			text-align: center;
+			color: var(--text-secondary);
+			font-size: 1.1rem;
+		}
+		.table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 1rem 0;
+		}
+		.table th, .table td {
+			border: 1px solid var(--border-color);
+			padding: 0.75rem 1rem;
+			text-align: left;
+		}
+		.table th {
+			background: var(--light-bg);
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<header>
+		<a href="../index.html" class="back-link">&larr; Back to Index</a>
+		<h1>POD Review & Approval</h1>
+		<p>Admin reviews and approves Proof of Delivery (POD) documents uploaded by drivers, ensuring shipment completion and compliance before proceeding to invoicing and settlement.</p>
+	</header>
+
+	<div class="section">
+		<h2>Workflow Goal</h2>
+		<p>To enable admins to efficiently review, approve, or reject PODs submitted by drivers, ensuring all required documentation is valid and complete before payment and settlement processes are triggered.</p>
+	</div>
+
+	<div class="section">
+		<h2>Frontend Pages</h2>
+		<ul class="feature-list">
+			<li><b>Admin Dashboard &rarr; POD Review Tab:</b> List of all pending PODs with shipment, driver, and trip details.</li>
+			<li><b>POD Detail View:</b> Preview POD image/PDF, shipment info, driver notes, and action buttons (Approve/Reject).</li>
+			<li><b>Rejection Modal:</b> Capture reason for rejection and notify driver.</li>
+		</ul>
+		<h3>Wireframes</h3>
+		<div class="wireframe-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-top: 2rem;">
+			<div class="wireframe" style="border: 2px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+				<div class="wireframe-header" style="background: #2563eb; color: white; padding: 1rem; text-align: center; font-weight: 600;">Admin Dashboard - POD Review List</div>
+				<div style="padding: 1.5rem;">
+					<table style="width: 100%; border-collapse: collapse;">
+						<thead>
+							<tr style="background: #f9fafb; color: #2563eb;">
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Shipment #</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Driver</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Date</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">POD Status</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">View</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Approve</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Reject</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td style="padding: 0.75rem;">12345</td>
+								<td style="padding: 0.75rem;">John Doe</td>
+								<td style="padding: 0.75rem;">2026-01-08</td>
+								<td style="padding: 0.75rem;"><span class="badge badge-warning" style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Pending</span></td>
+								<td style="padding: 0.75rem; text-align: center;">👁️</td>
+								<td style="padding: 0.75rem; text-align: center;">✔️</td>
+								<td style="padding: 0.75rem; text-align: center;">✖️</td>
+							</tr>
+							<tr>
+								<td style="padding: 0.75rem;">12346</td>
+								<td style="padding: 0.75rem;">Jane Roe</td>
+								<td style="padding: 0.75rem;">2026-01-08</td>
+								<td style="padding: 0.75rem;"><span class="badge badge-warning" style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Pending</span></td>
+								<td style="padding: 0.75rem; text-align: center;">👁️</td>
+								<td style="padding: 0.75rem; text-align: center;">✔️</td>
+								<td style="padding: 0.75rem; text-align: center;">✖️</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="wireframe" style="border: 2px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+				<div class="wireframe-header" style="background: #2563eb; color: white; padding: 1rem; text-align: center; font-weight: 600;">Mobile - POD Detail</div>
+				<div class="mobile-mockup" style="width: 375px; margin: 2rem auto; background: white; min-height: 500px; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+					<div class="mobile-header" style="background: #2563eb; color: white; padding: 1rem; display: flex; align-items: center; justify-content: space-between;">
+						<span>Back</span>
+						<h3 style="font-size: 1rem; margin: 0;">POD Detail</h3>
+						<span></span>
+					</div>
+					<div class="mobile-content" style="padding: 1rem; background: #f8fafc; min-height: 400px;">
+						<div class="photo-preview" style="width: 100%; height: 180px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; border: 1px solid #e5e7eb;">
+							<span style="font-size: 2rem; color: #6b7280;">POD Image</span>
+						</div>
+						<div class="card" style="background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+							<div class="info-row" style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+								<span class="info-label" style="color: #6b7280; font-size: 0.875rem;">Shipment</span>
+								<span class="info-value" style="color: #111827; font-weight: 600;">12345</span>
+							</div>
+							<div class="info-row" style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+								<span class="info-label" style="color: #6b7280; font-size: 0.875rem;">Driver</span>
+								<span class="info-value" style="color: #111827; font-weight: 600;">John Doe</span>
+							</div>
+							<div class="info-row" style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+								<span class="info-label" style="color: #6b7280; font-size: 0.875rem;">Date</span>
+								<span class="info-value" style="color: #111827; font-weight: 600;">2026-01-08</span>
+							</div>
+						</div>
+						<div style="display: flex; gap: 1rem;">
+							<button class="btn btn-success" style="background: #10b981; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; width: 100%; text-align: center;">Approve</button>
+							<button class="btn btn-danger" style="background: #ef4444; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; width: 100%; text-align: center;">Reject</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="section">
+		<h2>API Endpoints</h2>
+		<h3>1. Get Pending PODs</h3>
+		<div class="api-endpoint">GET /api/pods/pending</div>
+		<pre class="api-endpoint">Response (200 OK):
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "abc123",
+      "shipmentId": "ship456",
+      "driverId": "drv789",
+      "fileUrl": "https://s3.bucket/pod/abc123.jpg",
+      "status": "pending",
+      "uploadedAt": "2026-01-08T10:00:00Z"
+    }
+  ]
+}</pre>
+		<h3>2. Get POD Details</h3>
+		<div class="api-endpoint">GET /api/pods/:podId</div>
+		<pre class="api-endpoint">Response (200 OK):
+{
+  "success": true,
+  "data": {
+    "_id": "abc123",
+    "shipmentId": "ship456",
+    "driverId": "drv789",
+    "status": "pending",
+    "fileUrl": "https://s3.bucket/pod/abc123.jpg",
+    "uploadedAt": "2026-01-08T10:00:00Z"
+  }
+}</pre>
+		<h3>3. Approve POD</h3>
+		<div class="api-endpoint">POST /api/pods/:podId/approve</div>
+		<pre class="api-endpoint">Request:
+{
+  "notes": "POD verified successfully"
+}
+Response (200 OK):
+{
+  "success": true,
+  "message": "POD approved. Invoice generation triggered.",
+  "data": {
+    "podId": "abc123",
+    "status": "approved",
+    "reviewedBy": "admin123",
+    "reviewedAt": "2026-01-08T11:00:00Z",
+    "invoiceId": "inv789"
+  }
+}</pre>
+		<h3>4. Reject POD</h3>
+		<div class="api-endpoint">POST /api/pods/:podId/reject</div>
+		<pre class="api-endpoint">Request:
+{
+  "reason": "Image is unclear",
+  "actionRequired": "Resubmit POD"
+}
+Response (200 OK):
+{
+  "success": true,
+  "message": "POD rejected. Driver notified.",
+  "data": {
+    "podId": "abc123",
+    "status": "rejected",
+    "rejectionReason": "Image is unclear",
+    "reviewedBy": "admin123",
+    "reviewedAt": "2026-01-08T11:00:00Z"
+  }
+}
+Error (400):
+{
+  "success": false,
+  "error": "Reason is required for rejection"
+}</pre>
+	</div>
+
+	<div class="section">
+		<h2>Database Models</h2>
+		<table class="table">
+			<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+			<tr><td>_id</td><td>ObjectId</td><td>Unique POD ID</td></tr>
+			<tr><td>shipmentId</td><td>ObjectId</td><td>Reference to Shipment</td></tr>
+			<tr><td>driverId</td><td>ObjectId</td><td>Reference to Driver</td></tr>
+			<tr><td>fileUrl</td><td>String</td><td>POD file (image/pdf) URL</td></tr>
+			<tr><td>status</td><td>String</td><td>pending | approved | rejected</td></tr>
+			<tr><td>rejectionReason</td><td>String</td><td>Reason for rejection (if any)</td></tr>
+			<tr><td>reviewedBy</td><td>ObjectId</td><td>Admin who reviewed</td></tr>
+			<tr><td>reviewedAt</td><td>Date</td><td>Review timestamp</td></tr>
+		</table>
+	</div>
+
+	<div class="section">
+		<h2>Implementation & Business Rules</h2>
+		<h3>Workflow Steps</h3>
+		<ul class="feature-list">
+			<li><b>Step 1:</b> Driver uploads POD photos/documents after delivery</li>
+			<li><b>Step 2:</b> Admin dashboard displays POD in "Pending Review" queue</li>
+			<li><b>Step 3:</b> Admin reviews POD image quality, delivery confirmation, signature</li>
+			<li><b>Step 4a (Approve):</b> Triggers invoice generation, notifies customer, marks trip as completed</li>
+			<li><b>Step 4b (Reject):</b> Notifies driver, allows resubmission, holds payment processing</li>
+			<li><b>Step 5:</b> All review actions logged for audit trail</li>
+		</ul>
+		<h3>Business Rules</h3>
+		<ul class="feature-list">
+			<li>PODs must be reviewed within 24 hours of upload (SLA).</li>
+			<li>Only approved PODs trigger invoice and settlement workflows.</li>
+			<li>Rejected PODs notify the driver with detailed rejection reason and resubmission instructions.</li>
+			<li>Image quality: Minimum resolution 1024x768, clear visibility of goods and signature.</li>
+			<li>Maximum 3 resubmissions allowed before manual admin intervention.</li>
+			<li>All actions are logged with timestamp and admin name for compliance.</li>
+		</ul>
+	</div>
+
+	<div class="section">
+		<h2>Security & Compliance</h2>
+		<ul class="feature-list">
+			<li>Only users with Admin role can review/approve/reject PODs.</li>
+			<li>All file access is secured via signed URLs.</li>
+			<li>Audit logs maintained for all review actions.</li>
+		</ul>
+	</div>
+</div>
+</body>
+</html>

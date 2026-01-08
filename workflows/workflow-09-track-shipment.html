@@ -1,1 +1,941 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Track Shipment (User) - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>Track Shipment (User)</h1><p>Real-time GPS tracking of shipment</p></div><div class='section'><h2> Workflow Goal</h2><p>Real-time GPS tracking of shipment</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Shipment - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        header h1 { font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        header p { color: var(--text-secondary); font-size: 1.1rem; }
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--secondary-color); }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .section h3 { color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .feature-list li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .api-endpoint {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        .api-endpoint code { color: var(--secondary-color); font-weight: 600; }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: Courier New, monospace;
+            font-size: 0.9rem;
+        }
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .wireframe {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .wireframe-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .mobile-mockup {
+            width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 600px;
+            position: relative;
+        }
+        .mobile-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mobile-content {
+            padding: 1rem;
+            background: #f8fafc;
+            min-height: 500px;
+        }
+        .map-container {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            height: 300px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border: 2px solid var(--border-color);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+        .timeline-item:before {
+            content: "";
+            position: absolute;
+            left: -2rem;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success-color);
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--success-color);
+        }
+        .timeline-item.pending:before {
+            background: var(--border-color);
+            box-shadow: 0 0 0 2px var(--border-color);
+        }
+        .timeline-item.active:before {
+            background: var(--warning-color);
+            box-shadow: 0 0 0 2px var(--warning-color);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .timeline-item:after {
+            content: "";
+            position: absolute;
+            left: -1.69rem;
+            top: 12px;
+            width: 2px;
+            height: 100%;
+            background: var(--border-color);
+        }
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+        .desktop-mockup {
+            background: #f8fafc;
+            padding: 1.5rem;
+            min-height: 700px;
+        }
+        .eta-badge {
+            background: var(--warning-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link"> Back to Index</a>
+            <h1> Real-Time Shipment Tracking</h1>
+            <p>Track live location and status updates of shipments in transit</p>
+        </header>
+
+        <section class="section">
+            <h2> Workflow Goal</h2>
+            <p>Provide real-time GPS tracking for all active shipments. Customers can track their shipment location, view ETA, and receive status updates. Drivers update trip status at each milestone (pickup started, in transit, delivery started). Admin dashboard shows live map of all active trips. System calculates dynamic ETA based on current location and traffic conditions.</p>
+        </section>
+
+        <section class="section">
+            <h2> Frontend Pages</h2>
+            
+            <h3>TruckUser Mobile App (Customer)</h3>
+            <ul class="feature-list">
+                <li><strong>Live Map View:</strong> Real-time truck location on interactive map</li>
+                <li><strong>Trip Timeline:</strong> Visual timeline showing completed and upcoming milestones</li>
+                <li><strong>ETA Display:</strong> Dynamic estimated time of arrival</li>
+                <li><strong>Driver Info:</strong> Driver name, photo, phone, truck details</li>
+                <li><strong>Share Tracking:</strong> Share live tracking link with others</li>
+                <li><strong>Status Notifications:</strong> Push alerts for status changes</li>
+            </ul>
+
+            <h3>TruckDriver Mobile App</h3>
+            <ul class="feature-list">
+                <li><strong>Active Trip Screen:</strong> Current trip with navigation</li>
+                <li><strong>Status Update Buttons:</strong> Quick actions to update trip status</li>
+                <li><strong>Route Optimization:</strong> Suggested optimal route</li>
+                <li><strong>Checkpoint Updates:</strong> Mark milestones as complete</li>
+            </ul>
+
+            <h3>TruckAdmin Dashboard</h3>
+            <ul class="feature-list">
+                <li><strong>Live Fleet Map:</strong> All active trucks on single map view</li>
+                <li><strong>Trip List:</strong> Real-time status of all ongoing trips</li>
+                <li><strong>Geofence Alerts:</strong> Notifications when trucks enter/exit zones</li>
+                <li><strong>Route Monitoring:</strong> Compare actual vs planned route</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> API Endpoints</h2>
+            
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/tracking/:bookingId</code>
+                <p>Get real-time tracking data for booking (public endpoint with tracking token)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/driver/location/update</code>
+                <p>Driver app sends location updates every 30 seconds</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/driver/trips/:tripId/status</code>
+                <p>Driver updates trip status (pickup_started, in_transit, delivery_started, etc.)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/admin/fleet/live</code>
+                <p>Get live location of all active trucks</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/tracking/:bookingId/history</code>
+                <p>Get location history for completed or active trip</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>WS</strong> <code>wss://api.vcgtransport.com/tracking/:bookingId</code>
+                <p>WebSocket connection for real-time location updates</p>
+            </div>
+
+            <h3>Request Example: Update Location</h3>
+            <div class="code-block">
+POST /api/driver/location/update
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
+Body: {
+  "tripId": "65a1b2c3d4e5f6789012999",
+  "location": {
+    "latitude": 19.1234,
+    "longitude": 72.8765,
+    "accuracy": 15,
+    "speed": 65,
+    "heading": 180
+  },
+  "timestamp": "2026-01-09T12:30:00Z"
+}
+            </div>
+
+            <h3>Response Example: Get Tracking Data</h3>
+            <div class="code-block">
+GET /api/tracking/BK2601001?trackingToken=abc123xyz789
+
+Response: {
+  "success": true,
+  "data": {
+    "bookingId": "BK2601001",
+    "status": "in_transit",
+    "currentLocation": {
+      "latitude": 19.1234,
+      "longitude": 72.8765,
+      "lastUpdated": "2026-01-09T12:30:00Z"
+    },
+    "driver": {
+      "name": "Rajesh Kumar",
+      "phone": "+91 99887 76655",
+      "photo": "https://cdn.vcg.com/drivers/rajesh.jpg",
+      "rating": 4.8
+    },
+    "truck": {
+      "type": "14ft Container",
+      "number": "MH 02 AB 1234"
+    },
+    "pickup": {
+      "address": "Warehouse A, Mumbai",
+      "location": { "latitude": 19.0760, "longitude": 72.8777 },
+      "status": "completed",
+      "actualTime": "2026-01-09T10:15:00Z"
+    },
+    "delivery": {
+      "address": "Depot 5, Pune",
+      "location": { "latitude": 18.5204, "longitude": 73.8567 },
+      "status": "pending",
+      "eta": "2026-01-09T16:45:00Z"
+    },
+    "distanceCovered": 145,
+    "distanceRemaining": 100,
+    "estimatedTimeRemaining": 150,
+    "timeline": [
+      {
+        "status": "pickup_started",
+        "timestamp": "2026-01-09T10:00:00Z",
+        "location": "Warehouse A, Mumbai"
+      },
+      {
+        "status": "in_transit",
+        "timestamp": "2026-01-09T10:45:00Z",
+        "location": "Highway NH-48"
+      }
+    ]
+  }
+}
+            </div>
+
+            <h3>WebSocket Example</h3>
+            <div class="code-block">
+// Client connects to WebSocket
+const ws = new WebSocket('wss://api.vcgtransport.com/tracking/BK2601001');
+
+// Server sends location updates
+{
+  "type": "location_update",
+  "data": {
+    "latitude": 19.1234,
+    "longitude": 72.8765,
+    "speed": 65,
+    "eta": "2026-01-09T16:45:00Z",
+    "timestamp": "2026-01-09T12:30:00Z"
+  }
+}
+
+// Server sends status updates
+{
+  "type": "status_update",
+  "data": {
+    "status": "delivery_started",
+    "message": "Driver has reached delivery location",
+    "timestamp": "2026-01-09T16:30:00Z"
+  }
+}
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Database Models</h2>
+            
+            <h3>Location History Model</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>tripId</td>
+                        <td>ObjectId</td>
+                        <td>Reference to Trip (ref: Trip)</td>
+                    </tr>
+                    <tr>
+                        <td>driverId</td>
+                        <td>ObjectId</td>
+                        <td>Reference to Driver (ref: Driver)</td>
+                    </tr>
+                    <tr>
+                        <td>locations</td>
+                        <td>Array</td>
+                        <td>Array of location points with timestamps</td>
+                    </tr>
+                    <tr>
+                        <td>locations.latitude</td>
+                        <td>Number</td>
+                        <td>GPS latitude coordinate</td>
+                    </tr>
+                    <tr>
+                        <td>locations.longitude</td>
+                        <td>Number</td>
+                        <td>GPS longitude coordinate</td>
+                    </tr>
+                    <tr>
+                        <td>locations.accuracy</td>
+                        <td>Number</td>
+                        <td>Location accuracy in meters</td>
+                    </tr>
+                    <tr>
+                        <td>locations.speed</td>
+                        <td>Number</td>
+                        <td>Speed in km/h</td>
+                    </tr>
+                    <tr>
+                        <td>locations.heading</td>
+                        <td>Number</td>
+                        <td>Direction in degrees (0-360)</td>
+                    </tr>
+                    <tr>
+                        <td>locations.timestamp</td>
+                        <td>Date</td>
+                        <td>When location was captured</td>
+                    </tr>
+                    <tr>
+                        <td>startTime</td>
+                        <td>Date</td>
+                        <td>Trip start timestamp</td>
+                    </tr>
+                    <tr>
+                        <td>endTime</td>
+                        <td>Date</td>
+                        <td>Trip end timestamp</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Trip Status Updates</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Description</th>
+                        <th>Trigger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>accepted</td>
+                        <td>Driver accepted trip</td>
+                        <td>Manual - Driver action</td>
+                    </tr>
+                    <tr>
+                        <td>pickup_started</td>
+                        <td>Driver reached pickup location</td>
+                        <td>Manual or Geofence</td>
+                    </tr>
+                    <tr>
+                        <td>loading</td>
+                        <td>Loading goods in progress</td>
+                        <td>Manual - Driver action</td>
+                    </tr>
+                    <tr>
+                        <td>in_transit</td>
+                        <td>Truck en route to delivery</td>
+                        <td>Manual - Driver action</td>
+                    </tr>
+                    <tr>
+                        <td>delivery_started</td>
+                        <td>Driver reached delivery location</td>
+                        <td>Manual or Geofence</td>
+                    </tr>
+                    <tr>
+                        <td>unloading</td>
+                        <td>Unloading goods in progress</td>
+                        <td>Manual - Driver action</td>
+                    </tr>
+                    <tr>
+                        <td>delivered</td>
+                        <td>Goods delivered successfully</td>
+                        <td>Manual - Driver action</td>
+                    </tr>
+                    <tr>
+                        <td>completed</td>
+                        <td>Trip fully completed with POD</td>
+                        <td>Automatic after POD upload</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section">
+            <h2> Screen Wireframes</h2>
+            
+            <div class="wireframe-grid">
+                <div class="wireframe">
+                    <div class="wireframe-header">Customer App - Live Tracking</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Back</span>
+                            <h3 style="font-size: 1rem;">Track Shipment</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div class="map-container">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 3rem; margin-bottom: 0.5rem;"></div>
+                                    <div>Interactive Map</div>
+                                    <div style="font-size: 0.875rem;">Live truck location</div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h4>Booking #BK2601001</h4>
+                                    <span class="badge badge-warning">In Transit</span>
+                                </div>
+
+                                <div class="eta-badge" style="width: 100%; text-align: center;">
+                                     ETA: 4:45 PM (2 hrs 15 mins)
+                                </div>
+
+                                <div class="info-row">
+                                    <span class="info-label">Distance Covered</span>
+                                    <span class="info-value">145 / 245 km</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Current Speed</span>
+                                    <span class="info-value">65 km/h</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Last Updated</span>
+                                    <span class="info-value">Just now</span>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h4 style="margin-bottom: 1rem;">Driver Information</h4>
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <div style="width: 60px; height: 60px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700;">
+                                        RK
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <h5 style="margin-bottom: 0.25rem;">Rajesh Kumar</h5>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;"> 4.8 Rating  156 Trips</p>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">MH 02 AB 1234  14ft Container</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" style="margin-top: 1rem;"> Call Driver</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Customer App - Trip Timeline</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Back</span>
+                            <h3 style="font-size: 1rem;">Trip Timeline</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div class="card">
+                                <h4 style="margin-bottom: 1.5rem;">Shipment Progress</h4>
+                                
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div style="font-weight: 600; margin-bottom: 0.25rem;"> Pickup Started</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Warehouse A, Mumbai</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Jan 9, 10:00 AM</div>
+                                    </div>
+
+                                    <div class="timeline-item">
+                                        <div style="font-weight: 600; margin-bottom: 0.25rem;"> Loading Complete</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Goods loaded in truck</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Jan 9, 10:45 AM</div>
+                                    </div>
+
+                                    <div class="timeline-item active">
+                                        <div style="font-weight: 600; margin-bottom: 0.25rem;"> In Transit</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Currently on NH-48</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">145 km covered</div>
+                                    </div>
+
+                                    <div class="timeline-item pending">
+                                        <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--text-secondary);"> Delivery Started</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Depot 5, Pune</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Expected: 4:45 PM</div>
+                                    </div>
+
+                                    <div class="timeline-item pending">
+                                        <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--text-secondary);"> Delivered</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Proof of delivery uploaded</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.875rem;">Expected: 5:00 PM</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card" style="background: #dbeafe; border-color: var(--primary-color);">
+                                <div style="display: flex; gap: 0.75rem; align-items: start;">
+                                    <span style="font-size: 1.5rem;"></span>
+                                    <div>
+                                        <h5 style="margin-bottom: 0.25rem;">Share Tracking</h5>
+                                        <p style="font-size: 0.875rem; color: var(--text-secondary);">
+                                            Share live tracking link with your team or recipients
+                                        </p>
+                                        <button class="btn btn-primary" style="margin-top: 0.75rem;">Share Link</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Active Trip</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span></span>
+                            <h3 style="font-size: 1rem;">Active Trip</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div class="map-container">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 3rem; margin-bottom: 0.5rem;"></div>
+                                    <div>Navigation to Delivery</div>
+                                    <div style="font-size: 0.875rem;">100 km remaining</div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h4>Trip #BK2601001</h4>
+                                    <span class="badge badge-warning">In Transit</span>
+                                </div>
+
+                                <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                    <div style="font-size: 0.75rem; color: #92400e; margin-bottom: 0.25rem;">DELIVERY ADDRESS</div>
+                                    <div style="font-weight: 600; color: #92400e;"> Depot 5, Pune</div>
+                                    <div style="font-size: 0.875rem; color: #92400e; margin-top: 0.5rem;">
+                                        Contact: Amit Shah<br>
+                                        Phone: +91 97654 32109
+                                    </div>
+                                </div>
+
+                                <div class="info-row">
+                                    <span class="info-label">Distance Remaining</span>
+                                    <span class="info-value">100 km</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">ETA</span>
+                                    <span class="info-value">4:45 PM</span>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <button class="btn" style="background: var(--success-color); color: white;">
+                                     Start Delivery
+                                </button>
+                                <button class="btn" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color);">
+                                     Call Customer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe" style="grid-column: span 2;">
+                    <div class="wireframe-header">Admin Dashboard - Live Fleet Map</div>
+                    <div class="desktop-mockup">
+                        <div style="background: white; padding: 1rem 1.5rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <h3>Live Fleet Tracking</h3>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <span class="badge badge-success">12 Active</span>
+                                <span class="badge badge-warning">3 Delayed</span>
+                                <button class="btn btn-primary" style="width: auto; padding: 0.5rem 1rem;"> Refresh</button>
+                            </div>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); height: 400px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; border: 2px solid var(--border-color);">
+                            <div style="text-align: center;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;"></div>
+                                <div style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary);">Interactive Fleet Map</div>
+                                <div style="color: var(--text-secondary);">Real-time location of all 12 active trucks</div>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-bottom: 1rem;">Active Trips</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Trip ID</th>
+                                    <th>Driver</th>
+                                    <th>Route</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
+                                    <th>ETA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>#BK2601001</strong></td>
+                                    <td>Rajesh Kumar</td>
+                                    <td>Mumbai  Pune</td>
+                                    <td><span class="badge badge-warning">In Transit</span></td>
+                                    <td>
+                                        <div style="background: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden;">
+                                            <div style="background: var(--success-color); width: 60%; height: 100%;"></div>
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: var(--text-secondary);">145/245 km</span>
+                                    </td>
+                                    <td>4:45 PM</td>
+                                    <td>
+                                        <button style="padding: 0.25rem 0.75rem; background: var(--primary-color); color: white; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">View</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#BK2601002</strong></td>
+                                    <td>Amit Sharma</td>
+                                    <td>Delhi  Jaipur</td>
+                                    <td><span class="badge badge-success">Loading</span></td>
+                                    <td>
+                                        <div style="background: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden;">
+                                            <div style="background: var(--warning-color); width: 15%; height: 100%;"></div>
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: var(--text-secondary);">0/280 km</span>
+                                    </td>
+                                    <td>6:30 PM</td>
+                                    <td>
+                                        <button style="padding: 0.25rem 0.75rem; background: var(--primary-color); color: white; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">View</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#BK2601003</strong></td>
+                                    <td>Vikram Singh</td>
+                                    <td>Bangalore  Chennai</td>
+                                    <td><span class="badge badge-danger">Delayed</span></td>
+                                    <td>
+                                        <div style="background: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden;">
+                                            <div style="background: var(--danger-color); width: 40%; height: 100%;"></div>
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: var(--text-secondary);">120/350 km</span>
+                                    </td>
+                                    <td style="color: var(--danger-color);">10:00 PM <small>(+2hrs)</small></td>
+                                    <td>
+                                        <button style="padding: 0.25rem 0.75rem; background: var(--danger-color); color: white; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">Alert</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Implementation Flow</h2>
+            
+            <h3>Location Tracking Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Driver starts trip from app</li>
+                <li>App requests location permissions</li>
+                <li>Background location service starts</li>
+                <li>Every 30 seconds, app sends GPS coordinates to server</li>
+                <li>Server validates and stores location in LocationHistory model</li>
+                <li>Server calculates new ETA based on current position and traffic</li>
+                <li>WebSocket server broadcasts update to all connected clients</li>
+                <li>Customer app receives update and updates map marker</li>
+                <li>Admin dashboard refreshes fleet map with new positions</li>
+            </ol>
+
+            <h3>Status Update Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Driver reaches checkpoint (pickup/delivery location)</li>
+                <li>App detects geofence entry (optional auto-trigger)</li>
+                <li>Driver clicks status update button (e.g., "Start Loading")</li>
+                <li>POST request to /api/driver/trips/:tripId/status</li>
+                <li>Server updates Trip.status and adds to statusHistory</li>
+                <li>Server creates notification for customer and admin</li>
+                <li>Push notification sent to customer app</li>
+                <li>WebSocket broadcast sends status update to tracking page</li>
+                <li>Customer sees updated timeline with new status</li>
+            </ol>
+
+            <h3>ETA Calculation</h3>
+            <ol style="line-height: 2;">
+                <li>Server calculates distance remaining using Haversine formula</li>
+                <li>Integrates with Google Maps Distance Matrix API for traffic data</li>
+                <li>Considers current speed and historical average speed for route</li>
+                <li>Formula: ETA = (DistanceRemaining / AverageSpeed) + TrafficDelay</li>
+                <li>Updates ETA every 2 minutes or when speed changes significantly</li>
+                <li>Broadcasts new ETA to customer tracking screen</li>
+            </ol>
+        </section>
+
+        <section class="section">
+            <h2> Business Rules & Validation</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Location Update Frequency:</strong> Every 30 seconds while trip is active</li>
+                <li><strong>Battery Optimization:</strong> Reduce frequency to 2 mins if battery {'<'} 20%</li>
+                <li><strong>Accuracy Threshold:</strong> Reject location updates with accuracy {'>'} 100m</li>
+                <li><strong>Geofence Radius:</strong> 200m radius around pickup/delivery locations</li>
+                <li><strong>Data Retention:</strong> Keep location history for 90 days</li>
+                <li><strong>Public Tracking:</strong> Requires secure trackingToken for non-authenticated access</li>
+                <li><strong>Real-time Threshold:</strong> Show "Last updated X mins ago" if {'>'} 5 mins</li>
+                <li><strong>Speed Validation:</strong> Flag speeds {'>'} 120 km/h for admin review</li>
+                <li><strong>Route Deviation:</strong> Alert if truck deviates {'>'} 20km from planned route</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Security Considerations</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Tracking Token:</strong> Secure UUID-based token required for public tracking</li>
+                <li><strong>Rate Limiting:</strong> Max 1 location update per 20 seconds per driver</li>
+                <li><strong>Location Validation:</strong> Verify GPS coordinates are within expected geographic bounds</li>
+                <li><strong>WebSocket Authentication:</strong> Validate JWT before establishing connection</li>
+                <li><strong>Data Privacy:</strong> Mask exact driver location from non-admin users</li>
+                <li><strong>HTTPS Only:</strong> All API calls over encrypted HTTPS</li>
+                <li><strong>Token Expiry:</strong> Tracking tokens expire 7 days after trip completion</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Performance Optimization</h2>
+            
+            <h3>Backend Optimization</h3>
+            <ul class="feature-list">
+                <li><strong>Redis Caching:</strong> Cache current locations for 1 minute to reduce DB load</li>
+                <li><strong>MongoDB Geospatial Indexes:</strong> Create 2dsphere index on location fields</li>
+                <li><strong>WebSocket Rooms:</strong> Use Socket.IO rooms for trip-specific broadcasts</li>
+                <li><strong>Bulk Location Inserts:</strong> Batch insert location updates every 5 minutes</li>
+                <li><strong>CDN for Maps:</strong> Serve map tiles from CDN for faster loading</li>
+            </ul>
+
+            <h3>Frontend Optimization</h3>
+            <ul class="feature-list">
+                <li><strong>Map Clustering:</strong> Cluster nearby trucks on admin map when zoomed out</li>
+                <li><strong>Lazy Loading:</strong> Load map tiles on-demand as user scrolls</li>
+                <li><strong>Debounced Updates:</strong> Throttle map marker updates to 2 seconds</li>
+                <li><strong>Offline Support:</strong> Cache last known location for offline viewing</li>
+            </ul>
+        </section>
+
+    </div>
+</body>
+</html>

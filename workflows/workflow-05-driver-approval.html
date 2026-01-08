@@ -1,1 +1,789 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Admin Driver Approval - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>Admin Driver Approval</h1><p>Admin reviews and approves/rejects drivers</p></div><div class='section'><h2> Workflow Goal</h2><p>Admin reviews and approves/rejects drivers</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Driver Approval - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        header h1 { font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        header p { color: var(--text-secondary); font-size: 1.1rem; }
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--secondary-color); }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .section h3 { color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .feature-list li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .api-endpoint {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        .api-endpoint code { color: var(--secondary-color); font-weight: 600; }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: Courier New, monospace;
+            font-size: 0.9rem;
+        }
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .wireframe {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .wireframe-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .desktop-mockup {
+            background: #f8fafc;
+            padding: 1.5rem;
+            min-height: 700px;
+        }
+        .dashboard-header {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .driver-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .driver-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-outline {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .document-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .document-thumbnail {
+            aspect-ratio: 3/2;
+            background: linear-gradient(135deg, #e0e7ff 0%, #fce7f3 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 2px solid var(--border-color);
+        }
+        .doc-label {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 0.5rem;
+            background: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link"> Back to Index</a>
+            <h1> Admin Driver Approval</h1>
+            <p>Admin reviews driver documents, AI results, and approves or rejects driver applications</p>
+        </header>
+
+        <section class="section">
+            <h2> Workflow Goal</h2>
+            <p>Enable admin users to review pending driver applications, verify uploaded documents, review AI verification results, and make final approval/rejection decisions. Admins can view all driver information, document images, and provide feedback for rejections. This is the final step before drivers can start accepting trips.</p>
+        </section>
+
+        <section class="section">
+            <h2> Frontend Pages</h2>
+            <h3>TruckAdmin Dashboard</h3>
+            <ul class="feature-list">
+                <li><strong>Pending Drivers List:</strong> Table of all drivers awaiting approval with status filters</li>
+                <li><strong>Driver Details View:</strong> Comprehensive view of driver profile and documents</li>
+                <li><strong>Document Viewer:</strong> Full-screen image viewer with zoom and download</li>
+                <li><strong>AI Results Panel:</strong> Display OCR data and face match confidence scores</li>
+                <li><strong>Approval Modal:</strong> Confirmation dialog for approving driver</li>
+                <li><strong>Rejection Modal:</strong> Form to provide rejection reason and feedback</li>
+                <li><strong>Activity Timeline:</strong> History of all driver application events</li>
+                <li><strong>Bulk Actions:</strong> Approve/reject multiple drivers at once</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> API Endpoints</h2>
+            
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/admin/drivers/pending</code>
+                <p>Get list of drivers pending approval</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/admin/drivers/:driverId</code>
+                <p>Get complete driver details with documents and AI results</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/admin/drivers/:driverId/approve</code>
+                <p>Approve driver application</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/admin/drivers/:driverId/reject</code>
+                <p>Reject driver application with reason</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/admin/drivers/bulk-approve</code>
+                <p>Approve multiple drivers at once</p>
+            </div>
+
+            <h3>Request Example: Approve Driver</h3>
+            <div class="code-block">
+PUT /api/admin/drivers/507f1f77bcf86cd799439012/approve
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
+Body: {
+  "approvedBy": "507f1f77bcf86cd799439013",
+  "notes": "All documents verified. AI confidence scores acceptable."
+}
+            </div>
+
+            <h3>Response Example</h3>
+            <div class="code-block">
+{
+  "success": true,
+  "message": "Driver approved successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439012",
+    "name": "Rajesh Kumar",
+    "verificationStatus": "verified",
+    "approvedBy": "507f1f77bcf86cd799439013",
+    "approvedAt": "2026-01-08T14:30:00Z",
+    "isActive": true
+  }
+}
+            </div>
+
+            <h3>Request Example: Reject Driver</h3>
+            <div class="code-block">
+PUT /api/admin/drivers/507f1f77bcf86cd799439012/reject
+Body: {
+  "rejectedBy": "507f1f77bcf86cd799439013",
+  "rejectionReason": "License expired",
+  "notes": "Driving license expiry date is 2024-06-15. Please upload valid license.",
+  "rejectedDocuments": ["drivingLicense"]
+}
+
+Response: {
+  "success": true,
+  "message": "Driver application rejected",
+  "data": {
+    "verificationStatus": "rejected",
+    "rejectionReason": "License expired",
+    "notificationSent": true
+  }
+}
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Database Models</h2>
+            
+            <h3>Driver Model (Approval Fields)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>verificationStatus</td>
+                        <td>String</td>
+                        <td>enum: ['pending', 'processing', 'verified', 'rejected']</td>
+                    </tr>
+                    <tr>
+                        <td>approvedBy</td>
+                        <td>ObjectId</td>
+                        <td>Reference to admin who approved (ref: User)</td>
+                    </tr>
+                    <tr>
+                        <td>approvedAt</td>
+                        <td>Date</td>
+                        <td>Timestamp of approval</td>
+                    </tr>
+                    <tr>
+                        <td>rejectedBy</td>
+                        <td>ObjectId</td>
+                        <td>Reference to admin who rejected</td>
+                    </tr>
+                    <tr>
+                        <td>rejectedAt</td>
+                        <td>Date</td>
+                        <td>Timestamp of rejection</td>
+                    </tr>
+                    <tr>
+                        <td>rejectionReason</td>
+                        <td>String</td>
+                        <td>Reason for rejection</td>
+                    </tr>
+                    <tr>
+                        <td>adminNotes</td>
+                        <td>String</td>
+                        <td>Internal admin notes (not visible to driver)</td>
+                    </tr>
+                    <tr>
+                        <td>rejectedDocuments</td>
+                        <td>Array</td>
+                        <td>List of document types that need re-upload</td>
+                    </tr>
+                    <tr>
+                        <td>isActive</td>
+                        <td>Boolean</td>
+                        <td>Driver can accept trips (true after approval)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section">
+            <h2> Screen Wireframes</h2>
+            
+            <div class="wireframe-grid">
+                <div class="wireframe" style="grid-column: span 2;">
+                    <div class="wireframe-header">Admin Dashboard - Pending Drivers List</div>
+                    <div class="desktop-mockup">
+                        <div class="dashboard-header">
+                            <h3>Pending Driver Approvals</h3>
+                            <div style="display: flex; gap: 1rem;">
+                                <span class="badge badge-warning">12 Pending</span>
+                                <button class="btn btn-outline" style="padding: 0.5rem 1rem;">Filters</button>
+                            </div>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" /></th>
+                                    <th>Driver Name</th>
+                                    <th>Phone</th>
+                                    <th>License No.</th>
+                                    <th>AI Status</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" /></td>
+                                    <td><strong>Rajesh Kumar</strong></td>
+                                    <td>+91 99887 76655</td>
+                                    <td>MH12-20220012345</td>
+                                    <td><span class="badge badge-success">AI Passed 95%</span></td>
+                                    <td>2 hours ago</td>
+                                    <td>
+                                        <button class="btn btn-outline" style="padding: 0.5rem 1rem;">Review</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" /></td>
+                                    <td><strong>Amit Sharma</strong></td>
+                                    <td>+91 98765 43210</td>
+                                    <td>DL07-20210098765</td>
+                                    <td><span class="badge badge-warning">Manual Review 68%</span></td>
+                                    <td>5 hours ago</td>
+                                    <td>
+                                        <button class="btn btn-outline" style="padding: 0.5rem 1rem;">Review</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" /></td>
+                                    <td><strong>Vikram Singh</strong></td>
+                                    <td>+91 97654 32109</td>
+                                    <td>UP14-20220087654</td>
+                                    <td><span class="badge badge-success">AI Passed 88%</span></td>
+                                    <td>1 day ago</td>
+                                    <td>
+                                        <button class="btn btn-outline" style="padding: 0.5rem 1rem;">Review</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                            <button class="btn btn-success">Approve Selected (0)</button>
+                            <button class="btn btn-danger">Reject Selected</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe" style="grid-column: span 2;">
+                    <div class="wireframe-header">Admin Dashboard - Driver Details Review</div>
+                    <div class="desktop-mockup">
+                        <div class="dashboard-header">
+                            <div>
+                                <h3>Driver Application Review</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Rajesh Kumar  Submitted 2 hours ago</p>
+                            </div>
+                            <div style="display: flex; gap: 1rem;">
+                                <button class="btn btn-success"> Approve</button>
+                                <button class="btn btn-danger"> Reject</button>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <div class="driver-card">
+                                <h4 style="margin-bottom: 1rem;">Personal Information</h4>
+                                <div class="info-row">
+                                    <span class="info-label">Full Name</span>
+                                    <span class="info-value">Rajesh Kumar</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">+91 99887 76655</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value">rajesh.k@email.com</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">License No.</span>
+                                    <span class="info-value">MH12-20220012345</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">License Expiry</span>
+                                    <span class="info-value">31-12-2028</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Category</span>
+                                    <span class="info-value">Heavy Goods Vehicle</span>
+                                </div>
+                            </div>
+
+                            <div class="driver-card">
+                                <h4 style="margin-bottom: 1rem;">AI Verification Results</h4>
+                                <div style="background: #d1fae5; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                        <span style="font-weight: 600; color: #065f46;">OCR Confidence</span>
+                                        <span style="font-weight: 600; color: #065f46;">95%</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="font-weight: 600; color: #065f46;">Face Match</span>
+                                        <span style="font-weight: 600; color: #065f46;">92%</span>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Extracted Name</span>
+                                    <span class="info-value">Rajesh Kumar </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Extracted License</span>
+                                    <span class="info-value">MH12-20220012345 </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Extracted Expiry</span>
+                                    <span class="info-value">31-12-2028 </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">AI Recommendation</span>
+                                    <span class="badge badge-success">APPROVE</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="driver-card" style="margin-top: 1rem;">
+                            <h4 style="margin-bottom: 1rem;">Uploaded Documents</h4>
+                            <div class="document-grid">
+                                <div class="document-thumbnail">
+                                    <div style="font-size: 3rem;"></div>
+                                    <div class="doc-label">Driving License</div>
+                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Verified</span>
+                                </div>
+                                <div class="document-thumbnail">
+                                    <div style="font-size: 3rem;"></div>
+                                    <div class="doc-label">Aadhaar Card</div>
+                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Verified</span>
+                                </div>
+                                <div class="document-thumbnail">
+                                    <div style="font-size: 3rem;"></div>
+                                    <div class="doc-label">PAN Card</div>
+                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Verified</span>
+                                </div>
+                                <div class="document-thumbnail">
+                                    <div style="font-size: 3rem;"></div>
+                                    <div class="doc-label">Driver Photo</div>
+                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Verified</span>
+                                </div>
+                            </div>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 1rem;">
+                                Click on any document to view full size
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Admin Dashboard - Approval Confirmation</div>
+                    <div class="desktop-mockup">
+                        <div class="modal">
+                            <h3 style="color: var(--success-color); margin-bottom: 1rem;">Approve Driver Application?</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                You are about to approve <strong>Rajesh Kumar</strong>. The driver will be notified and can start accepting trips immediately.
+                            </p>
+                            
+                            <div class="driver-card">
+                                <h4 style="margin-bottom: 0.5rem;">Driver Summary</h4>
+                                <div class="info-row">
+                                    <span class="info-label">Name</span>
+                                    <span class="info-value">Rajesh Kumar</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">License</span>
+                                    <span class="info-value">MH12-20220012345</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">AI Confidence</span>
+                                    <span class="info-value" style="color: var(--success-color);">95%</span>
+                                </div>
+                            </div>
+
+                            <div style="margin: 1.5rem 0;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Admin Notes (optional)</label>
+                                <textarea placeholder="Add any internal notes about this approval..."></textarea>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button class="btn btn-success" style="flex: 1;">Confirm Approval</button>
+                                <button class="btn btn-outline" style="flex: 1;">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Admin Dashboard - Rejection Form</div>
+                    <div class="desktop-mockup">
+                        <div class="modal">
+                            <h3 style="color: var(--danger-color); margin-bottom: 1rem;">Reject Driver Application</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                Provide a reason for rejecting <strong>Rajesh Kumar</strong>'s application. The driver will receive this feedback.
+                            </p>
+                            
+                            <div style="margin: 1.5rem 0;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Rejection Reason *</label>
+                                <select style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px;">
+                                    <option>Select a reason...</option>
+                                    <option>License expired</option>
+                                    <option>Documents not clear</option>
+                                    <option>Information mismatch</option>
+                                    <option>Failed AI verification</option>
+                                    <option>Incomplete information</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+
+                            <div style="margin: 1.5rem 0;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Detailed Feedback *</label>
+                                <textarea placeholder="Explain what needs to be corrected. This message will be sent to the driver..."></textarea>
+                            </div>
+
+                            <div style="margin: 1.5rem 0;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Documents to Re-upload</label>
+                                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" />
+                                        <span>Driving License</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" />
+                                        <span>Aadhaar Card</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" />
+                                        <span>PAN Card</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" />
+                                        <span>Photo</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button class="btn btn-danger" style="flex: 1;">Confirm Rejection</button>
+                                <button class="btn btn-outline" style="flex: 1;">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Implementation Flow</h2>
+            
+            <h3>Approval Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Admin navigates to Pending Drivers page</li>
+                <li>System fetches all drivers with verificationStatus = 'pending'</li>
+                <li>Admin selects a driver to review</li>
+                <li>System loads complete driver profile, documents, and AI results</li>
+                <li>Admin reviews personal info, license details, and uploaded documents</li>
+                <li>Admin checks AI confidence scores and extracted data</li>
+                <li>Admin clicks full-size document viewer to examine images</li>
+                <li>If satisfied, admin clicks "Approve" button</li>
+                <li>Confirmation modal appears with driver summary</li>
+                <li>Admin adds optional notes and confirms</li>
+                <li>System sends PUT request to /api/admin/drivers/:id/approve</li>
+                <li>Backend updates verificationStatus to 'verified', sets approvedBy and approvedAt</li>
+                <li>Driver isActive flag set to true</li>
+                <li>Notification sent to driver via email and push notification</li>
+                <li>Admin sees success message and driver removed from pending list</li>
+            </ol>
+
+            <h3>Rejection Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Admin reviews driver and finds issues</li>
+                <li>Admin clicks "Reject" button</li>
+                <li>Rejection form modal appears</li>
+                <li>Admin selects rejection reason from dropdown</li>
+                <li>Admin writes detailed feedback explaining what needs correction</li>
+                <li>Admin selects which documents need re-upload (if applicable)</li>
+                <li>Admin confirms rejection</li>
+                <li>System sends PUT request to /api/admin/drivers/:id/reject</li>
+                <li>Backend updates verificationStatus to 'rejected'</li>
+                <li>Rejection reason and feedback stored in driver record</li>
+                <li>Selected documents marked for re-upload</li>
+                <li>Email sent to driver with rejection reason and instructions</li>
+                <li>Push notification sent to driver app</li>
+                <li>Driver can re-upload corrected documents and resubmit</li>
+            </ol>
+        </section>
+
+        <section class="section">
+            <h2> Business Rules & Validation</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Admin Authorization:</strong> Only users with role='admin' can approve/reject drivers</li>
+                <li><strong>Review Deadline:</strong> Drivers should be reviewed within 24 hours of submission</li>
+                <li><strong>SLA Monitoring:</strong> System flags applications pending over 48 hours</li>
+                <li><strong>Rejection Requires Reason:</strong> Rejection reason and detailed feedback are mandatory</li>
+                <li><strong>Document Verification:</strong> All 4 required documents must be uploaded</li>
+                <li><strong>AI Threshold:</strong> If AI confidence < 70%, manual review required</li>
+                <li><strong>License Validity:</strong> License expiry date must be at least 30 days in future</li>
+                <li><strong>Resubmission Limit:</strong> Drivers can resubmit up to 3 times after rejection</li>
+                <li><strong>Approval Notifications:</strong> Driver receives instant notification on approval</li>
+                <li><strong>Audit Trail:</strong> All approval/rejection decisions logged with admin ID and timestamp</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Security Considerations</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Role-Based Access:</strong> Only admins can access driver approval endpoints</li>
+                <li><strong>Action Logging:</strong> All approve/reject actions logged with IP and user agent</li>
+                <li><strong>Document Access:</strong> Signed URLs with 15-minute expiry for document viewing</li>
+                <li><strong>Data Privacy:</strong> Admin notes separate from driver-visible feedback</li>
+                <li><strong>Concurrent Reviews:</strong> Optimistic locking prevents multiple admins approving same driver</li>
+                <li><strong>Audit Reports:</strong> Monthly reports of all approval/rejection decisions</li>
+                <li><strong>Reversal Prevention:</strong> Once approved, driver cannot be auto-rejected</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Admin Analytics</h2>
+            
+            <h3>Key Metrics Tracked</h3>
+            <ul class="feature-list">
+                <li><strong>Average Review Time:</strong> Time from submission to approval/rejection</li>
+                <li><strong>Approval Rate:</strong> Percentage of drivers approved on first submission</li>
+                <li><strong>Rejection Reasons:</strong> Most common reasons for rejection</li>
+                <li><strong>AI Accuracy:</strong> Correlation between AI recommendation and admin decision</li>
+                <li><strong>Pending Queue Size:</strong> Number of drivers awaiting review</li>
+                <li><strong>Admin Performance:</strong> Number of reviews per admin per day</li>
+            </ul>
+        </section>
+
+    </div>
+</body>
+</html>

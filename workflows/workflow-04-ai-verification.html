@@ -1,1 +1,431 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>AI Document Verification - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>AI Document Verification</h1><p>AWS OCR and face recognition for document verification</p></div><div class='section'><h2> Workflow Goal</h2><p>AWS OCR and face recognition for document verification</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>AI Document Verification - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        header h1 { font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        header p { color: var(--text-secondary); font-size: 1.1rem; }
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--secondary-color); }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .section h3 { color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .feature-list li:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .api-endpoint {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        .api-endpoint code { color: var(--secondary-color); font-weight: 600; }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .wireframe {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .wireframe-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .phone-mockup {
+            background: #f8fafc;
+            padding: 1.5rem;
+            min-height: 600px;
+        }
+        .app-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .back-btn { margin-right: 1rem; font-size: 1.2rem; }
+        .status-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-processing { background: #dbeafe; color: #1e40af; }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            transition: width 0.3s;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+        .ai-result-box {
+            background: var(--light-bg);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <header>
+            <a href='../index.html' class='back-link'> Back to Index</a>
+            <h1> AI Document Verification</h1>
+            <p>Automated document verification using AWS Textract OCR and Rekognition face matching</p>
+        </header>
+
+        <section class='section'>
+            <h2> Workflow Goal</h2>
+            <p>Automatically verify uploaded driver documents using AWS AI services. Extract text from documents using OCR (Textract), match driver photo with license photo using face recognition (Rekognition), and validate document authenticity. This reduces manual verification time and improves accuracy.</p>
+        </section>
+
+        <section class='section'>
+            <h2> Frontend Pages</h2>
+            <h3>TruckDriver Mobile App</h3>
+            <ul class='feature-list'>
+                <li><strong>Verification Status Screen:</strong> Real-time AI verification progress</li>
+                <li><strong>Verification Results:</strong> Display extracted data and confidence scores</li>
+                <li><strong>Auto-detected Fields:</strong> Show OCR-extracted license number, name, expiry</li>
+                <li><strong>Face Match Result:</strong> Display face recognition confidence</li>
+            </ul>
+            <h3>TruckAdmin Dashboard</h3>
+            <ul class='feature-list'>
+                <li><strong>AI Results Review:</strong> View AI verification results with confidence scores</li>
+                <li><strong>OCR Data Display:</strong> Extracted text fields with edit capability</li>
+                <li><strong>Face Match Visualization:</strong> Side-by-side face comparison</li>
+                <li><strong>Override Controls:</strong> Manual approval/rejection if AI is uncertain</li>
+            </ul>
+        </section>
+
+        <section class='section'>
+            <h2> API Endpoints</h2>
+            <div class='api-endpoint'>
+                <strong>POST</strong> <code>/api/admin/drivers/:driverId/documents/:docId/verify-ai</code>
+                <p>Trigger AI verification (auto-triggered after upload)</p>
+            </div>
+            <div class='api-endpoint'>
+                <strong>GET</strong> <code>/api/drivers/:driverId/verification-status</code>
+                <p>Get AI verification status and results</p>
+            </div>
+            <h3>AWS Services Integration</h3>
+            <div class='code-block'>
+// AWS Textract - OCR Processing
+const extractTextFromDocument = async (s3Url) => {
+  const textract = new AWS.Textract();
+  const params = {
+    DocumentLocation: {
+      S3Object: {
+        Bucket: 'vcg-transport-documents',
+        Name: documentKey
+      }
+    },
+    FeatureTypes: ['FORMS', 'TABLES']
+  };
+  return await textract.analyzeDocument(params).promise();
+};
+
+// AWS Rekognition - Face Matching
+const compareFaces = async (photoUrl, licensePhotoUrl) => {
+  const rekognition = new AWS.Rekognition();
+  const params = {
+    SourceImage: { S3Object: { Bucket, Name: photoKey } },
+    TargetImage: { S3Object: { Bucket, Name: licenseKey } },
+    SimilarityThreshold: 80
+  };
+  return await rekognition.compareFaces(params).promise();
+};
+            </div>
+        </section>
+
+        <section class='section'>
+            <h2> Database Models</h2>
+            <h3>AI Verification Results Structure</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>aiVerificationResults</td><td>Object</td><td>Container for all AI results</td></tr>
+                    <tr><td>ocrData</td><td>Object</td><td>Textract extracted data</td></tr>
+                    <tr><td>ocrData.licenseNumber</td><td>String</td><td>Extracted license number</td></tr>
+                    <tr><td>ocrData.name</td><td>String</td><td>Extracted name from license</td></tr>
+                    <tr><td>ocrData.dateOfBirth</td><td>String</td><td>Extracted DOB</td></tr>
+                    <tr><td>ocrData.expiryDate</td><td>String</td><td>Extracted expiry date</td></tr>
+                    <tr><td>ocrData.confidence</td><td>Number</td><td>OCR confidence score (0-100)</td></tr>
+                    <tr><td>faceMatch</td><td>Object</td><td>Rekognition face match result</td></tr>
+                    <tr><td>faceMatch.similarity</td><td>Number</td><td>Face similarity score (0-100)</td></tr>
+                    <tr><td>faceMatch.isMatch</td><td>Boolean</td><td>Faces match above threshold</td></tr>
+                    <tr><td>aiVerifiedAt</td><td>Date</td><td>AI processing timestamp</td></tr>
+                    <tr><td>aiStatus</td><td>String</td><td>'passed', 'failed', 'manual_review'</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class='section'>
+            <h2> Screen Wireframes</h2>
+            <div class='wireframe-grid'>
+                <div class='wireframe'>
+                    <div class='wireframe-header'>Driver App - AI Processing</div>
+                    <div class='phone-mockup'>
+                        <div class='app-header'>
+                            <span class='back-btn'></span>
+                            <span>Verification in Progress</span>
+                        </div>
+                        <div style='text-align: center; padding: 2rem 1rem;'>
+                            <div class='spinner' style='margin: 2rem auto;'></div>
+                            <h3 style='margin: 1.5rem 0 0.5rem; color: var(--primary-color);'>Verifying Your Documents</h3>
+                            <p style='color: var(--text-secondary); font-size: 0.875rem;'>AI is analyzing your documents...</p>
+                            <div style='margin-top: 2rem;'>
+                                <div class='status-card'>
+                                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                                        <span> License OCR</span>
+                                        <span class='badge badge-processing'>Processing</span>
+                                    </div>
+                                </div>
+                                <div class='status-card'>
+                                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                                        <span> Face Matching</span>
+                                        <span class='badge badge-warning'>Pending</span>
+                                    </div>
+                                </div>
+                                <div class='status-card'>
+                                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                                        <span> Data Validation</span>
+                                        <span class='badge badge-warning'>Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='wireframe'>
+                    <div class='wireframe-header'>Driver App - Verification Success</div>
+                    <div class='phone-mockup'>
+                        <div class='app-header'>
+                            <span class='back-btn'></span>
+                            <span>Verification Complete</span>
+                        </div>
+                        <div style='padding: 0 1rem;'>
+                            <div style='text-align: center; margin: 2rem 0;'>
+                                <div style='width: 80px; height: 80px; background: var(--success-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2.5rem; color: white;'></div>
+                                <h3 style='color: var(--success-color); margin-bottom: 0.5rem;'>Verification Successful!</h3>
+                                <p style='color: var(--text-secondary); font-size: 0.875rem;'>Your documents have been verified by AI</p>
+                            </div>
+                            <div class='ai-result-box'>
+                                <h4 style='margin-bottom: 1rem;'> Extracted Information</h4>
+                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
+                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>License Number:</span>
+                                    <span style='font-weight: 600;'>MH12-20220012345</span>
+                                </div>
+                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
+                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>Name:</span>
+                                    <span style='font-weight: 600;'>Rajesh Kumar</span>
+                                </div>
+                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
+                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>Expiry Date:</span>
+                                    <span style='font-weight: 600;'>31-12-2028</span>
+                                </div>
+                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
+                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>OCR Confidence:</span>
+                                    <span style='font-weight: 600; color: var(--success-color);'>95%</span>
+                                </div>
+                            </div>
+                            <div class='ai-result-box' style='border-left-color: var(--primary-color);'>
+                                <h4 style='margin-bottom: 1rem;'> Face Match Result</h4>
+                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
+                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>Match Confidence:</span>
+                                    <span style='font-weight: 600; color: var(--success-color);'>92%</span>
+                                </div>
+                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
+                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>Status:</span>
+                                    <span class='badge badge-success'>Verified</span>
+                                </div>
+                            </div>
+                            <p style='background: #d1fae5; padding: 1rem; border-radius: 8px; font-size: 0.875rem; color: #065f46; margin-top: 1.5rem;'>
+                                 Your documents will be reviewed by an admin within 24 hours for final approval.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class='section'>
+            <h2> Implementation Flow</h2>
+            <ol style='line-height: 2;'>
+                <li>Document uploaded to S3, webhook/event triggers Lambda function</li>
+                <li>Lambda retrieves document from S3</li>
+                <li>AWS Textract analyzes document for text extraction</li>
+                <li>Parse OCR results to extract license number, name, DOB, expiry</li>
+                <li>Calculate confidence scores for each field</li>
+                <li>If driver photo exists, trigger AWS Rekognition face comparison</li>
+                <li>Compare driver photo with license photo</li>
+                <li>Calculate similarity score</li>
+                <li>Update database with AI verification results</li>
+                <li>Send notification to driver with results</li>
+                <li>If confidence {'>'} 80%, mark for admin review; if {'<'} 80%, flag for manual verification</li>
+            </ol>
+        </section>
+
+        <section class='section'>
+            <h2> Business Rules</h2>
+            <ul class='feature-list'>
+                <li><strong>OCR Confidence Threshold:</strong> Minimum 70% confidence for auto-approval</li>
+                <li><strong>Face Match Threshold:</strong> Minimum 80% similarity for auto-approval</li>
+                <li><strong>Manual Review:</strong> Any score below threshold requires admin review</li>
+                <li><strong>Processing Time:</strong> AI verification completes within 2 minutes</li>
+                <li><strong>Retry Logic:</strong> Automatic retry up to 3 times on AI service failure</li>
+                <li><strong>Data Validation:</strong> Extracted expiry date must be future date</li>
+                <li><strong>Cost Control:</strong> Use AWS Lambda for serverless, pay-per-use model</li>
+            </ul>
+        </section>
+
+        <section class='section'>
+            <h2> Security Considerations</h2>
+            <ul class='feature-list'>
+                <li><strong>IAM Roles:</strong> Lambda has minimum permissions for S3 and AI services</li>
+                <li><strong>Encryption:</strong> All data encrypted in transit and at rest</li>
+                <li><strong>Audit Logging:</strong> All AI operations logged in CloudWatch</li>
+                <li><strong>Data Privacy:</strong> AI results stored separately, PII encrypted</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

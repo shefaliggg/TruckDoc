@@ -1,1 +1,981 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>POD Upload (Driver) - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>POD Upload (Driver)</h1><p>Driver uploads proof of delivery photos and signature</p></div><div class='section'><h2> Workflow Goal</h2><p>Driver uploads proof of delivery photos and signature</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POD Upload - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        header h1 { font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        header p { color: var(--text-secondary); font-size: 1.1rem; }
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--secondary-color); }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .section h3 { color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .feature-list li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .api-endpoint {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        .api-endpoint code { color: var(--secondary-color); font-weight: 600; }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: Courier New, monospace;
+            font-size: 0.9rem;
+        }
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .wireframe {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .wireframe-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .mobile-mockup {
+            width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 600px;
+            position: relative;
+        }
+        .mobile-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mobile-content {
+            padding: 1rem;
+            background: #f8fafc;
+            min-height: 500px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        .upload-area {
+            border: 3px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 1rem 0;
+        }
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+        .photo-preview {
+            width: 100%;
+            height: 200px;
+            background: var(--light-bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .signature-pad {
+            width: 100%;
+            height: 150px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            margin: 1rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link"> Back to Index</a>
+            <h1> Proof of Delivery (POD) Upload</h1>
+            <p>Driver captures and uploads delivery confirmation documents</p>
+        </header>
+
+        <section class="section">
+            <h2> Workflow Goal</h2>
+            <p>Enable driver to capture proof of delivery after successful goods delivery. Driver takes photos of delivered items, collects recipient signature, and uploads POD documents. System validates documents, notifies customer and admin, and marks trip as completed. POD serves as legal proof of delivery and triggers payment settlement process.</p>
+        </section>
+
+        <section class="section">
+            <h2> Frontend Pages</h2>
+            <h3>TruckDriver Mobile App</h3>
+            <ul class="feature-list">
+                <li><strong>Delivery Confirmation:</strong> Mark goods as delivered at destination</li>
+                <li><strong>Camera Capture:</strong> Take photos of delivered goods (multiple angles)</li>
+                <li><strong>Document Scanner:</strong> Scan signed delivery receipts</li>
+                <li><strong>Digital Signature:</strong> Collect recipient signature on device</li>
+                <li><strong>Recipient Details:</strong> Capture recipient name and contact</li>
+                <li><strong>Upload Progress:</strong> Track upload status of POD documents</li>
+                <li><strong>Trip Summary:</strong> View completed trip details</li>
+            </ul>
+
+            <h3>TruckUser Mobile App (Customer)</h3>
+            <ul class="feature-list">
+                <li><strong>Delivery Notification:</strong> Alert when delivery completed</li>
+                <li><strong>POD Viewer:</strong> View uploaded photos and signature</li>
+                <li><strong>Download POD:</strong> Download proof documents as PDF</li>
+                <li><strong>Rate Trip:</strong> Provide rating and feedback for driver</li>
+            </ul>
+
+            <h3>TruckAdmin Dashboard</h3>
+            <ul class="feature-list">
+                <li><strong>POD Review:</strong> Verify uploaded POD documents</li>
+                <li><strong>Document Gallery:</strong> View all POD photos</li>
+                <li><strong>Dispute Resolution:</strong> Handle customer complaints with POD evidence</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> API Endpoints</h2>
+            
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/driver/trips/:tripId/delivery-complete</code>
+                <p>Mark delivery as complete (before POD upload)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/driver/pod/upload</code>
+                <p>Upload POD photos (multipart/form-data)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/driver/pod/signature</code>
+                <p>Upload recipient digital signature</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/driver/trips/:tripId/complete</code>
+                <p>Finalize trip completion with all POD documents</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/customer/bookings/:bookingId/pod</code>
+                <p>Customer retrieves POD documents for their booking</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/admin/pods/:podId</code>
+                <p>Admin views POD details for verification</p>
+            </div>
+
+            <h3>Request Example: Upload POD Photos</h3>
+            <div class="code-block">
+POST /api/driver/pod/upload
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "multipart/form-data"
+}
+FormData: {
+  "tripId": "65a1b2c3d4e5f6789012999",
+  "photos": [File, File, File],  // Multiple image files
+  "photoTypes": ["goods_overview", "closeup", "location"],
+  "uploadedAt": "2026-01-09T17:00:00Z"
+}
+            </div>
+
+            <h3>Response Example</h3>
+            <div class="code-block">
+{
+  "success": true,
+  "message": "POD photos uploaded successfully",
+  "data": {
+    "podId": "65a1b2c3d4e5f6789013000",
+    "tripId": "65a1b2c3d4e5f6789012999",
+    "photos": [
+      {
+        "url": "https://s3.amazonaws.com/vcg/pods/photo1.jpg",
+        "type": "goods_overview",
+        "uploadedAt": "2026-01-09T17:00:00Z"
+      },
+      {
+        "url": "https://s3.amazonaws.com/vcg/pods/photo2.jpg",
+        "type": "closeup",
+        "uploadedAt": "2026-01-09T17:00:15Z"
+      }
+    ],
+    "status": "photos_uploaded"
+  }
+}
+            </div>
+
+            <h3>Request Example: Upload Signature</h3>
+            <div class="code-block">
+POST /api/driver/pod/signature
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
+Body: {
+  "tripId": "65a1b2c3d4e5f6789012999",
+  "podId": "65a1b2c3d4e5f6789013000",
+  "signatureData": "data:image/png;base64,iVBORw0KGgoAAAANS...",
+  "recipientName": "Amit Shah",
+  "recipientPhone": "+91 97654 32109",
+  "deliveredAt": "2026-01-09T17:05:00Z",
+  "location": {
+    "latitude": 18.5204,
+    "longitude": 73.8567
+  }
+}
+
+Response: {
+  "success": true,
+  "message": "Signature captured successfully",
+  "data": {
+    "podId": "65a1b2c3d4e5f6789013000",
+    "signatureUrl": "https://s3.amazonaws.com/vcg/pods/signature.png",
+    "recipientName": "Amit Shah",
+    "status": "signature_captured"
+  }
+}
+            </div>
+
+            <h3>Request Example: Complete Trip</h3>
+            <div class="code-block">
+POST /api/driver/trips/65a1b2c3d4e5f6789012999/complete
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
+Body: {
+  "podId": "65a1b2c3d4e5f6789013000",
+  "deliveryNotes": "Delivered to warehouse manager. All items intact.",
+  "completedAt": "2026-01-09T17:10:00Z"
+}
+
+Response: {
+  "success": true,
+  "message": "Trip completed successfully! Payment settlement initiated.",
+  "data": {
+    "tripId": "65a1b2c3d4e5f6789012999",
+    "status": "completed",
+    "completedAt": "2026-01-09T17:10:00Z",
+    "podVerified": true,
+    "settlementStatus": "pending",
+    "estimatedPayout": 4500,
+    "payoutDate": "2026-01-11T00:00:00Z"
+  }
+}
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Database Models</h2>
+            
+            <h3>POD Model</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>_id</td>
+                        <td>ObjectId</td>
+                        <td>Unique POD identifier</td>
+                    </tr>
+                    <tr>
+                        <td>tripId</td>
+                        <td>ObjectId</td>
+                        <td>Reference to Trip (ref: Trip)</td>
+                    </tr>
+                    <tr>
+                        <td>bookingId</td>
+                        <td>ObjectId</td>
+                        <td>Reference to Booking (ref: Booking)</td>
+                    </tr>
+                    <tr>
+                        <td>driverId</td>
+                        <td>ObjectId</td>
+                        <td>Driver who uploaded POD (ref: Driver)</td>
+                    </tr>
+                    <tr>
+                        <td>photos</td>
+                        <td>Array</td>
+                        <td>Array of POD photo objects</td>
+                    </tr>
+                    <tr>
+                        <td>photos.url</td>
+                        <td>String</td>
+                        <td>S3 URL of uploaded photo</td>
+                    </tr>
+                    <tr>
+                        <td>photos.type</td>
+                        <td>String</td>
+                        <td>enum: ['goods_overview', 'closeup', 'location', 'receipt', 'other']</td>
+                    </tr>
+                    <tr>
+                        <td>photos.uploadedAt</td>
+                        <td>Date</td>
+                        <td>Upload timestamp</td>
+                    </tr>
+                    <tr>
+                        <td>signatureUrl</td>
+                        <td>String</td>
+                        <td>S3 URL of digital signature</td>
+                    </tr>
+                    <tr>
+                        <td>recipientName</td>
+                        <td>String</td>
+                        <td>Name of person who received goods</td>
+                    </tr>
+                    <tr>
+                        <td>recipientPhone</td>
+                        <td>String</td>
+                        <td>Phone number of recipient</td>
+                    </tr>
+                    <tr>
+                        <td>deliveredAt</td>
+                        <td>Date</td>
+                        <td>Actual delivery completion time</td>
+                    </tr>
+                    <tr>
+                        <td>deliveryLocation</td>
+                        <td>Object</td>
+                        <td>{ latitude, longitude } where POD captured</td>
+                    </tr>
+                    <tr>
+                        <td>deliveryNotes</td>
+                        <td>String</td>
+                        <td>Additional notes from driver</td>
+                    </tr>
+                    <tr>
+                        <td>status</td>
+                        <td>String</td>
+                        <td>enum: ['pending', 'photos_uploaded', 'signature_captured', 'completed', 'verified']</td>
+                    </tr>
+                    <tr>
+                        <td>verifiedBy</td>
+                        <td>ObjectId</td>
+                        <td>Admin who verified POD (ref: User)</td>
+                    </tr>
+                    <tr>
+                        <td>verifiedAt</td>
+                        <td>Date</td>
+                        <td>Verification timestamp</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section">
+            <h2> Screen Wireframes</h2>
+            
+            <div class="wireframe-grid">
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Start POD Capture</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Back</span>
+                            <h3 style="font-size: 1rem;">Complete Delivery</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div class="card" style="background: #d1fae5; border-color: var(--success-color);">
+                                <div style="text-align: center; padding: 1rem 0;">
+                                    <div style="font-size: 3rem; margin-bottom: 0.5rem;"></div>
+                                    <h4 style="color: var(--success-color); margin-bottom: 0.5rem;">Delivery Complete!</h4>
+                                    <p style="color: #065f46; font-size: 0.875rem;">
+                                        Upload proof of delivery to finalize trip
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h4 style="margin-bottom: 1rem;">Trip Summary</h4>
+                                <div class="info-row">
+                                    <span class="info-label">Booking ID</span>
+                                    <span class="info-value">#BK2601001</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Delivered To</span>
+                                    <span class="info-value">Depot 5, Pune</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Customer</span>
+                                    <span class="info-value">ABC Logistics</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Distance</span>
+                                    <span class="info-value">245 km</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Earnings</span>
+                                    <span class="info-value" style="color: var(--success-color);">₹4,500</span>
+                                </div>
+                            </div>
+
+                            <div style="background: #dbeafe; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                <h5 style="margin-bottom: 0.5rem;"> Required Documents</h5>
+                                <ul style="margin-left: 1.5rem; color: var(--text-secondary); font-size: 0.875rem; line-height: 2;">
+                                    <li>Photos of delivered goods (2-3 photos)</li>
+                                    <li>Recipient digital signature</li>
+                                    <li>Recipient name and contact</li>
+                                </ul>
+                            </div>
+
+                            <button class="btn btn-success">Start POD Upload</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Photo Capture</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Back</span>
+                            <h3 style="font-size: 1rem;">Upload Photos</h3>
+                            <span>1/3</span>
+                        </div>
+                        <div class="mobile-content">
+                            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                                Take 2-3 photos showing the delivered goods clearly
+                            </p>
+
+                            <div class="upload-area">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;"></div>
+                                <h4 style="margin-bottom: 0.5rem;">Take Photo</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                                    Tap to open camera
+                                </p>
+                            </div>
+
+                            <div style="margin: 1.5rem 0;">
+                                <h5 style="margin-bottom: 1rem;">Uploaded Photos (2)</h5>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div style="position: relative;">
+                                        <div class="photo-preview">
+                                            <span style="font-size: 2rem; color: var(--text-secondary);"></span>
+                                        </div>
+                                        <div style="position: absolute; top: 0.5rem; right: 0.5rem; background: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                            
+                                        </div>
+                                        <span class="badge badge-success" style="display: block; text-align: center;">Goods Overview</span>
+                                    </div>
+
+                                    <div style="position: relative;">
+                                        <div class="photo-preview">
+                                            <span style="font-size: 2rem; color: var(--text-secondary);"></span>
+                                        </div>
+                                        <div style="position: absolute; top: 0.5rem; right: 0.5rem; background: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                            
+                                        </div>
+                                        <span class="badge badge-success" style="display: block; text-align: center;">Close-up</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary">Continue to Signature </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Digital Signature</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Back</span>
+                            <h3 style="font-size: 1rem;">Recipient Signature</h3>
+                            <span>2/3</span>
+                        </div>
+                        <div class="mobile-content">
+                            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                                Collect signature from the person who received the goods
+                            </p>
+
+                            <div class="card">
+                                <h5 style="margin-bottom: 1rem;">Recipient Information</h5>
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Full Name *</label>
+                                    <input type="text" value="Amit Shah" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-family: inherit;" />
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Phone Number *</label>
+                                    <input type="tel" value="+91 97654 32109" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-family: inherit;" />
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h5>Digital Signature *</h5>
+                                    <button style="background: none; border: none; color: var(--primary-color); font-size: 0.875rem; cursor: pointer; font-weight: 600;">Clear</button>
+                                </div>
+                                <div class="signature-pad" style="display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 2rem; margin-bottom: 0.5rem;"></div>
+                                        <div style="font-size: 0.875rem;">Sign here with finger</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary">Continue to Review </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - POD Review & Submit</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Back</span>
+                            <h3 style="font-size: 1rem;">Review & Submit</h3>
+                            <span>3/3</span>
+                        </div>
+                        <div class="mobile-content">
+                            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                                Review all details before submitting POD
+                            </p>
+
+                            <div class="card">
+                                <h5 style="margin-bottom: 1rem;">Photos (2)</h5>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                    <div class="photo-preview" style="height: 100px;">
+                                        <span style="font-size: 1.5rem; color: var(--text-secondary);"></span>
+                                    </div>
+                                    <div class="photo-preview" style="height: 100px;">
+                                        <span style="font-size: 1.5rem; color: var(--text-secondary);"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h5 style="margin-bottom: 1rem;">Recipient Details</h5>
+                                <div class="info-row">
+                                    <span class="info-label">Name</span>
+                                    <span class="info-value">Amit Shah</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">+91 97654 32109</span>
+                                </div>
+                                <div style="margin-top: 1rem; padding: 1rem; background: var(--light-bg); border-radius: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem;">SIGNATURE</div>
+                                    <div style="height: 60px; background: white; border: 2px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                                         Signature Image
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Delivery Notes (Optional)</label>
+                                <textarea style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-family: inherit; resize: vertical; min-height: 80px;" placeholder="Add any additional notes about the delivery...">Delivered to warehouse manager. All items intact.</textarea>
+                            </div>
+
+                            <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: center;">
+                                <p style="font-size: 0.875rem; color: #92400e;">
+                                     Once submitted, POD cannot be edited
+                                </p>
+                            </div>
+
+                            <button class="btn btn-success"> Submit POD</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - POD Upload Success</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header" style="background: var(--success-color);">
+                            <span></span>
+                            <h3 style="font-size: 1rem;">Trip Completed</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div style="text-align: center; padding: 2rem 1rem;">
+                                <div style="width: 80px; height: 80px; background: var(--success-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;"></div>
+                                <h3 style="color: var(--success-color); margin-bottom: 1rem;">Trip Completed Successfully!</h3>
+                                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                                    POD uploaded and customer notified. Payment will be processed on Jan 11, 2026.
+                                </p>
+                            </div>
+
+                            <div class="card" style="background: #d1fae5; border-color: var(--success-color);">
+                                <h4 style="margin-bottom: 1rem;">Earnings Summary</h4>
+                                <div class="info-row" style="border-bottom: none;">
+                                    <span class="info-label">Trip Earnings</span>
+                                    <span class="info-value" style="color: var(--success-color); font-size: 1.5rem;">₹4,500</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding-top: 0;">
+                                    <span class="info-label">Payment Date</span>
+                                    <span class="info-value">Jan 11, 2026</span>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h4 style="margin-bottom: 1rem;">Trip Details</h4>
+                                <div class="info-row">
+                                    <span class="info-label">Booking ID</span>
+                                    <span class="info-value">#BK2601001</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Route</span>
+                                    <span class="info-value">Mumbai  Pune</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Distance</span>
+                                    <span class="info-value">245 km</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Duration</span>
+                                    <span class="info-value">6 hrs 15 mins</span>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" style="margin-bottom: 0.75rem;">View Trip History</button>
+                            <button class="btn" style="background: white; color: var(--primary-color); border: 2px solid var(--border-color);">Back to Home</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Customer App - POD Viewer</div>
+                    <div class="mobile-mockup">
+                        <div class="mobile-header">
+                            <span> Back</span>
+                            <h3 style="font-size: 1rem;">Proof of Delivery</h3>
+                            <span></span>
+                        </div>
+                        <div class="mobile-content">
+                            <div class="card" style="background: #d1fae5; border-color: var(--success-color);">
+                                <div style="text-align: center; padding: 0.5rem 0;">
+                                    <h4 style="color: var(--success-color); margin-bottom: 0.5rem;"> Delivery Confirmed</h4>
+                                    <p style="color: #065f46; font-size: 0.875rem;">
+                                        Jan 9, 2026 at 5:10 PM
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h5 style="margin-bottom: 1rem;">Delivery Photos</h5>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <div class="photo-preview">
+                                        <span style="font-size: 2rem;"></span>
+                                    </div>
+                                    <div class="photo-preview">
+                                        <span style="font-size: 2rem;"></span>
+                                    </div>
+                                </div>
+                                <p style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                                    Tap to view full size
+                                </p>
+                            </div>
+
+                            <div class="card">
+                                <h5 style="margin-bottom: 1rem;">Received By</h5>
+                                <div class="info-row">
+                                    <span class="info-label">Name</span>
+                                    <span class="info-value">Amit Shah</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">+91 97654 32109</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Delivered At</span>
+                                    <span class="info-value">5:10 PM</span>
+                                </div>
+                                <div style="margin-top: 1rem; padding: 1rem; background: var(--light-bg); border-radius: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem;">DIGITAL SIGNATURE</div>
+                                    <div style="height: 80px; background: white; border: 2px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                                         Signature
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h5 style="margin-bottom: 0.5rem;">Delivery Notes</h5>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                                    Delivered to warehouse manager. All items intact.
+                                </p>
+                            </div>
+
+                            <button class="btn btn-primary" style="margin-bottom: 0.75rem;"> Download POD PDF</button>
+                            <button class="btn" style="background: white; color: var(--primary-color); border: 2px solid var(--border-color);"> Rate This Trip</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Implementation Flow</h2>
+            
+            <h3>POD Upload Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Driver completes delivery and unloading</li>
+                <li>Driver clicks "Complete Delivery" in app</li>
+                <li>App shows POD upload screen</li>
+                <li>Driver takes 2-3 photos of delivered goods using camera</li>
+                <li>Photos uploaded to AWS S3 via multipart form-data</li>
+                <li>Server creates POD record with status 'photos_uploaded'</li>
+                <li>Driver navigates to signature capture screen</li>
+                <li>Driver enters recipient name and phone number</li>
+                <li>Recipient signs on touchscreen (signature saved as PNG)</li>
+                <li>Signature uploaded to S3</li>
+                <li>POD status updated to 'signature_captured'</li>
+                <li>Driver reviews all POD details</li>
+                <li>Driver adds optional delivery notes</li>
+                <li>Driver clicks "Submit POD"</li>
+                <li>Server updates Trip.status to 'completed'</li>
+                <li>POD status set to 'completed'</li>
+                <li>Push notification sent to customer</li>
+                <li>Email sent to admin for POD verification</li>
+                <li>Payment settlement workflow triggered</li>
+                <li>Driver sees success screen with earnings summary</li>
+            </ol>
+
+            <h3>Customer POD View Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Customer receives "Delivery Complete" notification</li>
+                <li>Customer opens TruckUser app</li>
+                <li>Customer navigates to completed booking</li>
+                <li>Customer clicks "View POD" button</li>
+                <li>App fetches POD data from API</li>
+                <li>Customer views delivery photos in gallery</li>
+                <li>Customer sees recipient signature and details</li>
+                <li>Customer can download POD as PDF</li>
+                <li>Customer can provide rating and feedback</li>
+            </ol>
+        </section>
+
+        <section class="section">
+            <h2> Business Rules & Validation</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Minimum Photos:</strong> At least 2 photos required for POD</li>
+                <li><strong>Photo Size Limit:</strong> Max 5MB per photo</li>
+                <li><strong>Accepted Formats:</strong> JPEG, PNG only</li>
+                <li><strong>Signature Required:</strong> Digital signature is mandatory</li>
+                <li><strong>Recipient Info:</strong> Name and phone required for verification</li>
+                <li><strong>Location Verification:</strong> GPS location must be within 500m of delivery address</li>
+                <li><strong>Time Validation:</strong> POD timestamp cannot be before trip start time</li>
+                <li><strong>Edit Restriction:</strong> POD cannot be edited once submitted</li>
+                <li><strong>Settlement Trigger:</strong> Trip completion triggers payment settlement</li>
+                <li><strong>Retention Period:</strong> POD documents stored for 3 years</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Security Considerations</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Authentication:</strong> Only assigned driver can upload POD for trip</li>
+                <li><strong>S3 Signed URLs:</strong> Temporary signed URLs for photo upload</li>
+                <li><strong>Image Validation:</strong> Verify uploaded files are valid images</li>
+                <li><strong>Virus Scanning:</strong> Scan uploaded files for malware</li>
+                <li><strong>Watermarking:</strong> Add timestamp and trip ID watermark to photos</li>
+                <li><strong>Access Control:</strong> Only customer, driver, and admin can view POD</li>
+                <li><strong>Audit Logging:</strong> Log all POD access and downloads</li>
+                <li><strong>Encryption:</strong> Encrypt POD documents at rest in S3</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> PDF Generation</h2>
+            
+            <h3>POD PDF Structure</h3>
+            <ul class="feature-list">
+                <li><strong>Header:</strong> Company logo, POD ID, generation date</li>
+                <li><strong>Trip Details:</strong> Booking ID, route, customer name, driver info</li>
+                <li><strong>Delivery Information:</strong> Delivery address, date/time, recipient details</li>
+                <li><strong>Photos Section:</strong> All uploaded photos with timestamps</li>
+                <li><strong>Signature:</strong> Digital signature with recipient name</li>
+                <li><strong>Footer:</strong> Terms, company contact, verification code</li>
+            </ul>
+
+            <h3>PDF Generation Code Example</h3>
+            <div class="code-block">
+import PDFDocument from 'pdfkit';
+import AWS from 'aws-sdk';
+
+async function generatePODPDF(podId) {
+  const pod = await POD.findById(podId).populate('tripId bookingId');
+  const doc = new PDFDocument();
+  
+  // Header
+  doc.fontSize(20).text('Proof of Delivery', { align: 'center' });
+  doc.fontSize(10).text(`POD ID: ${podId}`, { align: 'center' });
+  
+  // Trip Details
+  doc.fontSize(14).text('Trip Information', { underline: true });
+  doc.fontSize(10).text(`Booking: ${pod.bookingId._id}`);
+  doc.text(`Route: ${pod.tripId.pickup}  ${pod.tripId.delivery}`);
+  
+  // Add photos
+  for (const photo of pod.photos) {
+    const image = await downloadFromS3(photo.url);
+    doc.addPage().image(image, 50, 50, { width: 500 });
+  }
+  
+  // Add signature
+  const signature = await downloadFromS3(pod.signatureUrl);
+  doc.addPage().image(signature, 200, 300, { width: 200 });
+  
+  doc.end();
+  
+  return uploadPDFToS3(doc, `pod-${podId}.pdf`);
+}
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

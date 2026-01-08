@@ -1,1 +1,323 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Driver Settlement Processing - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>Driver Settlement Processing</h1><p>Process driver payments and settlements</p></div><div class='section'><h2> Workflow Goal</h2><p>Process driver payments and settlements</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Driver Settlement Processing - VCG Transport</title>
+	<style>
+		:root {
+			--primary-color: #2563eb;
+			--secondary-color: #1e40af;
+			--success-color: #10b981;
+			--warning-color: #f59e0b;
+			--danger-color: #ef4444;
+			--border-color: #e5e7eb;
+			--text-primary: #111827;
+			--text-secondary: #6b7280;
+			--light-bg: #f9fafb;
+			--card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		}
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+			line-height: 1.6;
+			color: var(--text-primary);
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+			padding: 2rem 1rem;
+		}
+		.container { max-width: 1400px; margin: 0 auto; }
+		header {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(10px);
+			border-radius: 16px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: var(--card-shadow);
+		}
+		header h1 { font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+		header p { color: var(--text-secondary); font-size: 1.1rem; }
+		.back-link {
+			display: inline-block;
+			color: var(--primary-color);
+			text-decoration: none;
+			margin-bottom: 1rem;
+			font-weight: 500;
+			transition: color 0.3s;
+		}
+		.back-link:hover { color: var(--secondary-color); }
+		.section {
+			background: white;
+			border-radius: 16px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: var(--card-shadow);
+		}
+		.section h2 {
+			color: var(--primary-color);
+			border-bottom: 3px solid var(--primary-color);
+			padding-bottom: 0.75rem;
+			margin-bottom: 1.5rem;
+			font-size: 1.5rem;
+		}
+		.section h3 { color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+		.feature-list { list-style: none; padding: 0; }
+		.feature-list li {
+			padding: 0.75rem 0;
+			padding-left: 2rem;
+			position: relative;
+			border-bottom: 1px solid var(--border-color);
+		}
+		.feature-list li:before {
+			content: "";
+			position: absolute;
+			left: 0;
+			color: var(--success-color);
+			font-weight: bold;
+			font-size: 1.2rem;
+		}
+		.api-endpoint {
+			background: var(--light-bg);
+			border-radius: 8px;
+			padding: 1rem;
+			margin: 1rem 0;
+			font-family: monospace;
+			color: var(--secondary-color);
+		}
+		.wireframe {
+			background: var(--light-bg);
+			border: 1px dashed var(--border-color);
+			border-radius: 8px;
+			padding: 1.5rem;
+			margin: 1rem 0;
+			text-align: center;
+			color: var(--text-secondary);
+			font-size: 1.1rem;
+		}
+		.table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 1rem 0;
+		}
+		.table th, .table td {
+			border: 1px solid var(--border-color);
+			padding: 0.75rem 1rem;
+			text-align: left;
+		}
+		.table th {
+			background: var(--light-bg);
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<header>
+		<a href="../index.html" class="back-link">&larr; Back to Index</a>
+		<h1>Driver Settlement Processing</h1>
+		<p>Automate and track payments to drivers for completed and approved shipments, ensuring transparency and timely settlements.</p>
+	</header>
+
+	<div class="section">
+		<h2>Workflow Goal</h2>
+		<p>To process and record settlements for drivers after successful delivery and invoice payment, including calculation of earnings, deductions, and payment status.</p>
+	</div>
+
+	<div class="section">
+		<h2>Frontend Pages</h2>
+		<ul class="feature-list">
+			<li><b>Admin Dashboard &rarr; Settlements Tab:</b> List of all settlements with driver, trip, and payment status.</li>
+			<li><b>Driver App &rarr; My Settlements:</b> Drivers can view their settlement history and payment status.</li>
+			<li><b>Settlement Detail View:</b> Shows trip, earnings, deductions, and payment breakdown.</li>
+		</ul>
+		<h3>Wireframes</h3>
+		<div class="wireframe-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-top: 2rem;">
+			<div class="wireframe" style="border: 2px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+				<div class="wireframe-header" style="background: #2563eb; color: white; padding: 1rem; text-align: center; font-weight: 600;">Admin Dashboard - Settlement List</div>
+				<div style="padding: 1.5rem;">
+					<table style="width: 100%; border-collapse: collapse;">
+						<thead>
+							<tr style="background: #f9fafb; color: #2563eb;">
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Settlement #</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Driver</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Trip</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Amount</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">Status</th>
+								<th style="padding: 0.75rem; border-bottom: 2px solid #e5e7eb;">View</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td style="padding: 0.75rem;">SET-20260108</td>
+								<td style="padding: 0.75rem;">John Doe</td>
+								<td style="padding: 0.75rem;">TRIP-12345</td>
+								<td style="padding: 0.75rem;">$900</td>
+								<td style="padding: 0.75rem;"><span class="badge badge-success" style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Paid</span></td>
+								<td style="padding: 0.75rem; text-align: center;">👁️</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="wireframe" style="border: 2px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+				<div class="wireframe-header" style="background: #2563eb; color: white; padding: 1rem; text-align: center; font-weight: 600;">Mobile - Settlement Detail</div>
+				<div class="mobile-mockup" style="width: 375px; margin: 2rem auto; background: white; min-height: 300px; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+					<div class="mobile-header" style="background: #2563eb; color: white; padding: 1rem; display: flex; align-items: center; justify-content: space-between;">
+						<span>Back</span>
+						<h3 style="font-size: 1rem; margin: 0;">Settlement Detail</h3>
+						<span></span>
+					</div>
+					<div class="mobile-content" style="padding: 1rem; background: #f8fafc; min-height: 200px;">
+						<div class="card" style="background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+							<div class="info-row" style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+								<span class="info-label" style="color: #6b7280; font-size: 0.875rem;">Trip</span>
+								<span class="info-value" style="color: #111827; font-weight: 600;">TRIP-12345</span>
+							</div>
+							<div class="info-row" style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+								<span class="info-label" style="color: #6b7280; font-size: 0.875rem;">Amount</span>
+								<span class="info-value" style="color: #111827; font-weight: 600;">$900</span>
+							</div>
+							<div class="info-row" style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+								<span class="info-label" style="color: #6b7280; font-size: 0.875rem;">Status</span>
+								<span class="info-value" style="color: #111827; font-weight: 600;">Paid</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="section">
+		<h2>API Endpoints</h2>
+		<h3>1. Get All Settlements</h3>
+		<div class="api-endpoint">GET /api/settlements?driverId=drv789&status=pending</div>
+		<pre class="api-endpoint">Response (200 OK):
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "set123",
+      "settlementNumber": "SET-20260108-001",
+      "driverId": "drv789",
+      "amount": 900,
+      "status": "pending",
+      "paymentMethod": "bank_transfer",
+      "createdAt": "2026-01-08T12:30:00Z"
+    }
+  ]
+}</pre>
+		<h3>2. Get Settlement Details</h3>
+		<div class="api-endpoint">GET /api/settlements/:settlementId</div>
+		<pre class="api-endpoint">Response (200 OK):
+{
+  "success": true,
+  "data": {
+    "_id": "set123",
+    "settlementNumber": "SET-20260108-001",
+    "driverId": "drv789",
+   h3>Settlement Processing Flow</h3>
+		<ul class="feature-list">
+			<li><b>Step 1:</b> Customer pays invoice → Settlement created for driver</li>
+			<li><b>Step 2:</b> System calculates driver earnings: Trip base + incentives - deductions</li>
+			<li><b>Step 3:</b> Deductions applied: Advance payments, penalties, account balance adjustments</li>
+			<li><b>Step 4:</b> Admin reviews and approves settlement for payment</li>
+			<li><b>Step 5:</b> Payment processed via bank transfer/UPI to driver's registered account</li>
+			<li><b>Step 6:</b> Driver notified with payment receipt and settlement details</li>
+			<li><b>Step 7:</b> All transactions logged for auditing and tax compliance</li>
+		</ul>
+		<h3>Business Rules</h3>
+		<ul class="feature-list">
+			<li>Settlement triggered only after customer invoice is marked "paid".</li>
+			<li>Settlement amount = Trip earnings + Performance incentives - Advance payments - Penalties.</li>
+			<li>Admins can process settlements in bulk (up to 100 per batch) or individually.</li>
+			<li>Drivers notified via SMS and app notification upon payment completion.</li>
+			<li>Payment methods: Bank transfer (NEFT/RTGS), UPI, Check (for international).</li>
+			<li>Settlements processed every 2 business days (Mon-Fri).</li>
+			<li>All settlement actions logged with admin name, timestamp for tax/audit compliance.</li>
+			<li>Failed payments auto-retry after 24 hours; notify admin after 3 failures
+      { "type": "advance", "amount": 100 },
+      { "type": "penalty", "amount": 0 }
+    ],
+    "paymentMethod": "bank_transfer",
+    "bankDetails": { "accountHolder": "John Doe", "accountNumber": "****5678" }
+  }
+}</pre>
+		<h3>3. Process Settlement Payment</h3>
+		<div class="api-endpoint">POST /api/settlements/:settlementId/pay</div>
+		<pre class="api-endpoint">Request:
+{
+  "method": "bank_transfer",
+  "amount": 900,
+  "reference": "NEFT-TXN-123456",
+  "notes": "Payment processed via NEFT"
+}
+Response (200 OK):
+{
+  "success": true,
+  "message": "Settlement paid to driver.",
+  "data": {
+    "settlementId": "set123",
+    "status": "paid",
+    "paidAt": "2026-01-08T14:00:00Z",
+    "paidAmount": 900,
+    "reference": "NEFT-TXN-123456"
+  }
+}
+Error (400):
+{
+  "success": false,
+  "error": "Settlement already paid"
+}</pre>
+		<h3>4. Bulk Settlement Processing</h3>
+		<div class="api-endpoint">POST /api/settlements/bulk-pay</div>
+		<pre class="api-endpoint">Request:
+{
+  "settlementIds": ["set123", "set124", "set125"],
+  "paymentMethod": "bank_transfer"
+}
+Response (200 OK):
+{
+  "success": true,
+  "message": "3 settlements queued for payment processing.",
+  "processedCount": 3,
+  "totalAmount": 2700
+}</pre>
+	</div>
+
+	<div class="section">
+		<h2>Database Models</h2>
+		<table class="table">
+			<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+			<tr><td>_id</td><td>ObjectId</td><td>Unique Settlement ID</td></tr>
+			<tr><td>driverId</td><td>ObjectId</td><td>Reference to Driver</td></tr>
+			<tr><td>tripId</td><td>ObjectId</td><td>Reference to Trip</td></tr>
+			<tr><td>amount</td><td>Number</td><td>Total settlement amount</td></tr>
+			<tr><td>status</td><td>String</td><td>pending | paid | failed</td></tr>
+			<tr><td>paidAt</td><td>Date</td><td>Payment date (if paid)</td></tr>
+			<tr><td>method</td><td>String</td><td>Payment method (bank_transfer, upi, etc.)</td></tr>
+			<tr><td>deductions</td><td>Array</td><td>List of deductions (advance, penalties, etc.)</td></tr>
+		</table>
+	</div>
+
+	<div class="section">
+		<h2>Implementation & Business Rules</h2>
+		<ul class="feature-list">
+			<li>Settlement is triggered only after invoice is marked paid.</li>
+			<li>Admins can process settlements in bulk or individually.</li>
+			<li>Drivers are notified upon payment completion.</li>
+			<li>All settlement actions are logged for compliance.</li>
+		</ul>
+	</div>
+
+	<div class="section">
+		<h2>Security & Compliance</h2>
+		<ul class="feature-list">
+			<li>Only authorized finance/admin users can process settlements.</li>
+			<li>All payment transactions are tracked and auditable.</li>
+			<li>Driver bank details are encrypted and securely stored.</li>
+		</ul>
+	</div>
+</div>
+</body>
+</html>

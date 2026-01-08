@@ -1,1 +1,875 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Assign Driver (Admin) - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>Assign Driver (Admin)</h1><p>Admin assigns driver and truck to booking</p></div><div class='section'><h2> Workflow Goal</h2><p>Admin assigns driver and truck to booking</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Driver to Trip - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        header h1 { font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        header p { color: var(--text-secondary); font-size: 1.1rem; }
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--secondary-color); }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .section h3 { color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .feature-list li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .api-endpoint {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        .api-endpoint code { color: var(--secondary-color); font-weight: 600; }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: Courier New, monospace;
+            font-size: 0.9rem;
+        }
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .wireframe {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .wireframe-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .desktop-mockup {
+            background: #f8fafc;
+            padding: 1.5rem;
+            min-height: 700px;
+        }
+        .dashboard-header {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        .btn-outline {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        .driver-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .driver-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+        .driver-card.selected {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-bar select, .filter-bar input {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link"> Back to Index</a>
+            <h1> Assign Driver to Trip</h1>
+            <p>Admin assigns verified driver and truck to confirmed booking</p>
+        </header>
+
+        <section class="section">
+            <h2> Workflow Goal</h2>
+            <p>Enable admin to assign available drivers and trucks to confirmed bookings. System matches drivers based on location, availability, truck type, and rating. Admin can manually select or use auto-assignment algorithm. Once assigned, driver receives trip notification and must accept within specified time.</p>
+        </section>
+
+        <section class="section">
+            <h2> Frontend Pages</h2>
+            <h3>TruckAdmin Dashboard</h3>
+            <ul class="feature-list">
+                <li><strong>Unassigned Bookings:</strong> List of bookings awaiting driver assignment</li>
+                <li><strong>Driver Search & Filter:</strong> Find available drivers by location, truck type, rating</li>
+                <li><strong>Driver Details Panel:</strong> View driver profile, current location, past trips, rating</li>
+                <li><strong>Assignment Modal:</strong> Confirm driver and truck assignment to booking</li>
+                <li><strong>Auto-Assignment:</strong> Algorithm suggests best-match drivers</li>
+                <li><strong>Assignment History:</strong> Track all assignments with timestamps</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> API Endpoints</h2>
+            
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/admin/bookings/unassigned</code>
+                <p>Get list of confirmed bookings without driver assignment</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/admin/drivers/available</code>
+                <p>Get available drivers filtered by criteria (location, truck type, etc.)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/admin/trips/:bookingId/assign</code>
+                <p>Assign driver and truck to booking</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/admin/trips/auto-assign</code>
+                <p>Use algorithm to auto-assign best match driver</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/admin/trips/:tripId/reassign</code>
+                <p>Reassign different driver to trip (before acceptance)</p>
+            </div>
+
+            <h3>Request Example: Assign Driver</h3>
+            <div class="code-block">
+POST /api/admin/trips/65a1b2c3d4e5f6789012345/assign
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
+Body: {
+  "driverId": "507f1f77bcf86cd799439012",
+  "truckType": "14ft Container",
+  "estimatedDistance": 245,
+  "estimatedDuration": 300,
+  "assignedBy": "507f1f77bcf86cd799439013"
+}
+            </div>
+
+            <h3>Response Example</h3>
+            <div class="code-block">
+{
+  "success": true,
+  "message": "Driver assigned successfully",
+  "data": {
+    "_id": "65a1b2c3d4e5f6789012999",
+    "bookingId": "65a1b2c3d4e5f6789012345",
+    "driverId": "507f1f77bcf86cd799439012",
+    "driverName": "Rajesh Kumar",
+    "driverPhone": "+91 99887 76655",
+    "status": "pending_acceptance",
+    "assignedAt": "2026-01-08T15:00:00Z",
+    "acceptanceDeadline": "2026-01-08T17:00:00Z",
+    "notificationSent": true
+  }
+}
+            </div>
+
+            <h3>Request Example: Get Available Drivers</h3>
+            <div class="code-block">
+GET /api/admin/drivers/available?location=Mumbai&truckType=14ft Container&radius=50
+
+Response: {
+  "success": true,
+  "data": {
+    "drivers": [
+      {
+        "_id": "507f1f77bcf86cd799439012",
+        "name": "Rajesh Kumar",
+        "phone": "+91 99887 76655",
+        "currentLocation": {
+          "city": "Mumbai",
+          "coordinates": [19.0760, 72.8777]
+        },
+        "truckType": "14ft Container",
+        "rating": 4.8,
+        "tripsCompleted": 156,
+        "isAvailable": true,
+        "distanceFromPickup": 8.5,
+        "lastTripEndTime": "2026-01-07T18:00:00Z"
+      }
+    ],
+    "totalAvailable": 12
+  }
+}
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Database Models</h2>
+            
+            <h3>Trip Model (Assignment Fields)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>bookingId</td>
+                        <td>ObjectId</td>
+                        <td>Reference to Booking (ref: Booking)</td>
+                    </tr>
+                    <tr>
+                        <td>driverId</td>
+                        <td>ObjectId</td>
+                        <td>Reference to assigned driver (ref: Driver)</td>
+                    </tr>
+                    <tr>
+                        <td>status</td>
+                        <td>String</td>
+                        <td>enum: ['pending_acceptance', 'accepted', 'in_progress', 'completed', 'cancelled']</td>
+                    </tr>
+                    <tr>
+                        <td>assignedBy</td>
+                        <td>ObjectId</td>
+                        <td>Admin who assigned (ref: User)</td>
+                    </tr>
+                    <tr>
+                        <td>assignedAt</td>
+                        <td>Date</td>
+                        <td>Assignment timestamp</td>
+                    </tr>
+                    <tr>
+                        <td>acceptanceDeadline</td>
+                        <td>Date</td>
+                        <td>Driver must accept before this time</td>
+                    </tr>
+                    <tr>
+                        <td>acceptedAt</td>
+                        <td>Date</td>
+                        <td>Driver acceptance timestamp</td>
+                    </tr>
+                    <tr>
+                        <td>rejectedAt</td>
+                        <td>Date</td>
+                        <td>Driver rejection timestamp</td>
+                    </tr>
+                    <tr>
+                        <td>rejectionReason</td>
+                        <td>String</td>
+                        <td>Reason if driver rejected</td>
+                    </tr>
+                    <tr>
+                        <td>estimatedDistance</td>
+                        <td>Number</td>
+                        <td>Distance in kilometers</td>
+                    </tr>
+                    <tr>
+                        <td>estimatedDuration</td>
+                        <td>Number</td>
+                        <td>Duration in minutes</td>
+                    </tr>
+                    <tr>
+                        <td>truckType</td>
+                        <td>String</td>
+                        <td>Type of truck required</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section">
+            <h2> Screen Wireframes</h2>
+            
+            <div class="wireframe-grid">
+                <div class="wireframe" style="grid-column: span 2;">
+                    <div class="wireframe-header">Admin Dashboard - Unassigned Bookings</div>
+                    <div class="desktop-mockup">
+                        <div class="dashboard-header">
+                            <h3>Unassigned Trips</h3>
+                            <span class="badge badge-warning">8 Pending Assignment</span>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">8</div>
+                                <div class="stat-label">Unassigned</div>
+                            </div>
+                            <div class="stat-card" style="border-left-color: var(--success-color);">
+                                <div class="stat-value" style="color: var(--success-color);">15</div>
+                                <div class="stat-label">Assigned Today</div>
+                            </div>
+                            <div class="stat-card" style="border-left-color: var(--warning-color);">
+                                <div class="stat-value" style="color: var(--warning-color);">3</div>
+                                <div class="stat-label">Awaiting Acceptance</div>
+                            </div>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Customer</th>
+                                    <th>Route</th>
+                                    <th>Truck Type</th>
+                                    <th>Pickup Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>#BK2601001</strong></td>
+                                    <td>ABC Logistics</td>
+                                    <td>Mumbai  Pune</td>
+                                    <td>14ft Container</td>
+                                    <td>Jan 10, 2026</td>
+                                    <td><span class="badge badge-warning">Unassigned</span></td>
+                                    <td>
+                                        <button class="btn btn-primary" style="padding: 0.5rem 1rem;">Assign Driver</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#BK2601002</strong></td>
+                                    <td>XYZ Corp</td>
+                                    <td>Delhi  Jaipur</td>
+                                    <td>20ft Open</td>
+                                    <td>Jan 11, 2026</td>
+                                    <td><span class="badge badge-warning">Unassigned</span></td>
+                                    <td>
+                                        <button class="btn btn-primary" style="padding: 0.5rem 1rem;">Assign Driver</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#BK2601003</strong></td>
+                                    <td>PQR Industries</td>
+                                    <td>Bangalore  Chennai</td>
+                                    <td>17ft Container</td>
+                                    <td>Jan 9, 2026</td>
+                                    <td><span class="badge badge-danger">Urgent</span></td>
+                                    <td>
+                                        <button class="btn btn-primary" style="padding: 0.5rem 1rem;">Assign Driver</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="wireframe" style="grid-column: span 2;">
+                    <div class="wireframe-header">Admin Dashboard - Driver Selection</div>
+                    <div class="desktop-mockup">
+                        <div class="dashboard-header">
+                            <div>
+                                <h3>Assign Driver to Booking #BK2601001</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Mumbai  Pune  14ft Container  245 km</p>
+                            </div>
+                            <button class="btn btn-outline">Auto Assign</button>
+                        </div>
+
+                        <div class="filter-bar">
+                            <select>
+                                <option>All Locations</option>
+                                <option>Mumbai</option>
+                                <option>Nearby (50km)</option>
+                            </select>
+                            <select>
+                                <option>All Truck Types</option>
+                                <option>14ft Container</option>
+                            </select>
+                            <select>
+                                <option>Sort by: Rating</option>
+                                <option>Sort by: Distance</option>
+                                <option>Sort by: Availability</option>
+                            </select>
+                            <input type="text" placeholder="Search driver name or phone..." />
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="driver-card selected">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <h4 style="margin-bottom: 0.25rem;">Rajesh Kumar</h4>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">+91 99887 76655</p>
+                                    </div>
+                                    <span class="badge badge-success">Available</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Truck Type</span>
+                                    <span class="info-value">14ft Container</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Rating</span>
+                                    <span class="info-value"> 4.8 (156 trips)</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Distance from Pickup</span>
+                                    <span class="info-value" style="color: var(--success-color);">8.5 km</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Last Trip</span>
+                                    <span class="info-value">Yesterday</span>
+                                </div>
+                            </div>
+
+                            <div class="driver-card">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <h4 style="margin-bottom: 0.25rem;">Amit Sharma</h4>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">+91 98765 43210</p>
+                                    </div>
+                                    <span class="badge badge-success">Available</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Truck Type</span>
+                                    <span class="info-value">14ft Container</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Rating</span>
+                                    <span class="info-value"> 4.6 (142 trips)</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Distance from Pickup</span>
+                                    <span class="info-value" style="color: var(--warning-color);">15.2 km</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Last Trip</span>
+                                    <span class="info-value">3 days ago</span>
+                                </div>
+                            </div>
+
+                            <div class="driver-card">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <h4 style="margin-bottom: 0.25rem;">Vikram Singh</h4>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">+91 97654 32109</p>
+                                    </div>
+                                    <span class="badge badge-warning">On Trip</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Truck Type</span>
+                                    <span class="info-value">14ft Container</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Rating</span>
+                                    <span class="info-value"> 4.9 (203 trips)</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Available After</span>
+                                    <span class="info-value">Tomorrow 10 AM</span>
+                                </div>
+                            </div>
+
+                            <div class="driver-card">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <h4 style="margin-bottom: 0.25rem;">Suresh Patil</h4>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">+91 96543 21098</p>
+                                    </div>
+                                    <span class="badge badge-success">Available</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Truck Type</span>
+                                    <span class="info-value">14ft Container</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Rating</span>
+                                    <span class="info-value"> 4.7 (89 trips)</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Distance from Pickup</span>
+                                    <span class="info-value">12.8 km</span>
+                                </div>
+                                <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                    <span class="info-label">Last Trip</span>
+                                    <span class="info-value">1 week ago</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                            <button class="btn btn-outline">Cancel</button>
+                            <button class="btn btn-success">Assign Rajesh Kumar to Trip</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Admin - Assignment Confirmation</div>
+                    <div class="desktop-mockup">
+                        <div style="text-align: center; padding: 2rem 1rem;">
+                            <div style="width: 80px; height: 80px; background: var(--success-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;"></div>
+                            <h3 style="color: var(--success-color); margin-bottom: 1rem;">Driver Assigned Successfully!</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Rajesh Kumar has been notified and must accept within 2 hours</p>
+                        </div>
+
+                        <div class="card">
+                            <h4 style="margin-bottom: 1rem;">Assignment Details</h4>
+                            <div class="info-row">
+                                <span class="info-label">Booking ID</span>
+                                <span class="info-value">#BK2601001</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Driver</span>
+                                <span class="info-value">Rajesh Kumar</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Phone</span>
+                                <span class="info-value">+91 99887 76655</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Route</span>
+                                <span class="info-value">Mumbai  Pune</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Acceptance Deadline</span>
+                                <span class="info-value">Today 5:00 PM</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Status</span>
+                                <span class="badge badge-warning">Awaiting Acceptance</span>
+                            </div>
+                        </div>
+
+                        <div style="background: #dbeafe; padding: 1rem; border-radius: 8px; margin: 1.5rem 0;">
+                            <p style="font-size: 0.875rem; color: #1e40af;">
+                                 Push notification and SMS sent to driver. You will be notified once driver accepts or if deadline passes.
+                            </p>
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;">Back to Unassigned List</button>
+                    </div>
+                </div>
+
+                <div class="wireframe">
+                    <div class="wireframe-header">Admin - Auto Assignment</div>
+                    <div class="desktop-mockup">
+                        <div class="card">
+                            <h3 style="margin-bottom: 1rem;"> Auto Assignment</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                Our algorithm will find the best driver based on location, rating, and availability.
+                            </p>
+
+                            <div style="background: var(--light-bg); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                <h4 style="margin-bottom: 0.5rem;">Matching Criteria</h4>
+                                <ul style="margin-left: 1.5rem; color: var(--text-secondary); font-size: 0.875rem; line-height: 2;">
+                                    <li>Distance from pickup location ({'<'}20km)</li>
+                                    <li>Truck type match (14ft Container)</li>
+                                    <li>Driver rating ({'>'} 4.5)</li>
+                                    <li>Currently available status</li>
+                                    <li>Recent activity (within 7 days)</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin: 1.5rem 0;">
+                                <h4 style="margin-bottom: 0.75rem;">Best Match Found</h4>
+                                <div class="driver-card" style="border-color: var(--primary-color); background: #eff6ff;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                        <div>
+                                            <h4 style="margin-bottom: 0.25rem;">Rajesh Kumar</h4>
+                                            <p style="color: var(--text-secondary); font-size: 0.875rem;">+91 99887 76655</p>
+                                        </div>
+                                        <span class="badge badge-success">95% Match</span>
+                                    </div>
+                                    <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                        <span class="info-label">Rating</span>
+                                        <span class="info-value"> 4.8 (156 trips)</span>
+                                    </div>
+                                    <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                        <span class="info-label">Distance</span>
+                                        <span class="info-value" style="color: var(--success-color);">8.5 km</span>
+                                    </div>
+                                    <div class="info-row" style="border-bottom: none; padding: 0.25rem 0;">
+                                        <span class="info-label">Availability</span>
+                                        <span class="info-value">Immediate</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button class="btn btn-outline" style="flex: 1;">View Other Options</button>
+                                <button class="btn btn-success" style="flex: 1;">Confirm Assignment</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2> Implementation Flow</h2>
+            
+            <h3>Manual Assignment Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Admin views unassigned bookings list</li>
+                <li>Admin selects booking to assign</li>
+                <li>System opens driver selection screen</li>
+                <li>System fetches available drivers matching truck type and location</li>
+                <li>Admin can filter/search drivers by various criteria</li>
+                <li>System displays drivers with key metrics (rating, distance, availability)</li>
+                <li>Admin selects preferred driver</li>
+                <li>System shows driver details and booking summary</li>
+                <li>Admin confirms assignment</li>
+                <li>System creates Trip record with status 'pending_acceptance'</li>
+                <li>System sets acceptance deadline (default 2 hours)</li>
+                <li>Push notification and SMS sent to driver</li>
+                <li>Email confirmation sent to customer</li>
+                <li>Admin sees success message with trip details</li>
+                <li>Booking status updated to 'driver_assigned'</li>
+            </ol>
+
+            <h3>Auto Assignment Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Admin clicks "Auto Assign" for booking</li>
+                <li>Algorithm runs with matching criteria:
+                    <ul style="margin-left: 2rem;">
+                        <li>Distance from pickup ({'<'} 20km radius)</li>
+                        <li>Truck type exact match</li>
+                        <li>Driver rating ({'>'} 4.5)</li>
+                        <li>isAvailable = true</li>
+                        <li>Last trip within 7 days (active driver)</li>
+                    </ul>
+                </li>
+                <li>System scores each matching driver based on weighted criteria</li>
+                <li>Top 3 matches returned with confidence scores</li>
+                <li>Admin reviews best match recommendation</li>
+                <li>Admin can accept recommendation or view alternatives</li>
+                <li>Once confirmed, same assignment process as manual</li>
+            </ol>
+        </section>
+
+        <section class="section">
+            <h2> Business Rules & Validation</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Driver Eligibility:</strong> Only verified drivers with isActive=true can be assigned</li>
+                <li><strong>Truck Type Match:</strong> Driver's truck type must match booking requirement</li>
+                <li><strong>Availability Check:</strong> Driver must have isAvailable=true</li>
+                <li><strong>Acceptance Deadline:</strong> Default 2 hours, adjustable based on urgency</li>
+                <li><strong>Max Concurrent Trips:</strong> Driver can have max 1 active trip</li>
+                <li><strong>Reassignment Window:</strong> Can reassign before driver accepts</li>
+                <li><strong>Auto-Rejection:</strong> If driver doesn't respond within deadline, auto-unassign</li>
+                <li><strong>Customer Notification:</strong> Customer notified immediately upon assignment</li>
+                <li><strong>Distance Preference:</strong> Prioritize drivers within 20km of pickup</li>
+                <li><strong>Rating Minimum:</strong> Drivers with rating {'<'} 4.0 flagged for admin review</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Security Considerations</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Admin Authorization:</strong> Only admins can assign drivers to trips</li>
+                <li><strong>Driver Privacy:</strong> Full driver details only visible to admins</li>
+                <li><strong>Assignment Logging:</strong> All assignments logged with admin ID and timestamp</li>
+                <li><strong>Rate Limiting:</strong> Max 50 assignment operations per admin per hour</li>
+                <li><strong>Concurrent Assignment Prevention:</strong> Lock mechanism prevents double-assignment</li>
+                <li><strong>Audit Trail:</strong> Complete history of assignments, reassignments, and rejections</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2> Auto-Assignment Algorithm</h2>
+            
+            <h3>Scoring Formula</h3>
+            <div class="code-block">
+Score = (RatingScore * 0.3) + 
+        (DistanceScore * 0.35) + 
+        (AvailabilityScore * 0.20) + 
+        (ActivityScore * 0.15)
+
+Where:
+- RatingScore = (rating / 5) * 100
+- DistanceScore = max(0, 100 - (distance * 2))
+- AvailabilityScore = isAvailable ? 100 : 0
+- ActivityScore = daysSinceLastTrip < 7 ? 100 : 50
+            </div>
+
+            <h3>Matching Process</h3>
+            <ol style="line-height: 2;">
+                <li>Filter drivers by truck type (exact match)</li>
+                <li>Filter by location (within configurable radius)</li>
+                <li>Filter by verification status (verified only)</li>
+                <li>Calculate score for each eligible driver</li>
+                <li>Sort by score descending</li>
+                <li>Return top 3 matches with confidence percentage</li>
+            </ol>
+        </section>
+
+    </div>
+</body>
+</html>

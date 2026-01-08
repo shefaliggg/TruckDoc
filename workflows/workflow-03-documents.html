@@ -1,1 +1,1008 @@
-﻿<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Document Upload & Verification - VCG Transport</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:2rem;background:#f5f5f5}.header{background:#2563eb;color:white;padding:2rem;border-radius:8px;margin-bottom:2rem}h1{margin:0}.back{color:white;text-decoration:none;display:inline-block;margin-bottom:1rem}.section{background:white;padding:2rem;margin-bottom:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}h2{color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:0.5rem}</style></head><body><div class='header'><a href='../index.html' class='back'> Back to Index</a><h1>Document Upload & Verification</h1><p>Driver uploads and verifies documents</p></div><div class='section'><h2> Workflow Goal</h2><p>Driver uploads and verifies documents</p></div><div class='section'><h2> Frontend Pages</h2><p>To be documented with detailed wireframes and implementation details.</p></div><div class='section'><h2> API Endpoints</h2><p>To be documented with request/response examples.</p></div><div class='section'><h2> Database Models</h2><p>To be documented with schema details.</p></div><div class='section'><h2> Screen Wireframes</h2><p>To be added with detailed mockups.</p></div></body></html>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Upload & Verification - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .section h3 {
+            color: var(--text-primary);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.2rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .api-endpoint {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .api-endpoint code {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .wireframe {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .wireframe-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .phone-mockup {
+            background: #f8fafc;
+            padding: 1.5rem;
+            min-height: 600px;
+        }
+
+        .app-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .back-btn {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .document-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .document-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .document-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .document-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background: var(--light-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            transition: width 0.3s;
+        }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--light-bg);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .file-size {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--border-color);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: 600;
+        }
+
+        .step.active .step-number {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">← Back to Index</a>
+            <h1>📄 Document Upload & Verification</h1>
+            <p>Driver uploads required documents for identity and license verification</p>
+        </header>
+
+        <!-- Workflow Goal -->
+        <section class="section">
+            <h2>📋 Workflow Goal</h2>
+            <p>Enable drivers to upload required documents (Driving License, Aadhaar Card, PAN Card, Photo) during the onboarding process. Documents are uploaded to secure cloud storage and tagged for AI verification. This workflow ensures all necessary documentation is collected before driver approval.</p>
+        </section>
+
+        <!-- Frontend Pages -->
+        <section class="section">
+            <h2>📱 Frontend Pages</h2>
+            
+            <h3>TruckDriver Mobile App</h3>
+            <ul class="feature-list">
+                <li><strong>Document Upload Screen:</strong> List of required documents with upload status</li>
+                <li><strong>Camera/Gallery Selection:</strong> Option to capture photo or select from gallery</li>
+                <li><strong>Document Preview:</strong> Preview uploaded image before submission</li>
+                <li><strong>Upload Progress:</strong> Visual indicator during file upload</li>
+                <li><strong>Verification Status:</strong> Real-time status of document verification</li>
+                <li><strong>Re-upload Option:</strong> Ability to re-upload rejected documents</li>
+            </ul>
+
+            <h3>TruckAdmin Dashboard</h3>
+            <ul class="feature-list">
+                <li><strong>Document Review Page:</strong> View all uploaded driver documents</li>
+                <li><strong>Document Preview Modal:</strong> Full-screen document viewer with zoom</li>
+                <li><strong>Verification Actions:</strong> Approve or reject documents with comments</li>
+            </ul>
+        </section>
+
+        <!-- API Endpoints -->
+        <section class="section">
+            <h2>🔌 API Endpoints</h2>
+            
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/drivers/:driverId/documents/upload</code>
+                <p>Upload a single document (multipart/form-data)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/drivers/:driverId/documents</code>
+                <p>Get list of all uploaded documents with status</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/drivers/:driverId/documents/:documentId</code>
+                <p>Get specific document details and URL</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>DELETE</strong> <code>/api/drivers/:driverId/documents/:documentId</code>
+                <p>Delete a document (before verification only)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/drivers/:driverId/documents/:documentId/verify</code>
+                <p>Admin: Verify or reject document</p>
+            </div>
+
+            <h3>Request Example: Upload Document</h3>
+            <div class="code-block">
+POST /api/drivers/507f1f77bcf86cd799439012/documents/upload
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "multipart/form-data"
+}
+FormData: {
+  "documentType": "drivingLicense",
+  "file": [Binary File Data],
+  "description": "Front side of driving license"
+}
+            </div>
+
+            <h3>Response Example</h3>
+            <div class="code-block">
+{
+  "success": true,
+  "message": "Document uploaded successfully",
+  "data": {
+    "_id": "65a1b2c3d4e5f6789012345",
+    "driverId": "507f1f77bcf86cd799439012",
+    "documentType": "drivingLicense",
+    "fileName": "DL_507f1f77_1704715200000.jpg",
+    "fileUrl": "https://vcg-docs.s3.amazonaws.com/drivers/...",
+    "fileSize": 2048576,
+    "mimeType": "image/jpeg",
+    "uploadedAt": "2026-01-08T10:00:00Z",
+    "verificationStatus": "pending",
+    "aiVerificationResults": null
+  }
+}
+            </div>
+
+            <h3>Request Example: Get Documents List</h3>
+            <div class="code-block">
+GET /api/drivers/507f1f77bcf86cd799439012/documents
+
+Response: {
+  "success": true,
+  "data": {
+    "documents": [
+      {
+        "_id": "65a1b2c3d4e5f6789012345",
+        "documentType": "drivingLicense",
+        "fileName": "DL_507f1f77_1704715200000.jpg",
+        "verificationStatus": "verified",
+        "uploadedAt": "2026-01-08T10:00:00Z"
+      },
+      {
+        "_id": "65a1b2c3d4e5f6789012346",
+        "documentType": "aadhaar",
+        "fileName": "Aadhaar_507f1f77_1704715300000.jpg",
+        "verificationStatus": "pending",
+        "uploadedAt": "2026-01-08T10:05:00Z"
+      }
+    ],
+    "completionStatus": {
+      "required": 4,
+      "uploaded": 2,
+      "verified": 1,
+      "pending": 1,
+      "rejected": 0
+    }
+  }
+}
+            </div>
+        </section>
+
+        <!-- Database Models -->
+        <section class="section">
+            <h2>💾 Database Models</h2>
+            
+            <h3>Driver Model (Extended)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>documents</td>
+                        <td>Array</td>
+                        <td>Array of document objects</td>
+                    </tr>
+                    <tr>
+                        <td>documents._id</td>
+                        <td>ObjectId</td>
+                        <td>Document unique identifier</td>
+                    </tr>
+                    <tr>
+                        <td>documents.documentType</td>
+                        <td>String</td>
+                        <td>enum: ['drivingLicense', 'aadhaar', 'pan', 'photo']</td>
+                    </tr>
+                    <tr>
+                        <td>documents.fileName</td>
+                        <td>String</td>
+                        <td>Original filename with timestamp</td>
+                    </tr>
+                    <tr>
+                        <td>documents.fileUrl</td>
+                        <td>String</td>
+                        <td>S3 or cloud storage URL</td>
+                    </tr>
+                    <tr>
+                        <td>documents.fileSize</td>
+                        <td>Number</td>
+                        <td>File size in bytes</td>
+                    </tr>
+                    <tr>
+                        <td>documents.mimeType</td>
+                        <td>String</td>
+                        <td>File MIME type (image/jpeg, image/png, application/pdf)</td>
+                    </tr>
+                    <tr>
+                        <td>documents.uploadedAt</td>
+                        <td>Date</td>
+                        <td>Upload timestamp</td>
+                    </tr>
+                    <tr>
+                        <td>documents.verificationStatus</td>
+                        <td>String</td>
+                        <td>enum: ['pending', 'processing', 'verified', 'rejected']</td>
+                    </tr>
+                    <tr>
+                        <td>documents.rejectionReason</td>
+                        <td>String</td>
+                        <td>Reason if rejected</td>
+                    </tr>
+                    <tr>
+                        <td>documents.aiVerificationResults</td>
+                        <td>Object</td>
+                        <td>OCR and face recognition results</td>
+                    </tr>
+                    <tr>
+                        <td>documents.verifiedBy</td>
+                        <td>ObjectId</td>
+                        <td>Admin who verified (ref: User)</td>
+                    </tr>
+                    <tr>
+                        <td>documents.verifiedAt</td>
+                        <td>Date</td>
+                        <td>Verification timestamp</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Required Documents</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document Type</th>
+                        <th>Required</th>
+                        <th>Format</th>
+                        <th>Max Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Driving License</td>
+                        <td>Yes</td>
+                        <td>JPG, PNG, PDF</td>
+                        <td>5 MB</td>
+                    </tr>
+                    <tr>
+                        <td>Aadhaar Card</td>
+                        <td>Yes</td>
+                        <td>JPG, PNG, PDF</td>
+                        <td>5 MB</td>
+                    </tr>
+                    <tr>
+                        <td>PAN Card</td>
+                        <td>Yes</td>
+                        <td>JPG, PNG, PDF</td>
+                        <td>5 MB</td>
+                    </tr>
+                    <tr>
+                        <td>Driver Photo</td>
+                        <td>Yes</td>
+                        <td>JPG, PNG</td>
+                        <td>2 MB</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Screen Wireframes -->
+        <section class="section">
+            <h2>🎨 Screen Wireframes</h2>
+            
+            <div class="wireframe-grid">
+                <!-- Document List Screen -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Document List</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Upload Documents</span>
+                        </div>
+
+                        <div class="step-indicator">
+                            <div class="step completed">
+                                <div class="step-number">1</div>
+                                <div class="step-label">Register</div>
+                            </div>
+                            <div class="step active">
+                                <div class="step-number">2</div>
+                                <div class="step-label">Documents</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-label">Verify</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <div class="step-label">Approved</div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 0 0.5rem;">
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.875rem;">
+                                Upload all required documents to complete your profile. Ensure images are clear and readable.
+                            </p>
+
+                            <!-- Document 1 -->
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <span class="document-title">📋 Driving License</span>
+                                    <span class="badge badge-success">Verified</span>
+                                </div>
+                                <div class="file-preview">
+                                    <div class="file-icon">🖼️</div>
+                                    <div class="file-info">
+                                        <div class="file-name">DL_front.jpg</div>
+                                        <div class="file-size">1.2 MB</div>
+                                    </div>
+                                    <button style="padding: 0.5rem 1rem; border: none; background: var(--light-bg); border-radius: 4px; cursor: pointer;">View</button>
+                                </div>
+                            </div>
+
+                            <!-- Document 2 -->
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <span class="document-title">🆔 Aadhaar Card</span>
+                                    <span class="badge badge-warning">Pending</span>
+                                </div>
+                                <div class="file-preview">
+                                    <div class="file-icon">🖼️</div>
+                                    <div class="file-info">
+                                        <div class="file-name">Aadhaar.jpg</div>
+                                        <div class="file-size">1.5 MB</div>
+                                    </div>
+                                    <button style="padding: 0.5rem 1rem; border: none; background: var(--light-bg); border-radius: 4px; cursor: pointer;">View</button>
+                                </div>
+                            </div>
+
+                            <!-- Document 3 -->
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <span class="document-title">💳 PAN Card</span>
+                                    <span class="badge badge-info">Required</span>
+                                </div>
+                                <div class="upload-area" style="padding: 1.5rem; margin-top: 0.5rem;">
+                                    <div class="upload-icon">📤</div>
+                                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Tap to upload</p>
+                                </div>
+                            </div>
+
+                            <!-- Document 4 -->
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <span class="document-title">📸 Driver Photo</span>
+                                    <span class="badge badge-danger">Rejected</span>
+                                </div>
+                                <div style="background: #fee2e2; padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem;">
+                                    <p style="color: #991b1b; font-size: 0.875rem;">⚠️ Photo is blurry. Please upload a clearer image.</p>
+                                </div>
+                                <button class="btn btn-primary">Re-upload Photo</button>
+                            </div>
+                        </div>
+
+                        <div style="padding: 0 0.5rem; margin-top: 1.5rem;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 50%;"></div>
+                            </div>
+                            <p style="text-align: center; color: var(--text-secondary); font-size: 0.875rem;">2 of 4 documents verified</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Screen -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Upload Document</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Upload PAN Card</span>
+                        </div>
+
+                        <div style="padding: 0 0.5rem;">
+                            <div style="background: #dbeafe; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                                <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">📋 Upload Guidelines</h4>
+                                <ul style="color: var(--text-primary); font-size: 0.875rem; padding-left: 1.5rem; line-height: 1.8;">
+                                    <li>Clear, readable image</li>
+                                    <li>All corners visible</li>
+                                    <li>No glare or shadows</li>
+                                    <li>JPG, PNG or PDF format</li>
+                                    <li>Maximum size: 5 MB</li>
+                                </ul>
+                            </div>
+
+                            <div class="upload-area">
+                                <div class="upload-icon">📤</div>
+                                <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">Choose Upload Method</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">Select from camera or gallery</p>
+                            </div>
+
+                            <button class="btn btn-primary">
+                                📷 Take Photo
+                            </button>
+                            <button class="btn btn-outline">
+                                🖼️ Choose from Gallery
+                            </button>
+
+                            <div style="margin-top: 2rem; padding: 1rem; background: var(--light-bg); border-radius: 8px;">
+                                <h4 style="margin-bottom: 0.5rem;">Why we need this:</h4>
+                                <p style="font-size: 0.875rem; color: var(--text-secondary);">
+                                    PAN card is required for tax purposes and payment processing. Your information is securely stored and encrypted.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview and Confirm -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Preview & Confirm</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Confirm Upload</span>
+                        </div>
+
+                        <div style="padding: 0 0.5rem;">
+                            <div style="background: white; border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem;">
+                                <div style="aspect-ratio: 16/10; background: linear-gradient(135deg, #e0e7ff 0%, #fce7f3 100%); display: flex; align-items: center; justify-content: center; position: relative;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 4rem; margin-bottom: 0.5rem;">🖼️</div>
+                                        <p style="color: var(--text-secondary);">Document Preview</p>
+                                    </div>
+                                    <div style="position: absolute; top: 1rem; right: 1rem; background: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem;">
+                                        📋 PAN Card
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="file-preview">
+                                <div class="file-icon">📄</div>
+                                <div class="file-info">
+                                    <div class="file-name">PAN_20260108_143052.jpg</div>
+                                    <div class="file-size">1.8 MB • JPG</div>
+                                </div>
+                            </div>
+
+                            <div style="background: #d1fae5; padding: 1rem; border-radius: 8px; margin: 1.5rem 0;">
+                                <h4 style="color: #065f46; margin-bottom: 0.5rem;">✓ Quality Check Passed</h4>
+                                <ul style="font-size: 0.875rem; color: #065f46; padding-left: 1.5rem; line-height: 1.8;">
+                                    <li>Image is clear and readable</li>
+                                    <li>All corners visible</li>
+                                    <li>No blur or glare detected</li>
+                                    <li>File size within limit</li>
+                                </ul>
+                            </div>
+
+                            <button class="btn btn-success">
+                                ✓ Confirm & Upload
+                            </button>
+                            <button class="btn btn-outline">
+                                ↺ Retake Photo
+                            </button>
+
+                            <p style="text-align: center; color: var(--text-secondary); font-size: 0.75rem; margin-top: 1rem;">
+                                Your document will be securely uploaded and verified within 24 hours
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Uploading Progress -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver App - Upload Progress</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Uploading...</span>
+                        </div>
+
+                        <div style="padding: 2rem 1rem; text-align: center;">
+                            <div style="width: 120px; height: 120px; margin: 2rem auto; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; animation: pulse 2s infinite;">
+                                📤
+                            </div>
+
+                            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Uploading PAN Card</h3>
+                            
+                            <div class="progress-bar" style="margin: 2rem 0;">
+                                <div class="progress-fill" style="width: 75%;"></div>
+                            </div>
+                            
+                            <p style="color: var(--text-secondary); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">75%</p>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem;">Uploading... Please wait</p>
+
+                            <div style="margin-top: 3rem; padding: 1rem; background: var(--light-bg); border-radius: 8px;">
+                                <p style="font-size: 0.875rem; color: var(--text-secondary);">
+                                    💡 Tip: Keep your documents ready for faster verification
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Implementation Flow -->
+        <section class="section">
+            <h2>⚙️ Implementation Flow</h2>
+            
+            <h3>Document Upload Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Driver navigates to Documents screen from profile setup</li>
+                <li>App fetches current document status via GET <code>/api/drivers/:id/documents</code></li>
+                <li>Driver selects document type to upload</li>
+                <li>App opens camera or gallery picker</li>
+                <li>Driver captures/selects image</li>
+                <li>App performs local quality check (resolution, size, format)</li>
+                <li>Preview screen shows selected image</li>
+                <li>On confirm, app uploads via POST <code>/api/drivers/:id/documents/upload</code></li>
+                <li>Backend stores file in AWS S3 or cloud storage</li>
+                <li>Document record created in database with status "pending"</li>
+                <li>Success response with document details returned</li>
+                <li>AI verification automatically triggered (next workflow)</li>
+                <li>Driver sees updated document list with new status</li>
+            </ol>
+
+            <h3>File Upload Process (Backend)</h3>
+            <ol style="line-height: 2;">
+                <li>Receive multipart/form-data request</li>
+                <li>Validate JWT token and driver authorization</li>
+                <li>Validate file type (JPG, PNG, PDF only)</li>
+                <li>Validate file size (max 5MB for documents, 2MB for photo)</li>
+                <li>Generate unique filename with timestamp and driver ID</li>
+                <li>Upload to S3 bucket: <code>vcg-transport/drivers/{driverId}/{documentType}/</code></li>
+                <li>Get signed URL from S3</li>
+                <li>Create document record in Driver.documents array</li>
+                <li>Trigger AI verification job (AWS Lambda or queue)</li>
+                <li>Return document details to client</li>
+            </ol>
+
+            <h3>Document Re-upload Flow</h3>
+            <ol style="line-height: 2;">
+                <li>Driver sees rejected document with reason</li>
+                <li>Taps "Re-upload" button</li>
+                <li>Previous document deleted via DELETE endpoint (optional)</li>
+                <li>New upload process initiated</li>
+                <li>Old document marked as replaced, new one uploaded</li>
+            </ol>
+        </section>
+
+        <!-- Business Rules -->
+        <section class="section">
+            <h2>📐 Business Rules & Validation</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Required Documents:</strong> All 4 documents must be uploaded before approval</li>
+                <li><strong>File Format:</strong> JPG, PNG for images; PDF accepted for documents only</li>
+                <li><strong>File Size:</strong> Max 5MB for documents, 2MB for driver photo</li>
+                <li><strong>Image Quality:</strong> Minimum 1024x768 resolution, clear and readable</li>
+                <li><strong>Document Type:</strong> Only one document per type (cannot upload duplicate DL)</li>
+                <li><strong>Re-upload Limit:</strong> Maximum 3 re-upload attempts per document</li>
+                <li><strong>Edit Restriction:</strong> Documents cannot be changed after verification</li>
+                <li><strong>Expiry Check:</strong> License expiry date must be future date</li>
+                <li><strong>Storage Duration:</strong> Documents retained for 7 years per compliance</li>
+                <li><strong>Access Control:</strong> Only driver and admins can view documents</li>
+            </ul>
+        </section>
+
+        <!-- Security Considerations -->
+        <section class="section">
+            <h2>🔒 Security Considerations</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Encrypted Storage:</strong> Files encrypted at rest in S3 using AES-256</li>
+                <li><strong>Signed URLs:</strong> Temporary pre-signed URLs with 15-minute expiry</li>
+                <li><strong>Access Control:</strong> S3 bucket not publicly accessible</li>
+                <li><strong>File Scanning:</strong> Antivirus scan on all uploaded files</li>
+                <li><strong>Metadata Stripping:</strong> Remove EXIF data from images (location, device info)</li>
+                <li><strong>Authorization:</strong> JWT token required, driver can only upload own documents</li>
+                <li><strong>Rate Limiting:</strong> Max 10 uploads per hour per driver</li>
+                <li><strong>Audit Trail:</strong> All uploads logged with IP, timestamp, and device info</li>
+                <li><strong>Backup:</strong> S3 versioning enabled for document recovery</li>
+                <li><strong>GDPR Compliance:</strong> Right to deletion after 7 years or account closure</li>
+            </ul>
+        </section>
+
+        <!-- File Storage Structure -->
+        <section class="section">
+            <h2>📂 File Storage Structure</h2>
+            
+            <h3>AWS S3 Bucket Organization</h3>
+            <div class="code-block">
+vcg-transport-documents/
+├── drivers/
+│   ├── {driverId}/
+│   │   ├── drivingLicense/
+│   │   │   ├── DL_507f1f77_1704715200000.jpg
+│   │   │   └── DL_507f1f77_1704715200000_thumb.jpg
+│   │   ├── aadhaar/
+│   │   │   └── Aadhaar_507f1f77_1704715300000.jpg
+│   │   ├── pan/
+│   │   │   └── PAN_507f1f77_1704715400000.jpg
+│   │   └── photo/
+│   │       └── Photo_507f1f77_1704715500000.jpg
+│   └── ...
+└── backup/
+    └── {date}/
+        └── ...
+            </div>
+
+            <h3>Naming Convention</h3>
+            <p><code>{DocumentType}_{DriverId}_{Timestamp}.{ext}</code></p>
+            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                Example: <code>DrivingLicense_507f1f77bcf86cd799439012_1704715200000.jpg</code>
+            </p>
+        </section>
+
+    </div>
+</body>
+</html>
