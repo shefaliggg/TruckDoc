@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration & Login - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .section h3 {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .section li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .section li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .section code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .wireframe {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .wireframe-title {
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .mockup {
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            margin: 1rem 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .mockup-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin: 1rem 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">← Back to Index</a>
+            <h1>🔐 User Registration & Login</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">
+                Allow users, drivers, and admins to create accounts and authenticate into the platform
+            </p>
+        </header>
+
+        <!-- Goal -->
+        <div class="section">
+            <h2>🎯 Workflow Goal</h2>
+            <p><strong>Objective:</strong> Secure user registration, login, and profile access for all user roles (Customer, Driver, Admin)</p>
+        </div>
+
+        <!-- Frontend Pages -->
+        <div class="section">
+            <h2>📱 Frontend Pages Required</h2>
+            
+            <h3>TruckUser Mobile App (React Native)</h3>
+            <ul>
+                <li><code>src/screens/Auth/RegisterScreen.tsx</code></li>
+                <li><code>src/screens/Auth/LoginScreen.tsx</code></li>
+                <li><code>src/screens/Auth/ForgotPasswordScreen.tsx</code></li>
+            </ul>
+
+            <h3>TruckDriver Mobile App (React Native)</h3>
+            <ul>
+                <li><code>src/screens/Auth/RegisterScreen.tsx</code></li>
+                <li><code>src/screens/Auth/LoginScreen.tsx</code></li>
+            </ul>
+
+            <h3>TruckAdmin Web Dashboard (React)</h3>
+            <ul>
+                <li><code>src/pages/Login.tsx</code></li>
+            </ul>
+        </div>
+
+        <!-- API Endpoints -->
+        <div class="section">
+            <h2>🔌 API Endpoints Required</h2>
+            <ul>
+                <li><code>POST /api/auth/register</code> - Create new user account</li>
+                <li><code>POST /api/auth/login</code> - Authenticate user and return JWT token</li>
+                <li><code>GET /api/auth/me</code> - Get current logged-in user details</li>
+                <li><code>POST /api/auth/verify-phone</code> - Verify phone number with OTP</li>
+                <li><code>POST /api/auth/verify-email</code> - Verify email address</li>
+                <li><code>PUT /api/auth/update-password</code> - Update user password</li>
+                <li><code>POST /api/auth/forgot-password</code> - Request password reset</li>
+            </ul>
+        </div>
+
+        <!-- Database Models -->
+        <div class="section">
+            <h2>🗄️ Database Models Needed</h2>
+            
+            <h3>User Model</h3>
+            <ul>
+                <li><strong>email</strong>: string (unique, required)</li>
+                <li><strong>password</strong>: string (hashed with bcrypt, required)</li>
+                <li><strong>role</strong>: enum ['customer', 'driver', 'admin']</li>
+                <li><strong>firstName</strong>: string</li>
+                <li><strong>lastName</strong>: string</li>
+                <li><strong>phone</strong>: string</li>
+                <li><strong>isEmailVerified</strong>: boolean (default: false)</li>
+                <li><strong>isPhoneVerified</strong>: boolean (default: false)</li>
+                <li><strong>createdAt</strong>: Date</li>
+                <li><strong>updatedAt</strong>: Date</li>
+            </ul>
+
+            <h3>Driver Model (extends User)</h3>
+            <ul>
+                <li><strong>userId</strong>: ObjectId (ref: User)</li>
+                <li><strong>driverLicense</strong>: string</li>
+                <li><strong>vehicleDetails</strong>: object</li>
+                <li><strong>approvalStatus</strong>: enum ['pending', 'approved', 'rejected']</li>
+            </ul>
+        </div>
+
+        <!-- Screen Wireframes -->
+        <div class="section">
+            <h2>🎨 Screen Wireframes</h2>
+
+            <div class="grid-2">
+                <!-- Login Screen -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Login Screen</div>
+                    <div class="mockup">
+                        <div class="mockup-header">VCG Transport</div>
+                        
+                        <h3 style="text-align: center; margin: 1rem 0;">Welcome Back!</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 2rem;">Login to continue</p>
+
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="user@example.com" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="••••••••" disabled>
+                        </div>
+
+                        <div style="text-align: right; margin: 0.5rem 0;">
+                            <a href="#" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">Forgot Password?</a>
+                        </div>
+
+                        <button class="btn">Login</button>
+
+                        <div class="link-text">
+                            Don't have an account? <a href="#" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Sign Up</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Register Screen -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Registration Screen</div>
+                    <div class="mockup">
+                        <div class="mockup-header">VCG Transport</div>
+                        
+                        <h3 style="text-align: center; margin: 1rem 0;">Create Account</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 2rem;">Sign up to get started</p>
+
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" placeholder="John" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" placeholder="Doe" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="john@example.com" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" placeholder="+1 (555) 123-4567" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="••••••••" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>User Type</label>
+                            <input type="text" placeholder="Customer / Driver" disabled>
+                        </div>
+
+                        <button class="btn">Create Account</button>
+
+                        <div class="link-text">
+                            Already have an account? <a href="#" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Login</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Flow -->
+        <div class="section">
+            <h2>🔄 Implementation Flow</h2>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6;">
+<strong>REGISTRATION FLOW:</strong>
+1. User opens Registration Screen
+2. Fills in: First Name, Last Name, Email, Phone, Password, Role
+3. Clicks "Create Account"
+4. API: POST /api/auth/register
+   - Validate input data
+   - Hash password (bcrypt with 10 rounds)
+   - Create User record in database
+   - Send verification email
+5. Return success response
+6. Navigate to Login Screen
+
+<strong>LOGIN FLOW:</strong>
+1. User opens Login Screen
+2. Enters Email and Password
+3. Clicks "Login"
+4. API: POST /api/auth/login
+   - Find user by email
+   - Compare password with hashed password
+   - Generate JWT token (expires in 7 days)
+   - Return token + user data
+5. Store token in secure storage
+6. Navigate to Home Screen based on role
+   - Customer → Bookings Screen
+   - Driver → Available Trips Screen
+   - Admin → Dashboard
+
+<strong>AUTHENTICATION CHECK:</strong>
+1. On app launch, check for stored JWT token
+2. If token exists:
+   - API: GET /api/auth/me
+   - Validate token
+   - Get fresh user data
+   - Navigate to appropriate home screen
+3. If no token or invalid:
+   - Show Login Screen
+            </pre>
+        </div>
+
+        <!-- Security Notes -->
+        <div class="section">
+            <h2>🔒 Security Considerations</h2>
+            <ul>
+                <li><strong>Password Hashing:</strong> Use bcrypt with 10 rounds for password hashing</li>
+                <li><strong>JWT Tokens:</strong> 7-day expiration, signed with secret key</li>
+                <li><strong>Input Validation:</strong> Validate email format, password strength (min 8 chars)</li>
+                <li><strong>Rate Limiting:</strong> Limit login attempts to prevent brute force attacks</li>
+                <li><strong>Secure Storage:</strong> Store JWT tokens in secure storage (iOS Keychain, Android KeyStore)</li>
+                <li><strong>HTTPS Only:</strong> All authentication endpoints must use HTTPS</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

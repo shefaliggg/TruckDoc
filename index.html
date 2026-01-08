@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VCG Transport Platform - Developer Documentation Index">
+    <title>VCG Transport - Documentation Index</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        header .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        header .description {
+            max-width: 700px;
+            margin: 1.5rem auto;
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .main-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .main-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--hover-shadow);
+            border-color: var(--primary-color);
+        }
+
+        .main-card h2 {
+            font-size: 1.75rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .main-card p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .main-card .badge {
+            display: inline-block;
+            background: var(--light-bg);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .index-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .index-section h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .workflow-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .workflow-category-title {
+            font-size: 1.3rem;
+            color: var(--secondary-color);
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .workflow-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            line-height: 1.6;
+            color: var(--text-primary);
+            font-size: 1.05rem;
+        }
+
+        .workflow-list li:before {
+            content: "▸";
+            position: absolute;
+            left: 0.5rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .workflow-list li a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .workflow-list li a:hover {
+            color: var(--primary-color);
+            padding-left: 0.5rem;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .stats {
+                gap: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .main-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 VCG Transport Platform</h1>
+            <p class="subtitle">Developer Documentation Index</p>
+            <p class="description">
+                Complete implementation guide for the VCG Transport Platform - a comprehensive truck rental and transport operations management system.
+            </p>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number">15</span>
+                    <span class="stat-label">Workflows</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">52+</span>
+                    <span class="stat-label">API Endpoints</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">3</span>
+                    <span class="stat-label">User Roles</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">8</span>
+                    <span class="stat-label">Database Models</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Documentation Cards -->
+        <div class="main-cards">
+            <a href="detailed-workflows.html" class="main-card">
+                <h2>📋 Detailed Workflows</h2>
+                <p>
+                    Complete breakdown of all 15 feature workflows with frontend pages, API endpoints, database models, and implementation details.
+                </p>
+                <span class="badge">15 Workflows</span>
+            </a>
+
+            <a href="flows.html" class="main-card">
+                <h2>🔄 Workflow Diagrams</h2>
+                <p>
+                    High-level business process flow diagrams and complete day-by-day transaction flows from booking to payment.
+                </p>
+                <span class="badge">5 Flow Diagrams</span>
+            </a>
+
+            <a href="architecture-info.html" class="main-card">
+                <h2>🏗️ Architecture Info</h2>
+                <p>
+                    System architecture overview, role permissions, security layers, and technology stack documentation.
+                </p>
+                <span class="badge">Architecture</span>
+            </a>
+        </div>
+
+        <!-- Workflow Index -->
+        <div class="index-section">
+            <h2>📑 Workflow Index</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">
+                Quick reference index of all 15 workflows organized by category.
+            </p>
+
+            <div class="workflow-category-title">1️⃣ Authentication & User Management</div>
+            <ul class="workflow-list">
+                <li><a href="workflows/workflow-01-auth.html"><strong>User Registration & Login</strong> - Account creation and authentication</a></li>
+                <li><a href="workflows/workflow-02-profile.html"><strong>Profile Management</strong> - View and update profile information</a></li>
+            </ul>
+
+            <div class="workflow-category-title">2️⃣ Driver Onboarding</div>
+            <ul class="workflow-list">
+                <li><a href="workflows/workflow-03-documents.html"><strong>Document Upload & Verification</strong> - Upload and verify driver documents</a></li>
+                <li><a href="workflows/workflow-04-ai-verification.html"><strong>AI Document Verification</strong> - AWS OCR and face recognition</a></li>
+                <li><a href="workflows/workflow-05-driver-approval.html"><strong>Admin Driver Approval</strong> - Review and approve/reject drivers</a></li>
+            </ul>
+
+            <div class="workflow-category-title">3️⃣ Booking & Trip Management</div>
+            <ul class="workflow-list">
+                <li><a href="workflows/workflow-06-create-booking.html"><strong>Create Booking (User)</strong> - Create new shipment booking</a></li>
+                <li><a href="workflows/workflow-07-assign-driver.html"><strong>Assign Driver (Admin)</strong> - Assign driver and truck to booking</a></li>
+                <li><a href="workflows/workflow-08-accept-trip.html"><strong>Accept Trip (Driver)</strong> - View and accept assigned trips</a></li>
+                <li><a href="workflows/workflow-09-track-shipment.html"><strong>Track Shipment (User)</strong> - Real-time GPS tracking</a></li>
+                <li><a href="workflows/workflow-10-pod-upload.html"><strong>POD Upload (Driver)</strong> - Upload proof of delivery photos</a></li>
+            </ul>
+
+            <div class="workflow-category-title">4️⃣ Payment & Settlement</div>
+            <ul class="workflow-list">
+                <li><a href="workflows/workflow-11-pod-review.html"><strong>POD Review & Approval</strong> - Admin verify delivery completion</a></li>
+                <li><a href="workflows/workflow-12-invoice.html"><strong>Invoice Generation & Payment</strong> - Auto-generate invoice and collect payment</a></li>
+                <li><a href="workflows/workflow-13-settlement.html"><strong>Driver Settlement Processing</strong> - Process driver payments</a></li>
+            </ul>
+
+            <div class="workflow-category-title">5️⃣ Additional Features</div>
+            <ul class="workflow-list">
+                <li><a href="workflows/workflow-14-rating.html"><strong>Driver Rating & Feedback</strong> - Rate driver performance</a></li>
+                <li><a href="workflows/workflow-15-support.html"><strong>Support Ticket System</strong> - Create and manage support tickets</a></li>
+                <li><a href="workflows/workflow-16-analytics.html"><strong>Analytics & Reporting</strong> - Dashboard KPIs and business metrics</a></li>
+            </ul>
+        </div>
+
+        <!-- Quick Links Section -->
+        <div class="index-section">
+            <h2>🔗 Quick Links</h2>
+            <ul class="workflow-list">
+                <li><strong>Detailed Workflows</strong> - <a href="detailed-workflows.html">View implementation details →</a></li>
+                <li><strong>Workflow Diagrams</strong> - <a href="flows.html">View business process flows →</a></li>
+                <li><strong>Architecture Info</strong> - <a href="architecture-info.html">View system architecture →</a></li>
+            </ul>
+        </div>
+
+        <footer>
+            <p><strong>VCG Transport Platform</strong> - Developer Documentation</p>
+            <p>Last Updated: January 8, 2026</p>
+            <p style="margin-top: 1rem; font-weight: 600;">
+                Total: 15 Workflows | 52+ APIs | 8 Models | 3 Roles
+            </p>
+            <p style="margin-top: 0.5rem;">
+                © 2026 VCG Transport. All rights reserved.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,939 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Management - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .section h3 {
+            color: var(--text-primary);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.2rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .api-endpoint {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .api-endpoint code {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .wireframe {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .wireframe-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .phone-mockup {
+            background: #f8fafc;
+            padding: 1.5rem;
+            min-height: 500px;
+        }
+
+        .app-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .back-btn {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            margin: 0 auto 1rem;
+            position: relative;
+        }
+
+        .edit-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--primary-color);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            margin-top: 0.5rem;
+        }
+
+        .info-card {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .tab-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--light-bg);
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">← Back to Index</a>
+            <h1>🔄 Profile Management</h1>
+            <p>View and update user or driver profile information</p>
+        </header>
+
+        <!-- Workflow Goal -->
+        <section class="section">
+            <h2>📋 Workflow Goal</h2>
+            <p>Allow users and drivers to view and update their profile information, including personal details, contact information, and role-specific data (like driver license information). This workflow ensures data accuracy and enables users to manage their account settings.</p>
+        </section>
+
+        <!-- Frontend Pages -->
+        <section class="section">
+            <h2>📱 Frontend Pages</h2>
+            
+            <h3>Customer Profile (TruckUser App)</h3>
+            <ul class="feature-list">
+                <li><strong>View Profile:</strong> Display name, email, phone, company details</li>
+                <li><strong>Edit Profile:</strong> Update personal and business information</li>
+                <li><strong>Change Password:</strong> Security settings for password update</li>
+                <li><strong>Notification Settings:</strong> Configure email/push preferences</li>
+            </ul>
+
+            <h3>Driver Profile (TruckDriver App)</h3>
+            <ul class="feature-list">
+                <li><strong>View Profile:</strong> Display driver info, license details, verification status</li>
+                <li><strong>Edit Profile:</strong> Update contact info, emergency contact</li>
+                <li><strong>License Management:</strong> View/update license number, expiry, category</li>
+                <li><strong>Document Status:</strong> See verification status of uploaded documents</li>
+                <li><strong>Availability Toggle:</strong> Set driver availability for new trips</li>
+            </ul>
+
+            <h3>Admin Dashboard (TruckAdmin)</h3>
+            <ul class="feature-list">
+                <li><strong>User/Driver Details View:</strong> Comprehensive profile information</li>
+                <li><strong>Edit User/Driver:</strong> Admin can modify user information</li>
+                <li><strong>Verification Management:</strong> Update driver verification status</li>
+                <li><strong>Activity History:</strong> View user/driver activity logs</li>
+            </ul>
+        </section>
+
+        <!-- API Endpoints -->
+        <section class="section">
+            <h2>🔌 API Endpoints</h2>
+            
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/users/me</code>
+                <p>Get current user profile (Customer)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/users/:userId</code>
+                <p>Update user profile information</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/drivers/me</code>
+                <p>Get current driver profile</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/drivers/:driverId</code>
+                <p>Update driver profile and license information</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/drivers/:driverId/availability</code>
+                <p>Update driver availability status</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/users/:userId/password</code>
+                <p>Change user password</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/users/:userId (Admin)</code>
+                <p>Admin view of user/driver profile</p>
+            </div>
+
+            <h3>Request Example: Update User Profile</h3>
+            <div class="code-block">
+PUT /api/users/507f1f77bcf86cd799439011
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
+Body: {
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "phone": "+919876543210",
+  "companyName": "ABC Logistics",
+  "gstNumber": "27AABCU9603R1ZM"
+}
+            </div>
+
+            <h3>Response Example</h3>
+            <div class="code-block">
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+919876543210",
+    "role": "customer",
+    "companyName": "ABC Logistics",
+    "gstNumber": "27AABCU9603R1ZM",
+    "isActive": true,
+    "updatedAt": "2026-01-08T10:30:00Z"
+  }
+}
+            </div>
+
+            <h3>Request Example: Update Driver Profile</h3>
+            <div class="code-block">
+PUT /api/drivers/507f1f77bcf86cd799439012
+Body: {
+  "name": "Rajesh Kumar",
+  "phone": "+919988776655",
+  "licenseNumber": "MH12-20220012345",
+  "licenseExpiry": "2028-12-31",
+  "licenseCategory": "Heavy Goods Vehicle",
+  "emergencyContact": {
+    "name": "Sita Kumar",
+    "phone": "+919988776656",
+    "relation": "Spouse"
+  },
+  "isAvailable": true
+}
+            </div>
+        </section>
+
+        <!-- Database Models -->
+        <section class="section">
+            <h2>💾 Database Models</h2>
+            
+            <h3>User Model (customers)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>_id</td>
+                        <td>ObjectId</td>
+                        <td>Unique user identifier</td>
+                    </tr>
+                    <tr>
+                        <td>name</td>
+                        <td>String</td>
+                        <td>Full name (required, indexed)</td>
+                    </tr>
+                    <tr>
+                        <td>email</td>
+                        <td>String</td>
+                        <td>Email address (unique, required)</td>
+                    </tr>
+                    <tr>
+                        <td>phone</td>
+                        <td>String</td>
+                        <td>Phone number (unique, required)</td>
+                    </tr>
+                    <tr>
+                        <td>password</td>
+                        <td>String</td>
+                        <td>Hashed password (bcrypt)</td>
+                    </tr>
+                    <tr>
+                        <td>role</td>
+                        <td>String</td>
+                        <td>enum: ['customer', 'driver', 'admin']</td>
+                    </tr>
+                    <tr>
+                        <td>companyName</td>
+                        <td>String</td>
+                        <td>Company name (for customers)</td>
+                    </tr>
+                    <tr>
+                        <td>gstNumber</td>
+                        <td>String</td>
+                        <td>GST registration number</td>
+                    </tr>
+                    <tr>
+                        <td>isActive</td>
+                        <td>Boolean</td>
+                        <td>Account status</td>
+                    </tr>
+                    <tr>
+                        <td>createdAt</td>
+                        <td>Date</td>
+                        <td>Registration timestamp</td>
+                    </tr>
+                    <tr>
+                        <td>updatedAt</td>
+                        <td>Date</td>
+                        <td>Last update timestamp</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Driver Model (drivers collection)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>_id</td>
+                        <td>ObjectId</td>
+                        <td>Unique driver identifier</td>
+                    </tr>
+                    <tr>
+                        <td>userId</td>
+                        <td>ObjectId</td>
+                        <td>Reference to User model</td>
+                    </tr>
+                    <tr>
+                        <td>name</td>
+                        <td>String</td>
+                        <td>Driver full name</td>
+                    </tr>
+                    <tr>
+                        <td>phone</td>
+                        <td>String</td>
+                        <td>Contact number</td>
+                    </tr>
+                    <tr>
+                        <td>licenseNumber</td>
+                        <td>String</td>
+                        <td>Driving license number (unique)</td>
+                    </tr>
+                    <tr>
+                        <td>licenseExpiry</td>
+                        <td>Date</td>
+                        <td>License expiration date</td>
+                    </tr>
+                    <tr>
+                        <td>licenseCategory</td>
+                        <td>String</td>
+                        <td>License type (e.g., HGV, LMV)</td>
+                    </tr>
+                    <tr>
+                        <td>documents</td>
+                        <td>Object</td>
+                        <td>URLs to uploaded documents</td>
+                    </tr>
+                    <tr>
+                        <td>emergencyContact</td>
+                        <td>Object</td>
+                        <td>{name, phone, relation}</td>
+                    </tr>
+                    <tr>
+                        <td>verificationStatus</td>
+                        <td>String</td>
+                        <td>enum: ['pending', 'verified', 'rejected']</td>
+                    </tr>
+                    <tr>
+                        <td>isAvailable</td>
+                        <td>Boolean</td>
+                        <td>Available for new trips</td>
+                    </tr>
+                    <tr>
+                        <td>rating</td>
+                        <td>Number</td>
+                        <td>Average rating (0-5)</td>
+                    </tr>
+                    <tr>
+                        <td>tripsCompleted</td>
+                        <td>Number</td>
+                        <td>Total completed trips</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Screen Wireframes -->
+        <section class="section">
+            <h2>🎨 Screen Wireframes</h2>
+            
+            <div class="wireframe-grid">
+                <!-- Customer Profile View -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Customer Profile - View</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>My Profile</span>
+                        </div>
+
+                        <div class="profile-avatar">
+                            JD
+                            <div class="edit-badge">📷</div>
+                        </div>
+
+                        <div style="text-align: center; margin-bottom: 2rem;">
+                            <h3 style="margin-bottom: 0.25rem;">John Doe</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem;">Customer Account</p>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Email</div>
+                                <div class="info-value">john.doe@example.com</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Phone</div>
+                                <div class="info-value">+91 98765 43210</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Company</div>
+                                <div class="info-value">ABC Logistics</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">GST Number</div>
+                                <div class="info-value">27AABCU9603R1ZM</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top: 1.5rem;">
+                            Edit Profile
+                        </button>
+                        <button class="btn btn-secondary">
+                            Change Password
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customer Profile Edit -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Customer Profile - Edit</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Edit Profile</span>
+                        </div>
+
+                        <div class="profile-avatar">
+                            JD
+                            <div class="edit-badge">✏️</div>
+                        </div>
+
+                        <form style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-input" value="John Doe" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-input" value="john.doe@example.com" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-input" value="+91 98765 43210" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Company Name</label>
+                                <input type="text" class="form-input" value="ABC Logistics" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">GST Number</label>
+                                <input type="text" class="form-input" value="27AABCU9603R1ZM" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                                Save Changes
+                            </button>
+                            <button type="button" class="btn btn-secondary">
+                                Cancel
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Driver Profile View -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver Profile - View</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>My Profile</span>
+                        </div>
+
+                        <div class="profile-avatar">
+                            RK
+                        </div>
+
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <h3 style="margin-bottom: 0.25rem;">Rajesh Kumar</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem;">Professional Driver</p>
+                            <div style="margin-top: 0.5rem;">
+                                <span class="badge badge-success">Verified</span>
+                                <span class="badge badge-success" style="margin-left: 0.5rem;">Available</span>
+                            </div>
+                        </div>
+
+                        <div class="tab-group">
+                            <button class="tab active">Personal</button>
+                            <button class="tab">License</button>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Phone</div>
+                                <div class="info-value">+91 99887 76655</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Rating</div>
+                                <div class="info-value">⭐ 4.8 (156 trips)</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Emergency Contact</div>
+                                <div class="info-value">Sita Kumar<br><small>+91 99887 76656</small></div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top: 1rem;">
+                            Edit Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Driver License Info -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver Profile - License Info</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>License Information</span>
+                        </div>
+
+                        <div class="tab-group">
+                            <button class="tab">Personal</button>
+                            <button class="tab active">License</button>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">License Number</div>
+                                <div class="info-value">MH12-20220012345</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Category</div>
+                                <div class="info-value">Heavy Goods Vehicle</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Expiry Date</div>
+                                <div class="info-value">31 Dec 2028</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Documents Status</div>
+                                <div>
+                                    <div class="info-value">License: <span class="badge badge-success">Verified</span></div>
+                                    <div class="info-value">Aadhaar: <span class="badge badge-success">Verified</span></div>
+                                    <div class="info-value">PAN: <span class="badge badge-success">Verified</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 8px;">
+                            <p style="font-size: 0.875rem; color: #92400e;">
+                                ⚠️ Your license will expire in 1,057 days. Update before expiry to continue receiving trips.
+                            </p>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top: 1rem;">
+                            Update License Info
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Implementation Flow -->
+        <section class="section">
+            <h2>⚙️ Implementation Flow</h2>
+            
+            <h3>Profile View Flow</h3>
+            <ol style="line-height: 2;">
+                <li>User navigates to profile screen</li>
+                <li>App sends GET request to <code>/api/users/me</code> or <code>/api/drivers/me</code></li>
+                <li>Backend verifies JWT token and fetches user/driver data</li>
+                <li>Response includes profile data with related information</li>
+                <li>Frontend displays profile in view mode with edit option</li>
+            </ol>
+
+            <h3>Profile Update Flow</h3>
+            <ol style="line-height: 2;">
+                <li>User taps "Edit Profile" button</li>
+                <li>Form loads with current profile data pre-filled</li>
+                <li>User modifies fields and submits form</li>
+                <li>Frontend validates input (email format, phone format, required fields)</li>
+                <li>App sends PUT request with updated data</li>
+                <li>Backend validates and updates database record</li>
+                <li>Success response triggers UI update and success message</li>
+                <li>User returned to view mode with updated information</li>
+            </ol>
+
+            <h3>Availability Toggle (Drivers)</h3>
+            <ol style="line-height: 2;">
+                <li>Driver toggles availability switch</li>
+                <li>App sends PUT to <code>/api/drivers/:id/availability</code></li>
+                <li>Backend updates <code>isAvailable</code> field</li>
+                <li>If unavailable, driver excluded from trip assignments</li>
+                <li>Status reflected in admin dashboard</li>
+            </ol>
+        </section>
+
+        <!-- Business Rules -->
+        <section class="section">
+            <h2>📐 Business Rules & Validation</h2>
+            
+            <ul class="feature-list">
+                <li><strong>Email Uniqueness:</strong> Email must be unique across all users</li>
+                <li><strong>Phone Validation:</strong> Phone number must be valid Indian format (+91...)</li>
+                <li><strong>License Validation:</strong> License number format must match state standards</li>
+                <li><strong>License Expiry:</strong> Drivers with expired licenses cannot accept new trips</li>
+                <li><strong>Document Verification:</strong> Profile changes don't affect verification status</li>
+                <li><strong>Email Change:</strong> Email changes require verification via confirmation email</li>
+                <li><strong>Password Change:</strong> Requires current password for security</li>
+                <li><strong>Admin Override:</strong> Admins can edit any profile but changes are logged</li>
+                <li><strong>Data Retention:</strong> Old profile data retained for 90 days for audit</li>
+                <li><strong>Availability Auto-Reset:</strong> Driver availability resets to available after 30 days inactive</li>
+            </ul>
+        </section>
+
+        <!-- Security Considerations -->
+        <section class="section">
+            <h2>🔒 Security Considerations</h2>
+            
+            <ul class="feature-list">
+                <li><strong>JWT Authentication:</strong> All profile endpoints require valid JWT token</li>
+                <li><strong>Role-Based Access:</strong> Users can only edit their own profiles</li>
+                <li><strong>Admin Authorization:</strong> Only admins can edit other users' profiles</li>
+                <li><strong>Password Hashing:</strong> Passwords never returned in API responses</li>
+                <li><strong>Data Sanitization:</strong> All inputs sanitized to prevent XSS/injection</li>
+                <li><strong>Rate Limiting:</strong> Profile updates limited to 5 per hour per user</li>
+                <li><strong>Audit Logging:</strong> All profile changes logged with timestamp and user IP</li>
+                <li><strong>Sensitive Data:</strong> License numbers and documents encrypted at rest</li>
+            </ul>
+        </section>
+
+    </div>
+</body>
+</html>

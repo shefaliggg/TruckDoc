@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VCG Transport Platform - Workflow Diagrams">
+    <title>VCG Transport - Workflow Diagrams</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        header .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .architecture-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .architecture-section h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .architecture-section h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .architecture-section pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            margin: 0.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+
+            .architecture-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔄 Workflow Diagrams & Flows</h1>
+            <p class="subtitle">VCG Transport Platform Business Process Flows</p>
+            <a href="index.html" class="back-link">← Back to Index</a>
+        </header>
+
+        <!-- High-Level Workflow Diagrams -->
+        <div class="architecture-section">
+            <h2>🔄 Complete Workflow Diagrams</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">
+                High-level workflow diagrams showing the complete business process flows in the platform.
+            </p>
+
+            <h3>📋 1. Driver Onboarding Flow</h3>
+            <pre>
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         DRIVER ONBOARDING FLOW                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+1. Driver Registration (Login/Signup)
+   ↓
+2. Upload Documents (RC, DL, etc.)
+   ↓
+3. AI/OCR Verification (AWS Textract + Rekognition)
+   ↓
+4. Admin Review → Approve/Reject
+   ↓
+5. Status: "Approved" ✅ → Driver can go online
+            </pre>
+
+            <h3>📦 2. Booking & Trip Flow</h3>
+            <pre>
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         BOOKING & TRIP FLOW                              │
+└─────────────────────────────────────────────────────────────────────────┘
+
+[User Creates Booking]
+   ↓ (Enters pickup, drop, dates, truck type, load details)
+[User Gets Quote]
+   ↓ (Fixed price or admin-set)
+[User Confirms Booking]
+   ↓ (Payment hold or pay later)
+[Booking Created in System] → Status: "pending"
+   ↓
+[Admin Reviews Booking]
+   ↓
+[Admin Assigns Driver + Truck]
+   ↓
+[Booking Status: "assigned"]
+   ↓
+[Driver Receives Trip Assignment]
+   ↓
+[Driver Accepts Trip]
+   ↓
+[Driver Status: "en_route_to_pickup"]
+   ↓
+[Driver Arrives at Pickup] → Status: "arrived_at_pickup"
+   ↓
+[Loading Started] → Status: "loading"
+   ↓
+[Loading Complete] → Status: "loaded"
+   ↓
+[Driver Starts Trip] → Status: "in_transit"
+   ↓ (User tracks driver live)
+[Driver Arrives at Drop] → Status: "arrived_at_drop"
+   ↓
+[Delivery Completed]
+   ↓
+[Driver Uploads POD (Photos + Signature)]
+   ↓
+[Trip Status: "delivered"]
+   ↓
+[User Marks Delivery Complete]
+            </pre>
+
+            <h3>✅ 3. POD Approval & Invoicing Flow</h3>
+            <pre>
+┌─────────────────────────────────────────────────────────────────────────┐
+│               POD APPROVAL & INVOICING FLOW                              │
+└─────────────────────────────────────────────────────────────────────────┘
+
+[Driver Submits POD]
+   ↓
+[Admin Reviews POD]
+   ↓
+[Admin Approves POD] ✅
+   ↓
+[🤖 AUTO: Invoice Generated]
+   ↓
+[Invoice Sent to User]
+   ↓
+[User Makes Payment]
+   ↓
+[Payment Settled]
+   ↓
+[Settlement Ready for Driver]
+            </pre>
+
+            <h3>💰 4. Settlement & Payment Flow</h3>
+            <pre>
+┌─────────────────────────────────────────────────────────────────────────┐
+│              SETTLEMENT & PAYMENT FLOW                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+[Admin Generates Settlement]
+   ↓
+[System Checks: All Invoices Paid?]
+   ├─ NO → ❌ Settlement status: "pending"
+   └─ YES → ✅ Settlement status: "ready"
+             ↓
+       [Admin Approves Settlement for Payment]
+             ↓
+       [Settlement Status: "approved"]
+             ↓
+       [Payment Processed (ACH/Wire to Driver)]
+             ↓
+       [Settlement Status: "paid"] ✅
+             ↓
+       [Driver Receives Payment Notification]
+             ↓
+       [Driver Views Settlement in App]
+            </pre>
+
+            <h3>⭐ 5. Rating & Feedback Flow</h3>
+            <pre>
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         RATING & FEEDBACK                                │
+└─────────────────────────────────────────────────────────────────────────┘
+
+[Trip Completed]
+   ↓
+[User Rates Driver] (1-5 stars + comments)
+   ↓
+[Rating Stored in Driver Profile]
+            </pre>
+        </div>
+
+        <!-- Day-by-Day Transaction Flow -->
+        <div class="architecture-section">
+            <h2>📅 Complete Transaction Flow: Booking to Payment</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">
+                Detailed day-by-day breakdown of a complete transaction from booking creation to driver payment.
+            </p>
+
+            <pre style="line-height: 1.6;">
+┌──────────────────────────────────────────────────────────────────┐
+│  Complete Transaction Flow (User → Driver → Admin → Payment)     │
+└──────────────────────────────────────────────────────────────────┘
+
+<strong style="color: var(--primary-color);">Day 1: BOOKING CREATION</strong>
+   User (Shipper) creates booking via TruckUser app
+      ↓ (Enter pickup, drop, dates, truck type, load details)
+      ↓ (API: POST /api/bookings)
+   Booking created with status: "pending"
+      ↓
+   User gets quote (fixed or admin-set)
+      ↓ (API: POST /api/bookings/:id/quote)
+   User confirms booking
+      ↓ (API: POST /api/bookings/:id/confirm)
+   Payment hold placed (or pay later option)
+      ↓
+   Booking status: "confirmed"
+
+<strong style="color: var(--success-color);">Day 1: DRIVER ASSIGNMENT</strong>
+   Admin reviews booking in TruckAdmin dashboard
+      ↓ (View: New Bookings)
+   Admin assigns driver + truck
+      ↓ (API: PUT /api/bookings/:id/assign-driver)
+   Booking status: "assigned"
+      ↓
+   Driver receives trip assignment notification
+      ↓ (API: GET /api/trips/driver/assigned)
+
+<strong style="color: var(--warning-color);">Day 2: PICKUP</strong>
+   Driver goes online
+      ↓ (API: PUT /api/drivers/status)
+   Driver accepts trip
+      ↓ (API: POST /api/trips/:id/accept)
+   Driver navigates to pickup
+      ↓ (Live tracking enabled)
+   Driver arrives at pickup
+      ↓ (API: PUT /api/trips/:id/status - "arrived_at_pickup")
+   Loading started
+      ↓ (API: PUT /api/trips/:id/status - "loading")
+   Loading complete
+      ↓ (API: PUT /api/trips/:id/status - "loaded")
+   Driver uploads pickup photos + signature
+      ↓ (API: POST /api/pods)
+   POD created, status: "pickup_complete"
+
+<strong style="color: var(--primary-color);">Day 3: IN TRANSIT</strong>
+   Driver starts journey
+      ↓ (API: PUT /api/trips/:id/status - "in_transit")
+   User tracks driver live
+      ↓ (API: GET /api/trips/:id/track)
+   Admin monitors trip
+      ↓ (View: Live Trip Monitoring)
+
+<strong style="color: var(--success-color);">Day 4: DELIVERY</strong>
+   Driver arrives at drop location
+      ↓ (API: PUT /api/trips/:id/status - "arrived_at_drop")
+   Delivery completed
+      ↓ (API: PUT /api/trips/:id/status - "delivered")
+   Driver uploads delivery photos + signature
+      ↓ (API: PUT /api/pods/:id)
+   POD complete, status: "pending_approval"
+      ↓
+   User marks delivery complete
+      ↓ (API: PUT /api/bookings/:id/complete)
+
+<strong style="color: var(--warning-color);">Day 5: POD APPROVAL & INVOICING</strong>
+   Admin reviews POD in TruckAdmin
+      ↓ (View: POD Review Interface)
+   Admin approves POD
+      ↓ (API: PUT /api/pods/:id/approve)
+   POD status: "approved" ✅
+      ↓
+   🤖 AUTO: Invoice generated for User
+      ↓ (API: POST /api/invoices - auto-trigger)
+   Invoice sent to User (email/app notification)
+      ↓
+   Invoice status: "pending_payment"
+
+<strong style="color: var(--primary-color);">Day 6: USER PAYMENT</strong>
+   User views invoice
+      ↓ (API: GET /api/invoices/user/me)
+   User makes payment
+      ↓ (API: POST /api/payments)
+   Payment verified by admin
+      ↓ (API: PUT /api/payments/:id/verify)
+   Invoice status: "paid" ✅
+      ↓
+   Settlement ready for driver
+
+<strong style="color: var(--success-color);">Day 7-10: DRIVER SETTLEMENT</strong>
+   Admin generates settlement for driver
+      ↓ (API: POST /api/settlements)
+   System checks: All related invoices paid?
+      ├─ NO → ❌ Settlement status: "pending"
+      └─ YES → ✅ Settlement status: "ready"
+   Admin approves settlement for payment
+      ↓ (API: PUT /api/settlements/:id/approve)
+   Settlement status: "approved"
+      ↓
+   Payment processed (ACH to driver's bank)
+      ↓ (API: PUT /api/settlements/:id/paid)
+   Settlement status: "paid" ✅
+      ↓
+   Driver receives payment notification
+      ↓
+   Driver views settlement in Earnings screen
+      ↓ (API: GET /api/settlements/driver/me)
+
+<strong style="color: var(--warning-color);">FINAL STEP: RATING</strong>
+   User rates driver
+      ↓ (API: POST /api/ratings)
+   Rating stored in driver profile
+      ↓
+   Driver views rating
+      ↓ (API: GET /api/ratings/my-ratings)
+            </pre>
+        </div>
+
+        <footer>
+            <p><strong>VCG Transport Platform</strong> - Workflow Diagrams</p>
+            <p>Last Updated: January 8, 2026</p>
+            <p style="margin-top: 0.5rem;">
+                © 2026 VCG Transport. All rights reserved.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

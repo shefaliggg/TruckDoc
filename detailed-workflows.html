@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VCG Transport Platform - Complete Implementation Guide">
+    <title>VCG Transport - Detailed Workflows</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        header .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        header .description {
+            max-width: 900px;
+            margin: 1rem auto;
+            color: #666;
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        header .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        header .stat-item {
+            text-align: center;
+        }
+
+        header .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        header .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Architecture Section Styles */
+        .architecture-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .architecture-section h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .architecture-section h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .architecture-section pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin: 1rem 0;
+        }
+
+        .architecture-section code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+        }
+
+        .architecture-section ul {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .architecture-section li {
+            padding: 0.3rem 0;
+            line-height: 1.7;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-card {
+            background: var(--light-bg);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .info-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .info-card.success {
+            border-left-color: var(--success-color);
+        }
+
+        .info-card.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .info-card.danger {
+            border-left-color: var(--danger-color);
+        }
+
+        .expand-btn-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .expand-all-btn {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+        }
+
+        .expand-all-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .workflow-category {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .workflow-category h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .workflow-card {
+            background: var(--light-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .workflow-card:hover {
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: var(--hover-shadow);
+        }
+
+        .workflow-card h3 {
+            color: var(--primary-color);
+            font-size: 1.35rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .workflow-description {
+            color: #666;
+            margin-bottom: 0.75rem;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .workflow-summary {
+            padding: 0.75rem 1rem;
+            background: #fffbeb;
+            border-left: 4px solid var(--warning-color);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            color: #92400e;
+            font-weight: 500;
+        }
+
+        .workflow-details {
+            display: none;
+            margin-top: 1.5rem;
+            border-top: 2px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .workflow-details.expanded {
+            display: block;
+        }
+
+        .detail-section {
+            margin-bottom: 1.75rem;
+            padding: 1.25rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid var(--border-color);
+        }
+
+        .detail-section.frontend {
+            border-left-color: var(--success-color);
+            background: #f0fdf4;
+        }
+
+        .detail-section.api {
+            border-left-color: var(--primary-color);
+            background: #eff6ff;
+        }
+
+        .detail-section.database {
+            border-left-color: var(--warning-color);
+            background: #fffbeb;
+        }
+
+        .detail-section.external {
+            border-left-color: var(--secondary-color);
+            background: #f5f3ff;
+        }
+
+        .detail-section.business-rule {
+            border-left-color: var(--danger-color);
+            background: #fef2f2;
+        }
+
+        .detail-section h4 {
+            margin-bottom: 1rem;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+        }
+
+        .detail-section ul {
+            margin-left: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .detail-section li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            line-height: 1.7;
+        }
+
+        .detail-section li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .detail-section li strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .detail-section code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            margin: 0.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+
+            .workflow-category {
+                padding: 1.5rem;
+            }
+
+            .workflow-card {
+                padding: 1rem;
+            }
+
+            .workflow-card h3 {
+                font-size: 1.15rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .expand-btn-container {
+                display: none;
+            }
+
+            .workflow-details {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>� Detailed Workflows</h1>
+            <p class="subtitle">VCG Transport Platform Feature Implementation Guide</p>
+            <p class="description">
+                Each workflow is broken down into <strong>frontend pages</strong>, <strong>API endpoints</strong>, and <strong>database models</strong> required for implementation. Click any workflow to expand implementation details.
+            </p>
+            <span class="version">15 Workflows | 5 Categories</span>
+        </header>
+
+        <div class="expand-btn-container">
+            <a href="index.html" class="expand-all-btn" style="text-decoration: none; display: inline-block;">
+                ← Back to Index
+            </a>
+            <button class="expand-all-btn" onclick="toggleAllWorkflows()" id="toggleBtn" style="margin-left: 1rem;">
+                📂 Expand All Workflows
+            </button>
+        </div>
+
+        <!-- Workflows Section -->
+        <div class="workflow-category">
+            <h2>1️⃣ Authentication & User Management</h2>
+
+            <!-- Workflow 1: User Registration & Login -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>🔐 User Registration & Login</h3>
+                <p class="workflow-description">
+                    Allow users, drivers, and admins to create accounts and authenticate into the platform.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Secure user registration, login, and profile access for all user roles
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckUser Mobile:</strong> <code>src/screens/Auth/RegisterScreen.tsx</code>, <code>LoginScreen.tsx</code></li>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Auth/RegisterScreen.tsx</code>, <code>LoginScreen.tsx</code></li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Login.tsx</code></li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>POST /api/auth/register</code> - Create new user account</li>
+                            <li><code>POST /api/auth/login</code> - Authenticate user and return JWT token</li>
+                            <li><code>GET /api/auth/me</code> - Get current logged-in user details</li>
+                            <li><code>POST /api/auth/verify-phone</code> - Verify phone number with OTP</li>
+                            <li><code>POST /api/auth/verify-email</code> - Verify email address</li>
+                            <li><code>PUT /api/auth/update-password</code> - Update user password</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>User Model:</strong> email, password (hashed), role, firstName, lastName, phone, isEmailVerified, isPhoneVerified, createdAt</li>
+                            <li><strong>Driver Model:</strong> Extends User with driverLicense, vehicleDetails, approvalStatus</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 2: Profile Management -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>👤 Profile Management</h3>
+                <p class="workflow-description">
+                    View and update user or driver profile information including contact details and preferences.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Allow users and drivers to manage their profile data and settings
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckUser Mobile:</strong> <code>src/screens/Profile/ProfileScreen.tsx</code></li>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Profile/ProfileScreen.tsx</code>, <code>EditProfileScreen.tsx</code></li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Users.tsx</code>, <code>Drivers.tsx</code> (view/edit user profiles)</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>GET /api/users/me</code> - Get current customer profile</li>
+                            <li><code>PUT /api/users/me</code> - Update customer profile</li>
+                            <li><code>GET /api/drivers/me</code> - Get current driver profile</li>
+                            <li><code>PUT /api/drivers/me</code> - Update driver profile</li>
+                            <li><code>PUT /api/drivers/status</code> - Toggle driver online/offline status</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>User Model:</strong> profile fields, address, contact info</li>
+                            <li><strong>Driver Model:</strong> license number, truck details, isOnline status, averageRating</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 2: Driver Onboarding -->
+        <div class="workflow-category">
+            <h2>2️⃣ Driver Onboarding</h2>
+
+            <!-- Workflow 3: Document Upload & Verification -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>📄 Document Upload & Verification</h3>
+                <p class="workflow-description">
+                    Driver uploads license, RC (registration certificate), insurance documents, and gets them verified by admin.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Verify driver identity and vehicle documents before allowing them to go online
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Onboarding/DocumentUploadScreen.tsx</code> - Photo capture and upload interface</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Drivers.tsx</code> - Document verification interface with approve/reject buttons</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>POST /api/drivers/documents</code> - Upload driver documents (multipart/form-data)</li>
+                            <li><code>GET /api/drivers/:id</code> - Admin view driver documents and details</li>
+                            <li><code>PUT /api/drivers/:id/verify</code> - Admin verify document with OCR results</li>
+                            <li><code>PUT /api/drivers/:id/approve</code> - Admin approve/reject driver application</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Driver Model:</strong> documents[] array, verificationStatus (pending/verified/rejected), approvalStatus</li>
+                            <li><strong>Document Schema:</strong> type (license/RC/insurance), url, uploadedAt, verificationResult (OCR extracted data)</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section external">
+                        <h4>☁️ External Services (Planned)</h4>
+                        <ul>
+                            <li><strong>AWS S3:</strong> Secure document storage</li>
+                            <li><strong>AWS Textract:</strong> OCR for automatic text extraction from documents</li>
+                            <li><strong>AWS Rekognition:</strong> Face recognition to match license photo with selfie</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 3: Booking & Trip Management -->
+        <div class="workflow-category">
+            <h2>3️⃣ Booking & Trip Management</h2>
+
+            <!-- Workflow 4: Create Booking -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>📦 Create Booking</h3>
+                <p class="workflow-description">
+                    Customer creates a new truck booking by specifying pickup location, drop location, dates, truck type, and load details.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Enable customers to request truck rental with all shipment details
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckUser Mobile:</strong> <code>src/screens/Booking/CreateBookingScreen.tsx</code> - Multi-step form with map selection</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Bookings.tsx</code> - View all bookings, filter by status</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>GET /api/trucks/types</code> - Get available truck types (tonnage, dimensions, pricing)</li>
+                            <li><code>POST /api/bookings</code> - Create new booking</li>
+                            <li><code>POST /api/bookings/:id/quote</code> - Calculate price quote based on distance and truck type</li>
+                            <li><code>POST /api/bookings/:id/confirm</code> - Customer confirms booking after seeing quote</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Booking Model:</strong> customerId, pickupLocation {address, lat, lng}, dropLocation {address, lat, lng}, pickupDate, truckType, loadDetails, estimatedPrice, status (pending/confirmed/assigned)</li>
+                            <li><strong>Truck Model:</strong> type, tonnage, dimensions, basePrice, perKmPrice</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section external">
+                        <h4>☁️ External Services</h4>
+                        <ul>
+                            <li><strong>Google Maps API:</strong> Address autocomplete, distance calculation, route preview</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 5: Assign Driver to Booking -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>🚛 Assign Driver to Booking</h3>
+                <p class="workflow-description">
+                    Admin reviews new booking requests and assigns an available driver and truck to the booking.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Match confirmed bookings with available drivers and create trip assignments
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Bookings.tsx</code> - Assign driver modal with driver/truck selection dropdowns</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Drivers.tsx</code> - View driver availability and current status</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>GET /api/drivers</code> - Get all drivers, filter by status=online and available</li>
+                            <li><code>GET /api/trucks</code> - Get available trucks matching booking requirements</li>
+                            <li><code>PUT /api/bookings/:id/assign-driver</code> - Assign driver and truck to booking</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Booking Model:</strong> Update status to "assigned", add driverId and truckId references</li>
+                            <li><strong>Trip Model:</strong> Create new trip record linking booking, driver, truck</li>
+                            <li><strong>Driver Model:</strong> Check isOnline status, current availability</li>
+                            <li><strong>Truck Model:</strong> Check availability, assign to trip</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 6: Driver Accepts Trip -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>✅ Driver Accepts Trip</h3>
+                <p class="workflow-description">
+                    Driver receives trip assignment notification, reviews trip details, and accepts or rejects the assignment.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Give drivers the ability to accept/reject trips based on route and timing
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Loads/LoadsScreen.tsx</code> - View all assigned trips</li>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Loads/LoadDetailsScreen.tsx</code> - View full trip details with map, accept/reject buttons</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>GET /api/trips/driver/assigned</code> - Get all trips assigned to logged-in driver</li>
+                            <li><code>POST /api/trips/:id/accept</code> - Driver accepts trip assignment</li>
+                            <li><code>POST /api/trips/:id/reject</code> - Driver rejects trip with reason</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Trip Model:</strong> Update status to "accepted" or "rejected", add acceptedAt timestamp</li>
+                            <li><strong>Booking Model:</strong> Update booking status accordingly</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 7: Pickup Process -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>📍 Pickup Process</h3>
+                <p class="workflow-description">
+                    Driver arrives at pickup location, loads the cargo, takes photos, and collects signature from shipper.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Document pickup with photos and signatures as proof of load acceptance
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Trip/TripTrackingScreen.tsx</code> - Status update buttons (Arrived, Loading, Loaded)</li>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/POD/PickupPODScreen.tsx</code> - Camera for photos, signature capture canvas</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>PUT /api/trips/:id/status</code> - Update status to "arrived_at_pickup", "loading", or "loaded"</li>
+                            <li><code>POST /api/pods</code> - Create POD (Proof of Delivery) with pickup photos and signature</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Trip Model:</strong> status field with pickup stage values, timestamps for each stage</li>
+                            <li><strong>POD Model:</strong> tripId, pickupPhotos[] (URLs), pickupSignature (URL), pickupTimestamp, pickupNotes</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section external">
+                        <h4>☁️ External Services</h4>
+                        <ul>
+                            <li><strong>AWS S3:</strong> Store photos and signature images</li>
+                            <li><strong>Google Maps API:</strong> GPS location tracking and verification</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 8: In Transit Tracking -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>🚚 In Transit Tracking</h3>
+                <p class="workflow-description">
+                    Real-time GPS tracking while driver is en route from pickup to delivery location.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Provide live shipment tracking to customers and admin for transparency
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Trip/TripTrackingScreen.tsx</code> - Background GPS tracking</li>
+                            <li><strong>TruckUser Mobile:</strong> <code>src/screens/Tracking/TrackingScreen.tsx</code> - Live map showing driver location and ETA</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Trips.tsx</code> - Real-time monitoring dashboard for all active trips</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>PUT /api/trips/:id/status</code> - Update status to "in_transit"</li>
+                            <li><code>GET /api/trips/:id/track</code> - Get current GPS coordinates and trip status</li>
+                            <li><code>PUT /api/trips/:id/location</code> - Driver app continuously updates GPS coordinates</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Trip Model:</strong> currentLocation {lat, lng}, lastLocationUpdate timestamp</li>
+                            <li><strong>LocationHistory Model:</strong> tripId, coordinates[], timestamps[] (track full route)</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section external">
+                        <h4>☁️ External Services</h4>
+                        <ul>
+                            <li><strong>Google Maps API:</strong> Real-time location display, ETA calculation, route optimization</li>
+                            <li><strong>Socket.io / WebSockets:</strong> Real-time location updates without polling</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 9: Delivery & POD Upload -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>📦 Delivery & POD Upload</h3>
+                <p class="workflow-description">
+                    Driver completes delivery, uploads delivery photos, and collects recipient signature as proof of delivery.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Complete trip with documented proof of delivery for invoicing
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/POD/DeliveryPODScreen.tsx</code> - Camera interface for delivery photos</li>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/POD/SignatureScreen.tsx</code> - Signature capture canvas</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>PUT /api/trips/:id/status</code> - Update status to "arrived_at_drop", then "delivered"</li>
+                            <li><code>PUT /api/pods/:id</code> - Update POD with delivery photos, signature, and timestamp</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Trip Model:</strong> Update status to "delivered", add deliveredAt timestamp</li>
+                            <li><strong>POD Model:</strong> deliveryPhotos[] (URLs), deliverySignature (URL), deliveryTimestamp, receiverName, deliveryNotes</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section external">
+                        <h4>☁️ External Services</h4>
+                        <ul>
+                            <li><strong>AWS S3:</strong> Store delivery photos and signature</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 4: Payment & Settlement -->
+        <div class="workflow-category">
+            <h2>4️⃣ Payment & Settlement</h2>
+
+            <!-- Workflow 10: POD Review & Approval -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>✅ POD Review & Approval</h3>
+                <p class="workflow-description">
+                    Admin reviews uploaded POD photos and signatures, verifies delivery completion, and approves or rejects.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Verify delivery completion before generating customer invoice
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/PODs.tsx</code> - POD review interface with photo gallery</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/components/PODViewer.tsx</code> - Lightbox component to view photos and signatures</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>GET /api/pods/pending</code> - Get all PODs pending admin approval</li>
+                            <li><code>GET /api/pods/trip/:tripId</code> - Get POD for specific trip</li>
+                            <li><code>PUT /api/pods/:id/approve</code> - Admin approve POD (triggers auto invoice generation)</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>POD Model:</strong> status (pending_approval/approved/rejected), adminReviewedBy, reviewedAt</li>
+                            <li><strong>Invoice Model:</strong> Auto-created when POD is approved</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section business-rule">
+                        <h4>⚠️ Business Rule</h4>
+                        <ul>
+                            <li>Invoice is automatically generated when admin approves POD</li>
+                            <li>POD rejection sends notification to driver to re-upload correct photos/signature</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 11: Invoice Generation & Payment -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>💰 Invoice Generation & Payment</h3>
+                <p class="workflow-description">
+                    System auto-generates invoice after POD approval. Customer views invoice and makes payment via available methods.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Collect payment from customer for completed shipment
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckUser Mobile:</strong> <code>src/screens/Invoice/InvoiceScreen.tsx</code> - View invoice details and make payment</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Invoices.tsx</code> - Manage all invoices, filter by payment status</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>GET /api/invoices/user/me</code> - Get all invoices for logged-in customer</li>
+                            <li><code>GET /api/invoices/:id</code> - Get invoice details</li>
+                            <li><code>POST /api/payments</code> - Create payment record (online/cash/cheque)</li>
+                            <li><code>PUT /api/payments/:id/verify</code> - Admin verify payment received</li>
+                            <li><code>PUT /api/invoices/:id/confirm</code> - Admin mark invoice as paid</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Invoice Model:</strong> invoiceNumber, bookingId, tripId, customerId, totalAmount, items[] (breakdown), status (pending_payment/paid), dueDate, generatedAt</li>
+                            <li><strong>Payment Model:</strong> invoiceId, amount, method (online/cash/cheque), transactionId, status (pending/verified), paidAt</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section external">
+                        <h4>☁️ External Services (Planned)</h4>
+                        <ul>
+                            <li><strong>Stripe API:</strong> Online payment processing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 12: Driver Settlement Processing -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>💸 Driver Settlement Processing</h3>
+                <p class="workflow-description">
+                    Admin generates settlement for driver after all related invoices are paid. Settlement is approved and payment is processed.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Pay drivers for completed trips after receiving customer payment
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Earnings/EarningsScreen.tsx</code> - View all settlements and total earnings</li>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Earnings/SettlementDetailsScreen.tsx</code> - View settlement breakdown</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Settlements.tsx</code> - Create, approve, and manage settlements</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>POST /api/settlements</code> - Admin creates settlement for driver (includes multiple trips)</li>
+                            <li><code>GET /api/settlements/driver/me</code> - Driver views their settlements</li>
+                            <li><code>PUT /api/settlements/:id/approve</code> - Admin approves settlement for payment</li>
+                            <li><code>PUT /api/settlements/:id/paid</code> - Mark settlement as paid after bank transfer</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Settlement Model:</strong> driverId, trips[] (array of trip IDs), invoices[] (related invoice IDs), totalAmount, adminFee, driverEarnings, status (pending/ready/approved/paid), generatedAt, paidAt</li>
+                            <li><strong>Driver Model:</strong> bankAccountDetails (for payment transfer)</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section business-rule">
+                        <h4>⚠️ Critical Business Rule</h4>
+                        <ul>
+                            <li><strong>Settlement can ONLY be approved after ALL related invoices are confirmed as paid by admin</strong></li>
+                            <li>System validates invoice payment status before allowing settlement approval</li>
+                            <li>Settlement status changes: pending → ready (when invoices paid) → approved (admin approval) → paid (after bank transfer)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 5: Additional Features -->
+        <div class="workflow-category">
+            <h2>5️⃣ Additional Features</h2>
+
+            <!-- Workflow 13: Driver Rating & Feedback -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>⭐ Driver Rating & Feedback</h3>
+                <p class="workflow-description">
+                    Customer rates driver performance after delivery completion, providing star rating and optional comments.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Maintain driver quality through customer feedback and ratings
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckUser Mobile:</strong> <code>src/screens/Rating/RateDriverScreen.tsx</code> - Star rating component and comment box</li>
+                            <li><strong>TruckDriver Mobile:</strong> <code>src/screens/Profile/RatingsScreen.tsx</code> - View own ratings and feedback</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>POST /api/ratings</code> - Customer submits rating for driver</li>
+                            <li><code>GET /api/ratings/driver/:id</code> - Get all ratings for specific driver</li>
+                            <li><code>GET /api/ratings/my-ratings</code> - Driver views their ratings</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>Rating Model:</strong> driverId, customerId, tripId, rating (1-5 stars), comment, createdAt</li>
+                            <li><strong>Driver Model:</strong> averageRating (calculated), totalRatings (count)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 14: Support Ticket System -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>🎫 Support Ticket System</h3>
+                <p class="workflow-description">
+                    Users and drivers can create support tickets for issues, which admin can view and resolve.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Provide customer support and issue resolution mechanism
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckUser/Driver Mobile:</strong> <code>src/screens/Support/SupportScreen.tsx</code> - Create and view support tickets</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Support.tsx</code> - View all tickets, respond and mark as resolved</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>POST /api/support/tickets</code> - Create new support ticket</li>
+                            <li><code>GET /api/support/tickets/me</code> - Get user's own tickets</li>
+                            <li><code>GET /api/support/tickets</code> - Admin view all tickets</li>
+                            <li><code>PUT /api/support/tickets/:id</code> - Admin respond or close ticket</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li><strong>SupportTicket Model:</strong> userId, ticketNumber, subject, description, status (open/in_progress/resolved/closed), priority (low/medium/high), createdAt, resolvedAt</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow 15: Analytics & Reporting -->
+            <div class="workflow-card" onclick="toggleWorkflow(this)">
+                <h3>📊 Analytics & Reporting</h3>
+                <p class="workflow-description">
+                    Admin dashboard displays KPIs, charts, and business metrics for monitoring platform performance.
+                </p>
+                <div class="workflow-summary">
+                    🎯 Goal: Provide business insights and data-driven decision making
+                </div>
+
+                <div class="workflow-details">
+                    <div class="detail-section frontend">
+                        <h4>📱 Frontend Pages Needed</h4>
+                        <ul>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/pages/Dashboard.tsx</code> - Main dashboard with KPI cards and charts</li>
+                            <li><strong>TruckAdmin Web:</strong> <code>src/components/Charts/*</code> - Reusable chart components (Line, Bar, Pie)</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section api">
+                        <h4>🔌 API Endpoints Required</h4>
+                        <ul>
+                            <li><code>GET /api/analytics/dashboard</code> - Get KPIs (total bookings, revenue, active drivers, etc.)</li>
+                            <li><code>GET /api/bookings</code> - Get bookings with date range filters for charts</li>
+                            <li><code>GET /api/invoices</code> - Get revenue data for financial charts</li>
+                            <li><code>GET /api/drivers</code> - Get driver metrics and performance data</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section database">
+                        <h4>🗄️ Database Models Needed</h4>
+                        <ul>
+                            <li>Aggregate queries on: <strong>Booking</strong>, <strong>Trip</strong>, <strong>Invoice</strong>, <strong>Settlement</strong>, <strong>Driver</strong></li>
+                            <li>Date range filters, grouping by status, calculating totals and averages</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>VCG Transport Platform</strong> - Feature Workflows Guide</p>
+            <p>Last Updated: January 8, 2026</p>
+            <p style="margin-top: 1rem; color: #666;">
+                Total: <strong>15 Workflows</strong> across <strong>5 Categories</strong>
+            </p>
+            <p style="margin-top: 0.5rem;">
+                © 2026 VCG Transport. All rights reserved.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        let allExpanded = false;
+
+        function toggleWorkflow(element) {
+            const details = element.querySelector('.workflow-details');
+            details.classList.toggle('expanded');
+        }
+
+        function toggleAllWorkflows() {
+            const allDetails = document.querySelectorAll('.workflow-details');
+            const btn = document.getElementById('toggleBtn');
+            
+            allExpanded = !allExpanded;
+            
+            allDetails.forEach(detail => {
+                if (allExpanded) {
+                    detail.classList.add('expanded');
+                } else {
+                    detail.classList.remove('expanded');
+                }
+            });
+            
+            btn.textContent = allExpanded ? '📁 Collapse All Workflows' : '📂 Expand All Workflows';
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

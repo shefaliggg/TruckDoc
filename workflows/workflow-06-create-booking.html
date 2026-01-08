@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Booking - VCG Transport</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .section h3 {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .section li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .section li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .section code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .wireframe {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .wireframe-title {
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .mockup {
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            margin: 1rem 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .mockup-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            text-align: center;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin: 1rem 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .price-card {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .price-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">← Back to Index</a>
+            <h1>📦 Create Booking (User)</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">
+                Customer creates a new shipment booking with pickup and delivery details
+            </p>
+        </header>
+
+        <!-- Goal -->
+        <div class="section">
+            <h2>🎯 Workflow Goal</h2>
+            <p><strong>Objective:</strong> Allow customers to create shipment bookings with pickup location, delivery location, truck type, load details, and get instant quote</p>
+        </div>
+
+        <!-- Frontend Pages -->
+        <div class="section">
+            <h2>📱 Frontend Pages Required</h2>
+            
+            <h3>TruckUser Mobile App (React Native)</h3>
+            <ul>
+                <li><code>src/screens/Booking/CreateBookingScreen.tsx</code></li>
+                <li><code>src/screens/Booking/SelectTruckTypeScreen.tsx</code></li>
+                <li><code>src/screens/Booking/BookingQuoteScreen.tsx</code></li>
+                <li><code>src/screens/Booking/BookingConfirmationScreen.tsx</code></li>
+                <li><code>src/components/LocationPicker.tsx</code></li>
+            </ul>
+        </div>
+
+        <!-- API Endpoints -->
+        <div class="section">
+            <h2>🔌 API Endpoints Required</h2>
+            <ul>
+                <li><code>POST /api/bookings</code> - Create new booking</li>
+                <li><code>POST /api/bookings/:id/quote</code> - Calculate price quote</li>
+                <li><code>POST /api/bookings/:id/confirm</code> - Confirm booking</li>
+                <li><code>GET /api/bookings/me</code> - Get user's bookings</li>
+                <li><code>GET /api/trucks/types</code> - Get available truck types</li>
+            </ul>
+        </div>
+
+        <!-- Database Models -->
+        <div class="section">
+            <h2>🗄️ Database Models Needed</h2>
+            
+            <h3>Booking Model</h3>
+            <ul>
+                <li><strong>bookingNumber</strong>: string (auto-generated, unique)</li>
+                <li><strong>customerId</strong>: ObjectId (ref: User)</li>
+                <li><strong>pickupLocation</strong>: { address, city, state, zipCode, lat, lng }</li>
+                <li><strong>deliveryLocation</strong>: { address, city, state, zipCode, lat, lng }</li>
+                <li><strong>pickupDate</strong>: Date</li>
+                <li><strong>deliveryDate</strong>: Date</li>
+                <li><strong>truckType</strong>: string (e.g., '10-wheeler', '20-wheeler')</li>
+                <li><strong>loadDetails</strong>: { weight, type, description }</li>
+                <li><strong>price</strong>: number</li>
+                <li><strong>status</strong>: enum ['pending', 'confirmed', 'assigned', 'in_progress', 'completed', 'cancelled']</li>
+                <li><strong>createdAt</strong>: Date</li>
+            </ul>
+        </div>
+
+        <!-- Screen Wireframes -->
+        <div class="section">
+            <h2>🎨 Screen Wireframes</h2>
+
+            <!-- Create Booking Screen -->
+            <div class="wireframe">
+                <div class="wireframe-title">📱 Create Booking Screen</div>
+                <div class="mockup">
+                    <div class="mockup-header">
+                        <span>←</span>
+                        <span>New Booking</span>
+                        <span>   </span>
+                    </div>
+
+                    <h3 style="margin: 1rem 0 0.5rem 0; font-size: 1rem; color: #666;">📍 Pickup Details</h3>
+                    <div class="form-group">
+                        <label>Pickup Location</label>
+                        <input type="text" placeholder="Search address..." disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pickup Date & Time</label>
+                        <input type="datetime-local" disabled>
+                    </div>
+
+                    <h3 style="margin: 1.5rem 0 0.5rem 0; font-size: 1rem; color: #666;">🎯 Delivery Details</h3>
+                    <div class="form-group">
+                        <label>Delivery Location</label>
+                        <input type="text" placeholder="Search address..." disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Expected Delivery Date</label>
+                        <input type="date" disabled>
+                    </div>
+
+                    <h3 style="margin: 1.5rem 0 0.5rem 0; font-size: 1rem; color: #666;">🚛 Truck & Load Details</h3>
+                    <div class="form-group">
+                        <label>Truck Type</label>
+                        <select disabled>
+                            <option>Select truck type</option>
+                            <option>10-Wheeler</option>
+                            <option>20-Wheeler</option>
+                            <option>Container Truck</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Load Weight (tons)</label>
+                        <input type="number" placeholder="e.g., 10" disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Load Type</label>
+                        <input type="text" placeholder="e.g., Construction materials" disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Notes</label>
+                        <textarea rows="3" placeholder="Any special instructions..." disabled></textarea>
+                    </div>
+
+                    <button class="btn">Get Quote</button>
+                </div>
+            </div>
+
+            <!-- Quote Screen -->
+            <div class="wireframe">
+                <div class="wireframe-title">📱 Price Quote Screen</div>
+                <div class="mockup">
+                    <div class="mockup-header">
+                        <span>←</span>
+                        <span>Booking Quote</span>
+                        <span>   </span>
+                    </div>
+
+                    <h3 style="text-align: center; margin: 1rem 0; color: var(--success-color);">✅ Quote Ready!</h3>
+
+                    <div class="price-card">
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Total Price</div>
+                        <div class="price-amount">$1,250.00</div>
+                        <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">Estimated cost for this shipment</div>
+                    </div>
+
+                    <div style="background: white; border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                        <h4 style="margin-bottom: 0.75rem; color: #333;">Trip Summary</h4>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Distance</span>
+                            <strong>250 km</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Truck Type</span>
+                            <strong>10-Wheeler</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Load Weight</span>
+                            <strong>10 tons</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                            <span style="color: #666;">Estimated Duration</span>
+                            <strong>1-2 days</strong>
+                        </div>
+                    </div>
+
+                    <button class="btn" style="background: var(--success-color);">Confirm Booking</button>
+                    <button class="btn" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color);">Edit Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Flow -->
+        <div class="section">
+            <h2>🔄 Implementation Flow</h2>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6;">
+<strong>BOOKING CREATION FLOW:</strong>
+
+1. User opens "Create Booking" screen
+2. Enters pickup location (with autocomplete/map selection)
+3. Selects pickup date and time
+4. Enters delivery location
+5. Selects expected delivery date
+6. Selects truck type from dropdown
+7. Enters load weight and load type
+8. Adds any special notes
+9. Clicks "Get Quote"
+
+10. API: POST /api/bookings
+    Request Body: {
+      pickupLocation: {...},
+      deliveryLocation: {...},
+      pickupDate: "2026-01-15T09:00:00Z",
+      deliveryDate: "2026-01-16",
+      truckType: "10-wheeler",
+      loadDetails: {
+        weight: 10,
+        type: "Construction materials",
+        description: "Steel beams"
+      }
+    }
+    
+11. Backend calculates price based on:
+    - Distance (pickup to delivery)
+    - Truck type pricing
+    - Load weight
+    - Date/time (peak hours markup)
+    
+12. API: POST /api/bookings/:id/quote
+    Response: {
+      bookingId: "BK123456",
+      price: 1250.00,
+      distance: 250,
+      estimatedDuration: "1-2 days",
+      breakdown: {...}
+    }
+
+13. Show Quote Screen with price and trip summary
+14. User reviews and clicks "Confirm Booking"
+
+15. API: POST /api/bookings/:id/confirm
+    - Update booking status to "confirmed"
+    - Create trip record
+    - Send notification to admin
+    
+16. Show confirmation screen with booking number
+17. Navigate to "My Bookings" screen
+            </pre>
+        </div>
+
+        <!-- Business Rules -->
+        <div class="section">
+            <h2>⚠️ Business Rules</h2>
+            <ul>
+                <li><strong>Price Calculation:</strong> Base rate + per km + per ton + truck type markup</li>
+                <li><strong>Booking Status:</strong> Starts as "pending", becomes "confirmed" after user confirms quote</li>
+                <li><strong>Minimum Weight:</strong> Minimum 1 ton per booking</li>
+                <li><strong>Advance Booking:</strong> Pickup date must be at least 4 hours in future</li>
+                <li><strong>Distance Limit:</strong> Maximum 1000 km per single booking</li>
+                <li><strong>Admin Assignment:</strong> After booking is confirmed, admin assigns driver within 24 hours</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
