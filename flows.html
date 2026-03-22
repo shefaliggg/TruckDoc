@@ -151,141 +151,10 @@
 <body>
     <div class="container">
         <header>
-            <h1>🔄 Workflow Diagrams & Flows</h1>
-            <p class="subtitle">VCG Transport Platform Business Process Flows</p>
+            <h1>📅 Complete Transaction Flow</h1>
+            <p class="subtitle">VCG Transport Platform Booking to Payment Journey</p>
             <a href="index.html" class="back-link">← Back to Index</a>
         </header>
-
-        <!-- High-Level Workflow Diagrams -->
-        <div class="architecture-section">
-            <h2>🔄 Complete Workflow Diagrams</h2>
-            <p style="color: #666; margin-bottom: 1.5rem;">
-                High-level workflow diagrams showing the complete business process flows in the platform.
-            </p>
-
-            <h3>📋 1. Driver Onboarding Flow</h3>
-            <pre>
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         DRIVER ONBOARDING FLOW                           │
-└─────────────────────────────────────────────────────────────────────────┘
-
-1. Driver Registration (Login/Signup)
-   ↓
-2. Upload Documents (RC, DL, etc.)
-   ↓
-3. AI/OCR Verification (AWS Textract + Rekognition)
-   ↓
-4. Admin Review → Approve/Reject
-   ↓
-5. Status: "Approved" ✅ → Driver can go online
-            </pre>
-
-            <h3>📦 2. Booking & Trip Flow</h3>
-            <pre>
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         BOOKING & TRIP FLOW                              │
-└─────────────────────────────────────────────────────────────────────────┘
-
-[User Creates Booking]
-   ↓ (Enters pickup, drop, dates, truck type, load details)
-[User Gets Quote]
-   ↓ (Fixed price or admin-set)
-[User Confirms Booking]
-   ↓ (Payment hold or pay later)
-[Booking Created in System] → Status: "pending"
-   ↓
-[Admin Reviews Booking]
-   ↓
-[Admin Assigns Driver + Truck]
-   ↓
-[Booking Status: "assigned"]
-   ↓
-[Driver Receives Trip Assignment]
-   ↓
-[Driver Accepts Trip]
-   ↓
-[Driver Status: "en_route_to_pickup"]
-   ↓
-[Driver Arrives at Pickup] → Status: "arrived_at_pickup"
-   ↓
-[Loading Started] → Status: "loading"
-   ↓
-[Loading Complete] → Status: "loaded"
-   ↓
-[Driver Starts Trip] → Status: "in_transit"
-   ↓ (User tracks driver live)
-[Driver Arrives at Drop] → Status: "arrived_at_drop"
-   ↓
-[Delivery Completed]
-   ↓
-[Driver Uploads POD (Photos + Signature)]
-   ↓
-[Trip Status: "delivered"]
-   ↓
-[User Marks Delivery Complete]
-            </pre>
-
-            <h3>✅ 3. POD Approval & Invoicing Flow</h3>
-            <pre>
-┌─────────────────────────────────────────────────────────────────────────┐
-│               POD APPROVAL & INVOICING FLOW                              │
-└─────────────────────────────────────────────────────────────────────────┘
-
-[Driver Submits POD]
-   ↓
-[Admin Reviews POD]
-   ↓
-[Admin Approves POD] ✅
-   ↓
-[🤖 AUTO: Invoice Generated]
-   ↓
-[Invoice Sent to User]
-   ↓
-[User Makes Payment]
-   ↓
-[Payment Settled]
-   ↓
-[Settlement Ready for Driver]
-            </pre>
-
-            <h3>💰 4. Settlement & Payment Flow</h3>
-            <pre>
-┌─────────────────────────────────────────────────────────────────────────┐
-│              SETTLEMENT & PAYMENT FLOW                                   │
-└─────────────────────────────────────────────────────────────────────────┘
-
-[Admin Generates Settlement]
-   ↓
-[System Checks: All Invoices Paid?]
-   ├─ NO → ❌ Settlement status: "pending"
-   └─ YES → ✅ Settlement status: "ready"
-             ↓
-       [Admin Approves Settlement for Payment]
-             ↓
-       [Settlement Status: "approved"]
-             ↓
-       [Payment Processed (ACH/Wire to Driver)]
-             ↓
-       [Settlement Status: "paid"] ✅
-             ↓
-       [Driver Receives Payment Notification]
-             ↓
-       [Driver Views Settlement in App]
-            </pre>
-
-            <h3>⭐ 5. Rating & Feedback Flow</h3>
-            <pre>
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         RATING & FEEDBACK                                │
-└─────────────────────────────────────────────────────────────────────────┘
-
-[Trip Completed]
-   ↓
-[User Rates Driver] (1-5 stars + comments)
-   ↓
-[Rating Stored in Driver Profile]
-            </pre>
-        </div>
 
         <!-- Day-by-Day Transaction Flow -->
         <div class="architecture-section">
@@ -305,11 +174,14 @@
       ↓ (API: POST /api/bookings)
    Booking created with status: "pending"
       ↓
-   User gets quote (fixed or admin-set)
+   Drivers submit quotes for booking
       ↓ (API: POST /api/bookings/:id/quote)
-   User confirms booking
-      ↓ (API: POST /api/bookings/:id/confirm)
-   Payment hold placed (or pay later option)
+   User selects preferred quote
+      ↓ (API: POST /api/bookings/:id/select-quote)
+   Rate confirmation is signed by user and accepted by driver
+      ↓ (API: POST /api/bookings/:id/rate-confirmation/user-sign)
+      ↓ (API: POST /api/bookings/:id/rate-confirmation/driver-accept)
+   Booking moves to assignment-ready state
       ↓
    Booking status: "confirmed"
 
@@ -317,69 +189,56 @@
    Admin reviews booking in TruckAdmin dashboard
       ↓ (View: New Bookings)
    Admin assigns driver + truck
-      ↓ (API: PUT /api/bookings/:id/assign-driver)
+      ↓ (API: POST /api/admin/bookings/:id/assign)
    Booking status: "assigned"
       ↓
    Driver receives trip assignment notification
       ↓ (API: GET /api/trips/driver/assigned)
 
 <strong style="color: var(--warning-color);">Day 2: PICKUP</strong>
-   Driver goes online
-      ↓ (API: PUT /api/drivers/status)
-   Driver accepts trip
-      ↓ (API: POST /api/trips/:id/accept)
+   Driver opens assigned trip and starts execution in Driver app
+      ↓ (App event: trip-status-update)
    Driver navigates to pickup
       ↓ (Live tracking enabled)
-   Driver arrives at pickup
-      ↓ (API: PUT /api/trips/:id/status - "arrived_at_pickup")
-   Loading started
-      ↓ (API: PUT /api/trips/:id/status - "loading")
-   Loading complete
-      ↓ (API: PUT /api/trips/:id/status - "loaded")
-   Driver uploads pickup photos + signature
-      ↓ (API: POST /api/pods)
-   POD created, status: "pickup_complete"
+   Driver app sends periodic location updates
+      ↓ (API: POST /api/trips/:id/location)
+   Pickup and loading milestones are updated via trip status events
 
 <strong style="color: var(--primary-color);">Day 3: IN TRANSIT</strong>
-   Driver starts journey
-      ↓ (API: PUT /api/trips/:id/status - "in_transit")
+   Driver is in transit
+      ↓ (Location + status updates continue)
    User tracks driver live
-      ↓ (API: GET /api/trips/:id/track)
+      ↓ (API: GET /api/trips/booking/:bookingId)
    Admin monitors trip
       ↓ (View: Live Trip Monitoring)
 
 <strong style="color: var(--success-color);">Day 4: DELIVERY</strong>
-   Driver arrives at drop location
-      ↓ (API: PUT /api/trips/:id/status - "arrived_at_drop")
-   Delivery completed
-      ↓ (API: PUT /api/trips/:id/status - "delivered")
    Driver uploads delivery photos + signature
-      ↓ (API: PUT /api/pods/:id)
-   POD complete, status: "pending_approval"
-      ↓
-   User marks delivery complete
-      ↓ (API: PUT /api/bookings/:id/complete)
+      ↓ (API: POST /api/trips/:id/upload-pod)
+   Trip marked delivered and POD goes to admin review queue
 
 <strong style="color: var(--warning-color);">Day 5: POD APPROVAL & INVOICING</strong>
    Admin reviews POD in TruckAdmin
-      ↓ (View: POD Review Interface)
+      ↓ (API: GET /api/trips/pods/pending)
    Admin approves POD
-      ↓ (API: PUT /api/pods/:id/approve)
+      ↓ (API: PUT /api/trips/:id/approve-pod)
+   (If invalid, admin can reject)
+      ↓ (API: PUT /api/trips/:id/reject-pod)
    POD status: "approved" ✅
       ↓
-   🤖 AUTO: Invoice generated for User
-      ↓ (API: POST /api/invoices - auto-trigger)
+   Invoice is generated for user
    Invoice sent to User (email/app notification)
       ↓
    Invoice status: "pending_payment"
 
 <strong style="color: var(--primary-color);">Day 6: USER PAYMENT</strong>
    User views invoice
-      ↓ (API: GET /api/invoices/user/me)
+      ↓ (API: GET /api/invoices/my)
    User makes payment
-      ↓ (API: POST /api/payments)
-   Payment verified by admin
-      ↓ (API: PUT /api/payments/:id/verify)
+      ↓ (API: POST /api/invoices/:id/pay)
+   For bank transfer, admin confirms or rejects payment proof
+      ↓ (API: PUT /api/invoices/:id/confirm-bank-transfer)
+      ↓ (API: PUT /api/invoices/:id/reject-bank-transfer)
    Invoice status: "paid" ✅
       ↓
    Settlement ready for driver
@@ -414,8 +273,8 @@
         </div>
 
         <footer>
-            <p><strong>VCG Transport Platform</strong> - Workflow Diagrams</p>
-            <p>Last Updated: January 8, 2026</p>
+         <p><strong>VCG Transport Platform</strong> - Complete Transaction Flow</p>
+         <p>Last Updated: March 18, 2026</p>
             <p style="margin-top: 0.5rem;">
                 © 2026 VCG Transport. All rights reserved.
             </p>
