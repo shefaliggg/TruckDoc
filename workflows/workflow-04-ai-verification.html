@@ -203,51 +203,76 @@
         <header>
             <a href='../index.html' class='back-link'> Back to Index</a>
             <h1> AI Document Verification</h1>
-            <p>Automated document verification using AWS Textract OCR and Rekognition face matching</p>
+            <p>Planned: automated document verification using AWS Textract OCR (Rekognition face matching deferred)</p>
         </header>
 
         <section class='section'>
             <h2> Workflow Goal</h2>
-            <p>Automatically verify uploaded driver documents using AWS AI services. Extract text from documents using OCR (Textract), match driver photo with license photo using face recognition (Rekognition), and validate document authenticity. This reduces manual verification time and improves accuracy.</p>
+            <p>Automatically verify uploaded CP Driver documents — CDL, Insurance, Vehicle Registration, and Inspection/Safety — using AWS AI services. Extract text from documents using OCR (Textract) and validate document authenticity/expiry. This reduces manual verification time and improves accuracy.</p>
+            <div class='api-endpoint' style="border-left-color: var(--danger-color); background: #fee2e2;">
+                <strong>⚠ Not implemented today.</strong> As documented in
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>, there is currently no OCR/AI
+                pipeline wired up at all — everything in this file describes a planned integration, not shipped
+                behavior. Documents sit at <code>Document.status: 'pending'</code> until an admin manually approves or
+                rejects the whole driver (<a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>).
+            </div>
+            <div class='api-endpoint' style="border-left-color: var(--warning-color); background: #fef3c7;">
+                <strong>⚠ Face-match / selfie verification is deferred, not just unimplemented.</strong> The CP Driver
+                onboarding redesign does not collect a driver profile photo/selfie anywhere in the flow (see
+                <a href="workflow-02-profile.html">workflow-02-profile.html</a>) — so there is nothing to compare a
+                license photo against. The Rekognition face-matching sections below are kept for historical/design
+                reference only; they describe a feature that is out of scope until profile photo capture is added to
+                onboarding, not a feature that currently works or is close to working.
+            </div>
         </section>
 
         <section class='section'>
             <h2> Frontend Pages</h2>
-            <h3>TruckDriver Mobile App</h3>
+            <h3>CP Driver Mobile App (vcg_driverr) — planned, not built</h3>
             <ul class='feature-list'>
                 <li><strong>Verification Status Screen:</strong> Real-time AI verification progress</li>
                 <li><strong>Verification Results:</strong> Display extracted data and confidence scores</li>
-                <li><strong>Auto-detected Fields:</strong> Show OCR-extracted license number, name, expiry</li>
-                <li><strong>Face Match Result:</strong> Display face recognition confidence</li>
+                <li><strong>Auto-detected Fields:</strong> Show OCR-extracted CDL number, name, class, expiry (from the
+                    CDL document); policy number/expiry (Insurance); VIN/plate (Registration); inspection date
+                    (Inspection)</li>
+                <li style="color: var(--text-secondary);"><strong>Face Match Result:</strong> deferred — no driver
+                    photo/selfie is collected in this onboarding flow, see caveat above</li>
             </ul>
-            <h3>TruckAdmin Dashboard</h3>
+            <h3>TruckAdmin Dashboard — planned, not built</h3>
             <ul class='feature-list'>
                 <li><strong>AI Results Review:</strong> View AI verification results with confidence scores</li>
                 <li><strong>OCR Data Display:</strong> Extracted text fields with edit capability</li>
-                <li><strong>Face Match Visualization:</strong> Side-by-side face comparison</li>
+                <li style="color: var(--text-secondary);"><strong>Face Match Visualization:</strong> deferred, see caveat above</li>
                 <li><strong>Override Controls:</strong> Manual approval/rejection if AI is uncertain</li>
             </ul>
         </section>
 
         <section class='section'>
             <h2> API Endpoints</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">None of the endpoints below exist yet — this
+                is a proposal for how the future OCR pipeline could be wired up on top of the actual
+                <code>Document</code> model from <a href="workflow-03-documents.html">workflow-03-documents.html</a>.
+                Also note real document storage today is <strong>local disk</strong> (<code>uploads/drivers/</code>),
+                not S3 — any real implementation of the below would need to either move storage to S3 first or point
+                Textract at local files via a different ingestion path.</p>
             <div class='api-endpoint'>
-                <strong>POST</strong> <code>/api/admin/drivers/:driverId/documents/:docId/verify-ai</code>
-                <p>Trigger AI verification (auto-triggered after upload)</p>
+                <strong>POST</strong> <code>/api/admin/documents/:documentId/verify-ai</code>
+                <p>Trigger AI/OCR verification for one <code>Document</code> (auto-triggered after upload, in this proposal)</p>
             </div>
             <div class='api-endpoint'>
-                <strong>GET</strong> <code>/api/drivers/:driverId/verification-status</code>
-                <p>Get AI verification status and results</p>
+                <strong>GET</strong> <code>/api/drivers/me/documents/:documentId/verification-status</code>
+                <p>Get AI verification status and results for one document</p>
             </div>
-            <h3>AWS Services Integration</h3>
+            <h3>AWS Services Integration (proposed — CDL / Insurance / Registration / Inspection OCR only)</h3>
             <div class='code-block'>
 // AWS Textract - OCR Processing
-const extractTextFromDocument = async (s3Url) => {
+// Runs against Document.fileUrl for docType in ['cdl', 'insurance', 'vehicle_registration', 'inspection']
+const extractTextFromDocument = async (documentKey) => {
   const textract = new AWS.Textract();
   const params = {
     DocumentLocation: {
       S3Object: {
-        Bucket: 'vcg-transport-documents',
+        Bucket: 'vcg-transport-documents', // NOTE: today's storage is local disk, not S3 — see caveat above
         Name: documentKey
       }
     },
@@ -256,12 +281,15 @@ const extractTextFromDocument = async (s3Url) => {
   return await textract.analyzeDocument(params).promise();
 };
 
-// AWS Rekognition - Face Matching
-const compareFaces = async (photoUrl, licensePhotoUrl) => {
+// AWS Rekognition - Face Matching — DEFERRED, not applicable to this onboarding flow.
+// No driver profile photo/selfie is collected anywhere in CP Driver onboarding today
+// (see workflow-02-profile.html), so there is no second image to compare a CDL photo
+// against. Kept here only as a reference for a possible future feature.
+const compareFaces = async (selfiePhotoUrl, cdlPhotoUrl) => {
   const rekognition = new AWS.Rekognition();
   const params = {
-    SourceImage: { S3Object: { Bucket, Name: photoKey } },
-    TargetImage: { S3Object: { Bucket, Name: licenseKey } },
+    SourceImage: { S3Object: { Bucket, Name: selfieKey } },
+    TargetImage: { S3Object: { Bucket, Name: cdlKey } },
     SimilarityThreshold: 80
   };
   return await rekognition.compareFaces(params).promise();
@@ -271,7 +299,14 @@ const compareFaces = async (photoUrl, licensePhotoUrl) => {
 
         <section class='section'>
             <h2> Database Models</h2>
-            <h3>AI Verification Results Structure</h3>
+            <h3>AI Verification Results Structure (proposed — none of this exists on the real <code>Document</code> model today)</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                The real <code>Document</code> schema (<a href="workflow-03-documents.html">workflow-03-documents.html</a>)
+                only has <code>status</code>, <code>rejectionReason</code>, <code>reviewedAt</code>,
+                <code>reviewedBy</code> for review state — none of it populated by any automated process yet. The table
+                below is a proposal for where OCR results could live if this were built, e.g. as an
+                <code>ocrData</code> sub-object on <code>Document</code>, shaped per <code>docType</code>.
+            </p>
             <table>
                 <thead>
                     <tr>
@@ -281,18 +316,18 @@ const compareFaces = async (photoUrl, licensePhotoUrl) => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>aiVerificationResults</td><td>Object</td><td>Container for all AI results</td></tr>
-                    <tr><td>ocrData</td><td>Object</td><td>Textract extracted data</td></tr>
-                    <tr><td>ocrData.licenseNumber</td><td>String</td><td>Extracted license number</td></tr>
-                    <tr><td>ocrData.name</td><td>String</td><td>Extracted name from license</td></tr>
-                    <tr><td>ocrData.dateOfBirth</td><td>String</td><td>Extracted DOB</td></tr>
-                    <tr><td>ocrData.expiryDate</td><td>String</td><td>Extracted expiry date</td></tr>
+                    <tr><td>ocrData</td><td>Object</td><td>Textract extracted data, shape depends on <code>docType</code></td></tr>
+                    <tr><td>ocrData.cdlNumber</td><td>String</td><td>Extracted CDL number (docType: 'cdl')</td></tr>
+                    <tr><td>ocrData.name</td><td>String</td><td>Extracted name from the CDL</td></tr>
+                    <tr><td>ocrData.dateOfBirth</td><td>String</td><td>Extracted DOB (docType: 'cdl')</td></tr>
+                    <tr><td>ocrData.cdlClass</td><td>String</td><td>Extracted class letter (A/B/C) (docType: 'cdl')</td></tr>
+                    <tr><td>ocrData.expiryDate</td><td>String</td><td>Extracted expiry (docType: 'cdl', 'insurance', 'inspection')</td></tr>
+                    <tr><td>ocrData.policyNumber</td><td>String</td><td>Extracted insurance policy number (docType: 'insurance')</td></tr>
+                    <tr><td>ocrData.vin / ocrData.plateNumber</td><td>String</td><td>Extracted from the registration document, cross-checked against <code>Truck.vin</code> / <code>Truck.plateNumber</code> (docType: 'vehicle_registration')</td></tr>
                     <tr><td>ocrData.confidence</td><td>Number</td><td>OCR confidence score (0-100)</td></tr>
-                    <tr><td>faceMatch</td><td>Object</td><td>Rekognition face match result</td></tr>
-                    <tr><td>faceMatch.similarity</td><td>Number</td><td>Face similarity score (0-100)</td></tr>
-                    <tr><td>faceMatch.isMatch</td><td>Boolean</td><td>Faces match above threshold</td></tr>
                     <tr><td>aiVerifiedAt</td><td>Date</td><td>AI processing timestamp</td></tr>
                     <tr><td>aiStatus</td><td>String</td><td>'passed', 'failed', 'manual_review'</td></tr>
+                    <tr><td colspan="3" style="color: var(--text-secondary);"><em>faceMatch (deferred)</em> — not proposed for this onboarding flow; there is no selfie/profile photo to match a CDL photo against, see caveat above</td></tr>
                 </tbody>
             </table>
         </section>
@@ -310,24 +345,24 @@ const compareFaces = async (photoUrl, licensePhotoUrl) => {
                         <div style='text-align: center; padding: 2rem 1rem;'>
                             <div class='spinner' style='margin: 2rem auto;'></div>
                             <h3 style='margin: 1.5rem 0 0.5rem; color: var(--primary-color);'>Verifying Your Documents</h3>
-                            <p style='color: var(--text-secondary); font-size: 0.875rem;'>AI is analyzing your documents...</p>
+                            <p style='color: var(--text-secondary); font-size: 0.875rem;'>AI is analyzing your documents... (proposed — not built)</p>
                             <div style='margin-top: 2rem;'>
                                 <div class='status-card'>
                                     <div style='display: flex; justify-content: space-between; align-items: center;'>
-                                        <span> License OCR</span>
+                                        <span> CDL OCR</span>
                                         <span class='badge badge-processing'>Processing</span>
                                     </div>
                                 </div>
                                 <div class='status-card'>
                                     <div style='display: flex; justify-content: space-between; align-items: center;'>
-                                        <span> Face Matching</span>
+                                        <span> Insurance / Registration / Inspection OCR</span>
                                         <span class='badge badge-warning'>Pending</span>
                                     </div>
                                 </div>
-                                <div class='status-card'>
+                                <div class='status-card' style="opacity: 0.5;">
                                     <div style='display: flex; justify-content: space-between; align-items: center;'>
-                                        <span> Data Validation</span>
-                                        <span class='badge badge-warning'>Pending</span>
+                                        <span> Face Matching (deferred — no selfie collected)</span>
+                                        <span class='badge' style="background: var(--light-bg); color: var(--text-secondary);">N/A</span>
                                     </div>
                                 </div>
                             </div>
@@ -349,37 +384,39 @@ const compareFaces = async (photoUrl, licensePhotoUrl) => {
                                 <p style='color: var(--text-secondary); font-size: 0.875rem;'>Your documents have been verified by AI</p>
                             </div>
                             <div class='ai-result-box'>
-                                <h4 style='margin-bottom: 1rem;'> Extracted Information</h4>
+                                <h4 style='margin-bottom: 1rem;'> Extracted Information (CDL)</h4>
                                 <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
-                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>License Number:</span>
-                                    <span style='font-weight: 600;'>MH12-20220012345</span>
+                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>CDL Number:</span>
+                                    <span style='font-weight: 600;'>TX-88213456</span>
                                 </div>
                                 <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
                                     <span style='color: var(--text-secondary); font-size: 0.875rem;'>Name:</span>
-                                    <span style='font-weight: 600;'>Rajesh Kumar</span>
+                                    <span style='font-weight: 600;'>James Whitfield</span>
+                                </div>
+                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
+                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>Class:</span>
+                                    <span style='font-weight: 600;'>A</span>
                                 </div>
                                 <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
                                     <span style='color: var(--text-secondary); font-size: 0.875rem;'>Expiry Date:</span>
-                                    <span style='font-weight: 600;'>31-12-2028</span>
+                                    <span style='font-weight: 600;'>04/12/2029</span>
                                 </div>
                                 <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
                                     <span style='color: var(--text-secondary); font-size: 0.875rem;'>OCR Confidence:</span>
                                     <span style='font-weight: 600; color: var(--success-color);'>95%</span>
                                 </div>
                             </div>
-                            <div class='ai-result-box' style='border-left-color: var(--primary-color);'>
-                                <h4 style='margin-bottom: 1rem;'> Face Match Result</h4>
-                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
-                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>Match Confidence:</span>
-                                    <span style='font-weight: 600; color: var(--success-color);'>92%</span>
-                                </div>
-                                <div style='display: flex; justify-content: space-between; margin: 0.5rem 0;'>
-                                    <span style='color: var(--text-secondary); font-size: 0.875rem;'>Status:</span>
-                                    <span class='badge badge-success'>Verified</span>
-                                </div>
+                            <div class='ai-result-box' style='border-left-color: var(--text-secondary); opacity: 0.6;'>
+                                <h4 style='margin-bottom: 1rem;'> Face Match Result — Deferred</h4>
+                                <p style='font-size: 0.875rem; color: var(--text-secondary);'>
+                                    Not applicable to this onboarding flow — CP Driver does not collect a profile
+                                    photo/selfie, so there is no image to compare the CDL photo against. This card is
+                                    shown for design-reference purposes only.
+                                </p>
                             </div>
                             <p style='background: #d1fae5; padding: 1rem; border-radius: 8px; font-size: 0.875rem; color: #065f46; margin-top: 1.5rem;'>
-                                 Your documents will be reviewed by an admin within 24 hours for final approval.
+                                 Your documents will be reviewed by an admin for final approval — see
+                                <a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>.
                             </p>
                         </div>
                     </div>
@@ -388,27 +425,34 @@ const compareFaces = async (photoUrl, licensePhotoUrl) => {
         </section>
 
         <section class='section'>
-            <h2> Implementation Flow</h2>
+            <h2> Implementation Flow (proposed — not built)</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Written against a future state where document storage has moved to S3; today it's local disk (see
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>).
+            </p>
             <ol style='line-height: 2;'>
-                <li>Document uploaded to S3, webhook/event triggers Lambda function</li>
-                <li>Lambda retrieves document from S3</li>
+                <li>Document uploaded (<code>docType</code>: cdl / insurance / vehicle_registration / inspection),
+                    webhook/event triggers Lambda function</li>
+                <li>Lambda retrieves the document file</li>
                 <li>AWS Textract analyzes document for text extraction</li>
-                <li>Parse OCR results to extract license number, name, DOB, expiry</li>
+                <li>Parse OCR results per <code>docType</code> — CDL number/name/DOB/class/expiry (cdl); policy
+                    number/expiry (insurance); VIN/plate (vehicle_registration, cross-checked against the linked
+                    <code>Truck</code>); inspection date (inspection)</li>
                 <li>Calculate confidence scores for each field</li>
-                <li>If driver photo exists, trigger AWS Rekognition face comparison</li>
-                <li>Compare driver photo with license photo</li>
-                <li>Calculate similarity score</li>
-                <li>Update database with AI verification results</li>
+                <li style="color: var(--text-secondary);"><del>If driver photo exists, trigger AWS Rekognition face comparison</del> —
+                    deferred, no driver photo is collected in this onboarding flow (see caveat above)</li>
+                <li>Update <code>Document</code> with AI verification results</li>
                 <li>Send notification to driver with results</li>
                 <li>If confidence {'>'} 80%, mark for admin review; if {'<'} 80%, flag for manual verification</li>
             </ol>
         </section>
 
         <section class='section'>
-            <h2> Business Rules</h2>
+            <h2> Business Rules (proposed — not enforced today)</h2>
             <ul class='feature-list'>
                 <li><strong>OCR Confidence Threshold:</strong> Minimum 70% confidence for auto-approval</li>
-                <li><strong>Face Match Threshold:</strong> Minimum 80% similarity for auto-approval</li>
+                <li style="color: var(--text-secondary);"><strong>Face Match Threshold:</strong> N/A — deferred, no
+                    driver photo/selfie collected in this onboarding flow</li>
                 <li><strong>Manual Review:</strong> Any score below threshold requires admin review</li>
                 <li><strong>Processing Time:</strong> AI verification completes within 2 minutes</li>
                 <li><strong>Retry Logic:</strong> Automatic retry up to 3 times on AI service failure</li>
@@ -418,7 +462,7 @@ const compareFaces = async (photoUrl, licensePhotoUrl) => {
         </section>
 
         <section class='section'>
-            <h2> Security Considerations</h2>
+            <h2> Security Considerations (proposed — not built)</h2>
             <ul class='feature-list'>
                 <li><strong>IAM Roles:</strong> Lambda has minimum permissions for S3 and AI services</li>
                 <li><strong>Encryption:</strong> All data encrypted in transit and at rest</li>

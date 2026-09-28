@@ -10,6 +10,7 @@
             --secondary-color: #1e40af;
             --success-color: #10b981;
             --warning-color: #f59e0b;
+            --danger-color: #ef4444;
             --border-color: #e5e7eb;
             --text-primary: #111827;
             --text-secondary: #6b7280;
@@ -116,6 +117,19 @@
             font-weight: 600;
         }
 
+        .note {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem 1.25rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            color: var(--text-primary);
+        }
+
+        .note strong {
+            color: var(--secondary-color);
+        }
+
         .wireframe {
             background: white;
             border: 2px solid var(--border-color);
@@ -169,6 +183,22 @@
             font-size: 1rem;
         }
 
+        .otp-boxes {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .otp-boxes input {
+            width: 2.5rem;
+            height: 2.5rem;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1.1rem;
+        }
+
         .btn {
             background: var(--primary-color);
             color: white;
@@ -180,6 +210,12 @@
             cursor: pointer;
             width: 100%;
             margin-top: 1rem;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
         }
 
         .link-text {
@@ -194,8 +230,32 @@
             gap: 2rem;
         }
 
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .status-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: #fef3c7; color: #92400e; }
+        .status-badge.approved { background: #d1fae5; color: #065f46; }
+        .status-badge.danger { background: #fee2e2; color: #991b1b; }
+
         @media (max-width: 768px) {
-            .grid-2 {
+            .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
             }
         }
@@ -207,48 +267,236 @@
             <a href="../index.html" class="back-link">← Back to Index</a>
             <h1>🔐 User Registration & Login</h1>
             <p style="color: var(--text-secondary); margin-top: 0.5rem;">
-                Allow users, drivers, and admins to create accounts and authenticate into the platform
+                Account creation and authentication for CP Driver (US), CP Shipper (US), and TruckAdmin
             </p>
         </header>
 
         <!-- Goal -->
         <div class="section">
             <h2>🎯 Workflow Goal</h2>
-            <p><strong>Objective:</strong> Secure user registration, login, and profile access for all user roles (Customer, Driver, Admin)</p>
+            <p><strong>Objective:</strong> Secure, role-appropriate account creation and login for all three apps.</p>
+            <div class="note">
+                <strong>Scope note:</strong> CP Driver (<code>vcg_driverr</code>) and CP Shipper (<code>vcg_user</code>) both
+                target the <strong>US market</strong> and use a <strong>passwordless phone/email + OTP</strong> flow (sections
+                below). CP Shipper is the renamed/redesigned TruckUser customer app — its old email + password screens are
+                superseded by the OTP flow. Company name, business address, EIN, tax info, payment info, and pickup/delivery
+                locations are <strong>not</strong> collected during CP Shipper auth — they belong to the separate Shipper
+                Profile Creation step (Personal, Business, Locations) covered by
+                <a href="workflow-02-profile.html">workflow-02-profile.html</a>. Likewise, driver's license, DOT info, truck
+                details, insurance, and banking belong to the Driver Profile & Verification workflow
+                (<a href="workflow-02-profile.html">workflow-02-profile.html</a>,
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>). India-market fields (Aadhaar, PAN, GSTIN,
+                IFSC, PUC, +91 numbers) do not apply to either US flow. TruckAdmin is unaffected and keeps the existing email +
+                password flow — see <a href="#legacy-auth">Legacy Auth</a> at the bottom of this page.
+            </div>
+        </div>
+
+        <!-- CP Driver Auth Flow Diagram -->
+        <div class="section">
+            <h2>🇺🇸 CP Driver — Authentication Flow</h2>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6;">
+Splash
+   ↓
+Welcome
+   ↓
+Create Account / Log In
+   ↓
+Phone or Email
+   ↓
+Verification Code (OTP)
+   ↓
+Account Check
+   ├── New Driver      → Profile Creation
+   └── Existing Driver  → Account Status / Home
+            </pre>
+            <div class="note">
+                <strong>Phone is the primary option</strong> on the "How would you like to continue?" screen, since
+                operational communication (dispatch, trip updates) is heavily phone/SMS-based for drivers — email is offered
+                as a secondary alternative, same passwordless OTP flow either way.
+            </div>
+            <div class="note" style="background: #fef3c7; border-left-color: var(--warning-color);">
+                <strong>⚠ Phone/SMS delivery is not implemented yet.</strong> No SMS provider (e.g. Twilio) is configured
+                on the backend. <code>POST /api/auth/otp/send</code> and <code>POST /api/auth/otp/verify</code> both return
+                <code>501 { success: false, smsAvailable: false, message: 'Phone verification is not available yet...' }</code>
+                for <code>channel: 'phone'</code>. The <code>PhoneAuthScreen.jsx</code> UI exists and does basic US phone
+                format validation client-side, but on submit it surfaces the 501 and offers a "continue with email"
+                fallback. <strong>Only the email OTP channel is functional today</strong> — it sends a real 6-digit code via
+                Resend, 10-minute expiry, 60-second resend cooldown, 5 max attempts.
+            </div>
+            <p style="color: var(--text-secondary); margin-top: 1rem;">
+                Keep authentication itself to <strong>4 screens</strong>; everything else is a separate stage:
+            </p>
+            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                <tr style="background: var(--light-bg);">
+                    <th style="text-align: left; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">#</th>
+                    <th style="text-align: left; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Screen</th>
+                    <th style="text-align: left; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Purpose</th>
+                </tr>
+                <tr><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">01</td><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Splash</td><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Initialize app/session</td></tr>
+                <tr><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">02</td><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Welcome</td><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Sign up or log in</td></tr>
+                <tr><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">03</td><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Phone / Email</td><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Identify user (method choice + entry)</td></tr>
+                <tr><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">04</td><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Verification Code</td><td style="padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);">Verify identity</td></tr>
+            </table>
+            <div class="note">
+                <strong>What comes after authentication</strong> (not part of this workflow — see
+                <a href="workflow-02-profile.html">workflow-02-profile.html</a>,
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>,
+                <a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>):
+            </div>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6; margin-top: 0.75rem;">
+AUTHENTICATION  (this workflow: account identity)
+      ↓
+DRIVER PROFILE        — personal info, photo, address, emergency contact
+      ↓
+LICENSE / DRIVER VERIFICATION  — driver's license, CDL info, credentials
+      ↓
+TRUCK PROFILE          — truck info, VIN/vehicle details, registration
+      ↓
+TRUCK DOCUMENTS        — insurance, required vehicle documents
+      ↓
+PAYOUT                 — bank/payout information
+      ↓
+WORK PREFERENCES       — preferred loads, routes, availability
+      ↓
+REVIEW
+      ↓
+VERIFICATION            (proving driver + truck are eligible to operate on CP)
+      ↓
+DRIVER HOME
+            </pre>
+        </div>
+
+        <!-- CP Shipper Auth Flow Diagram -->
+        <div class="section">
+            <h2>🇺🇸 CP Shipper — Authentication Flow</h2>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6;">
+Splash
+   ↓
+Welcome
+   ↓
+Create Shipper Account / Log In
+   ↓
+Phone or Email
+   ↓
+Verification Code (OTP)
+   ↓
+Account Check
+   ├── New Shipper      → Shipper Profile Creation
+   └── Existing Shipper  → Home / Continue Setup
+            </pre>
+            <p style="color: var(--text-secondary); margin-top: 1rem;">
+                Authentication, profile creation, and shipment booking are kept as three separate stages so the app is easier
+                to use and develop:
+            </p>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6; margin-top: 0.75rem;">
+                 CP SHIPPER APP
+                       │
+                AUTHENTICATION
+                       │
+              Phone / Email + OTP
+                       │
+                       ▼
+                SHIPPER PROFILE
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+       Personal     Business     Locations
+          │            │            │
+          └────────────┼────────────┘
+                       ▼
+                    HOME
+                       │
+                       ▼
+              BOOK TRUCK + DRIVER
+            </pre>
+            <div class="note">
+                <strong>Primary contact after signup:</strong> Both phone and email are available at auth time, but once the
+                account is created, <strong>phone number becomes the primary operational contact</strong> — SMS matters
+                throughout Booking → Driver Assignment → Pickup → In Transit → Delivery.
+            </div>
         </div>
 
         <!-- Frontend Pages -->
         <div class="section">
             <h2>📱 Frontend Pages Required</h2>
-            
-            <h3>TruckUser Mobile App (React Native)</h3>
+
+            <h3>CP Driver Mobile App (React Native — vcg_driverr)</h3>
             <ul>
-                <li><code>src/screens/Auth/RegisterScreen.tsx</code></li>
-                <li><code>src/screens/Auth/LoginScreen.tsx</code></li>
-                <li><code>src/screens/Auth/ForgotPasswordScreen.tsx</code></li>
+                <li><code>src/components/LaunchSplashScreen.jsx</code> — checks session, account status, profile completion, and verification status, then routes automatically</li>
+                <li><code>src/screens/auth/WelcomeScreen.jsx</code> — Create Driver Account / Log In</li>
+                <li><code>src/screens/auth/ChooseAuthMethodScreen.jsx</code> — "How would you like to continue?" (phone primary, email secondary)</li>
+                <li><code>src/screens/auth/PhoneAuthScreen.jsx</code> — US phone entry (+1, formatted)</li>
+                <li><code>src/screens/auth/EmailAuthScreen.jsx</code> — Email entry (alternative to phone)</li>
+                <li><code>src/screens/auth/VerifyCodeScreen.jsx</code> — 6-digit OTP entry, resend, change phone/email; on success routes to the driver's current onboarding step, or to PendingApprovalScreen/DriverTabs if onboarding is already further along</li>
+                <li><code>src/screens/onboarding/PendingApprovalScreen.jsx</code> — status/waiting screen for <code>approvalStatus: 'pending'</code>; also shown for <code>'rejected'</code> with a Reapply button that re-enters the step flow (there is no separate "action_required"/"suspended" screen today)</li>
+                <li style="color: var(--text-secondary);">Replaces the old password-based <code>RegisterScreen.jsx</code> / <code>LoginScreen.jsx</code></li>
             </ul>
 
-            <h3>TruckDriver Mobile App (React Native)</h3>
+            <h3>CP Shipper Mobile App (React Native — vcg_user)</h3>
             <ul>
-                <li><code>src/screens/Auth/RegisterScreen.tsx</code></li>
-                <li><code>src/screens/Auth/LoginScreen.tsx</code></li>
+                <li><code>src/screens/SplashScreen.js</code> — session/status check, then route</li>
+                <li><code>src/screens/auth/WelcomeScreen.js</code> — Create Shipper Account / Log In</li>
+                <li><code>src/screens/auth/PhoneAuthScreen.js</code> — US phone entry (+1, formatted)</li>
+                <li><code>src/screens/auth/EmailAuthScreen.js</code> — Email entry (alternative to phone)</li>
+                <li><code>src/screens/auth/VerifyCodeScreen.js</code> — 6-digit OTP entry, resend, change phone/email</li>
+                <li><code>src/screens/auth/AccountStatusScreen.js</code> — profile incomplete / verification pending / action required / suspended</li>
+                <li style="color: var(--text-secondary);">Replaces the current password-based <code>LoginScreen.js</code> / <code>ForgotPasswordScreen.js</code></li>
             </ul>
 
-            <h3>TruckAdmin Web Dashboard (React)</h3>
+            <h3>TruckAdmin Web Dashboard (React) — unchanged</h3>
             <ul>
-                <li><code>src/pages/Login.tsx</code></li>
+                <li><code>src/pages/Login.js</code></li>
             </ul>
         </div>
 
         <!-- API Endpoints -->
         <div class="section">
             <h2>🔌 API Endpoints Required</h2>
+
+            <h3>CP Driver (US, phone/email + OTP) — actual implementation</h3>
+            <div class="note">
+                There is <strong>one shared pair of endpoints</strong> for both send and verify, not separate
+                per-channel/per-role routes — the channel is selected by a <code>channel</code> field in the request body,
+                and there's no separate "resend" route: calling <code>send</code> again is the resend (subject to the
+                60-second cooldown below).
+            </div>
+            <ul>
+                <li><code>POST /api/auth/otp/send</code> - body <code>{ channel: 'email' | 'phone', email?, phone? }</code>.
+                    For <code>channel: 'email'</code>: validates email format, enforces a 60s resend cooldown per
+                    identifier, generates a 6-digit code (hashed, 10 min expiry), emails it via Resend. Returns
+                    <code>200 { success: true, message }</code>, or <code>429</code> if within the cooldown window. For
+                    <code>channel: 'phone'</code>: always returns <code>501 { success: false, smsAvailable: false, message }</code>
+                    (no SMS provider configured — see caveat above).</li>
+                <li><code>POST /api/auth/otp/verify</code> - body <code>{ channel: 'email' | 'phone', email?, phone?, code? }</code>.
+                    For <code>channel: 'email'</code>: checks the hashed code against the most recent unexpired,
+                    unconsumed OTP for that identifier (max 5 attempts before <code>429</code>), then auto-detects
+                    new vs. existing user by email. If new: creates the <code>User</code> (<code>role: 'driver'</code>,
+                    <code>authMethod: 'email_otp'</code>, <code>emailVerified: true</code>) and a matching <code>Driver</code>
+                    record (<code>approvalStatus: 'incomplete'</code>, <code>onboardingStep: 'driver_info'</code>).
+                    Returns <code>200 { success: true, token, user, isNewUser, driver: { approvalStatus, onboardingStep } }</code>.
+                    For <code>channel: 'phone'</code>: always returns the same <code>501</code> stub as send.</li>
+                <li><code>GET /api/auth/me</code> - generic (not driver-specific), <code>requireAuth</code>. Returns
+                    <code>{ success: true, user: { id, firstName, lastName, email, phone, role, createdAt } }</code> — no
+                    onboarding/approval status here (use <code>GET /api/drivers/me</code>, see
+                    <a href="workflow-02-profile.html">workflow-02-profile.html</a>, for <code>approvalStatus</code> /
+                    <code>onboardingStep</code>).</li>
+            </ul>
+
+            <h3>CP Shipper (US, phone/email + OTP)</h3>
+            <ul>
+                <li><code>POST /api/auth/shipper/phone/send-code</code> - Send 6-digit SMS OTP to a US (+1) number</li>
+                <li><code>POST /api/auth/shipper/phone/verify</code> - Verify phone OTP; returns JWT + <code>isNewShipper</code></li>
+                <li><code>POST /api/auth/shipper/email/send-code</code> - Send 6-digit email OTP</li>
+                <li><code>POST /api/auth/shipper/email/verify</code> - Verify email OTP; returns JWT + <code>isNewShipper</code></li>
+                <li><code>POST /api/auth/shipper/resend-code</code> - Resend OTP (rate-limited)</li>
+                <li><code>GET /api/auth/shipper/me</code> - Get current shipper + <code>accountStatus</code></li>
+            </ul>
+
+            <h3>TruckAdmin — unchanged</h3>
             <ul>
                 <li><code>POST /api/auth/register</code> - Create new user account</li>
                 <li><code>POST /api/auth/login</code> - Authenticate user and return JWT token</li>
                 <li><code>GET /api/auth/me</code> - Get current logged-in user details</li>
-                <li><code>POST /api/auth/verify-phone</code> - Verify phone number with OTP</li>
-                <li><code>POST /api/auth/verify-email</code> - Verify email address</li>
                 <li><code>PUT /api/auth/update-password</code> - Update user password</li>
                 <li><code>POST /api/auth/forgot-password</code> - Request password reset</li>
             </ul>
@@ -257,33 +505,484 @@
         <!-- Database Models -->
         <div class="section">
             <h2>🗄️ Database Models Needed</h2>
-            
-            <h3>User Model</h3>
+
+            <h3>User Model (CP Driver, US) — actual implementation, passwordless-capable</h3>
+            <div class="note">
+                This is the real <code>User</code> collection (shared by all roles), not a separate Driver auth model.
+                Driver-specific onboarding fields (CDL, address, truck, agreements, etc.) live on the separate
+                <code>Driver</code> profile — see <a href="workflow-02-profile.html">workflow-02-profile.html</a>.
+            </div>
+            <ul>
+                <li><strong>authMethod</strong>: enum ['password', 'email_otp', 'phone_otp'] (default: 'password')</li>
+                <li><strong>firstName</strong> / <strong>lastName</strong>: string, optional (not required — a fresh OTP
+                    signup has neither until the Driver Information step)</li>
+                <li><strong>email</strong>: string, lowercase, <strong>sparse unique</strong>, optional</li>
+                <li><strong>phone</strong>: string, <strong>sparse unique</strong>, optional</li>
+                <li><strong>passwordHash</strong>: string, optional (not set for OTP-created accounts)</li>
+                <li><strong>role</strong>: enum ['user', 'driver', 'admin'], required</li>
+                <li><strong>isPhoneVerified</strong>: boolean (default: false)</li>
+                <li><strong>emailVerified</strong>: boolean (default: false) — note: no separate <code>isEmailVerified</code> field, this is the existing field, reused</li>
+                <li><strong>createdAt</strong> / <strong>updatedAt</strong>: Date</li>
+                <li style="color: var(--text-secondary);">No Aadhaar/PAN/GSTIN/IFSC/PUC fields — not applicable to the US market. There
+                    is no <code>accountStatus</code> enum on this model; driver progress/approval state lives on
+                    <code>Driver.onboardingStep</code> and <code>Driver.approvalStatus</code> instead (see
+                    <a href="workflow-02-profile.html">workflow-02-profile.html</a>,
+                    <a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>) — the "Account Status
+                    States" section below describes the intended UX states conceptually, but they are derived/mapped from
+                    those two Driver fields, not stored as a single enum.</li>
+            </ul>
+
+            <h3>Shipper Model (CP Shipper, US) — passwordless</h3>
+            <ul>
+                <li><strong>authMethod</strong>: enum ['phone', 'email']</li>
+                <li><strong>phone</strong>: string, E.164 US format (<code>+1XXXXXXXXXX</code>), unique, nullable — becomes primary operational contact once profile is complete</li>
+                <li><strong>email</strong>: string, unique, nullable</li>
+                <li><strong>isPhoneVerified</strong>: boolean (default: false)</li>
+                <li><strong>isEmailVerified</strong>: boolean (default: false)</li>
+                <li><strong>accountStatus</strong>: enum ['profile_incomplete', 'verification_pending', 'action_required', 'approved', 'suspended']</li>
+                <li><strong>createdAt</strong> / <strong>updatedAt</strong>: Date</li>
+                <li style="color: var(--text-secondary);">No <code>password</code> field. Personal / business / location details live on the Shipper Profile (<a href="workflow-02-profile.html">workflow-02-profile.html</a>), not here.</li>
+            </ul>
+
+            <h3>OtpCode Model — actual implementation (currently backs CP Driver only)</h3>
+            <ul>
+                <li><strong>identifier</strong>: string — lowercased email, or E.164 phone (no separate <code>ownerType</code>/<code>ownerId</code> — the record isn't linked to a User until <code>verify</code> succeeds)</li>
+                <li><strong>channel</strong>: enum ['email', 'phone']</li>
+                <li><strong>codeHash</strong>: string, sha256 (hashed, never stored in plaintext)</li>
+                <li><strong>purpose</strong>: enum ['signup_login'] (default)</li>
+                <li><strong>expiresAt</strong>: Date (10 min TTL)</li>
+                <li><strong>attempts</strong>: number (default 0, max 5 before lockout)</li>
+                <li><strong>consumedAt</strong>: Date, nullable</li>
+                <li style="color: var(--text-secondary);">Only <code>channel: 'email'</code> records are ever actually
+                    created today — the <code>phone</code> channel is rejected before an OTP record is written (see the
+                    501 stub note above).</li>
+            </ul>
+
+            <h3>User Model (TruckAdmin) — unchanged</h3>
             <ul>
                 <li><strong>email</strong>: string (unique, required)</li>
                 <li><strong>password</strong>: string (hashed with bcrypt, required)</li>
-                <li><strong>role</strong>: enum ['customer', 'driver', 'admin']</li>
-                <li><strong>firstName</strong>: string</li>
-                <li><strong>lastName</strong>: string</li>
+                <li><strong>role</strong>: enum ['admin']</li>
+                <li><strong>firstName</strong> / <strong>lastName</strong>: string</li>
                 <li><strong>phone</strong>: string</li>
-                <li><strong>isEmailVerified</strong>: boolean (default: false)</li>
-                <li><strong>isPhoneVerified</strong>: boolean (default: false)</li>
-                <li><strong>createdAt</strong>: Date</li>
-                <li><strong>updatedAt</strong>: Date</li>
-            </ul>
-
-            <h3>Driver Model (extends User)</h3>
-            <ul>
-                <li><strong>userId</strong>: ObjectId (ref: User)</li>
-                <li><strong>driverLicense</strong>: string</li>
-                <li><strong>vehicleDetails</strong>: object</li>
-                <li><strong>approvalStatus</strong>: enum ['pending', 'approved', 'rejected']</li>
+                <li><strong>isEmailVerified</strong> / <strong>isPhoneVerified</strong>: boolean (default: false)</li>
+                <li><strong>createdAt</strong> / <strong>updatedAt</strong>: Date</li>
             </ul>
         </div>
 
         <!-- Screen Wireframes -->
         <div class="section">
-            <h2>🎨 Screen Wireframes</h2>
+            <h2>🎨 CP Driver Screen Wireframes</h2>
+
+            <div class="grid-2">
+                <!-- Splash -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Splash</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Driver</div>
+
+                        <h3 style="text-align: center; margin: 3rem 0;">CP<br>Driver</h3>
+                        <p style="text-align: center; color: #666; font-size: 0.8rem;">Checks session, account status, profile completion, and verification status, then routes automatically.</p>
+                    </div>
+                </div>
+
+                <!-- Welcome -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Welcome</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Driver</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">Welcome to CP</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 2rem;">Find loads, manage trips, and grow your business.</p>
+
+                        <button class="btn">Create Driver Account</button>
+                        <button class="btn btn-secondary">Log In</button>
+
+                        <div class="link-text" style="font-size: 0.8rem; margin-top: 1.5rem;">
+                            Terms of Service · Privacy Policy
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Choose Auth Method -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Choose Authentication Method</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Driver</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">How would you like to continue?</h3>
+
+                        <button class="btn">Continue with Phone</button>
+                        <p style="text-align: center; color: #666; font-size: 0.8rem; margin: 0.25rem 0 1rem;">Use your mobile number.</p>
+
+                        <button class="btn btn-secondary">Continue with Email</button>
+                        <p style="text-align: center; color: #666; font-size: 0.8rem; margin-top: 0.25rem;">Use your email address.</p>
+                    </div>
+                </div>
+
+                <!-- Phone Auth -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Phone Number</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Driver</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">Enter your phone number</h3>
+
+                        <div class="form-group">
+                            <label>Country</label>
+                            <input type="text" value="🇺🇸 +1" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone number</label>
+                            <input type="tel" placeholder="(555) 123-4567" disabled>
+                        </div>
+
+                        <button class="btn">Continue</button>
+
+                        <p style="text-align: center; color: #666; font-size: 0.85rem; margin-top: 1rem;">We'll send you a verification code.</p>
+                        <p style="text-align: center; color: var(--danger-color); font-size: 0.8rem; margin-top: 0.5rem;">⚠ Enter a valid phone number.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Email Auth -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Email</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Driver</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">Enter your email</h3>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="driver@example.com" disabled>
+                        </div>
+
+                        <button class="btn">Continue</button>
+
+                        <p style="text-align: center; color: #666; font-size: 0.85rem; margin-top: 1rem;">We'll send you a verification code.</p>
+                    </div>
+                </div>
+
+                <!-- Verification Code -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Verify Your Account</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Driver</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">Verify your account</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 1rem;">Enter the 6-digit code we sent to your phone/email.</p>
+
+                        <div class="otp-boxes">
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                        </div>
+
+                        <div class="link-text" style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <a href="#" style="color: var(--primary-color); text-decoration: none;">Resend code</a>
+                            <a href="#" style="color: var(--primary-color); text-decoration: none;">Change phone/email</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Verification States -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Verification States</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Driver</div>
+
+                        <p style="color: var(--danger-color); font-size: 0.9rem; margin-bottom: 0.75rem;"><strong>Incorrect:</strong> That code isn't correct. Try again.</p>
+                        <p style="color: var(--warning-color); font-size: 0.9rem; margin-bottom: 0.75rem;"><strong>Expired:</strong> This code has expired. Request a new code.</p>
+                        <p style="color: var(--success-color); font-size: 0.9rem;"><strong>✓ Successful:</strong> Phone number verified — continues automatically.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CP Shipper Screen Wireframes -->
+        <div class="section">
+            <h2>🎨 CP Shipper Screen Wireframes</h2>
+
+            <div class="grid-2">
+                <!-- Splash -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Splash</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Shipper</div>
+
+                        <h3 style="text-align: center; margin: 3rem 0;">CP<br>Shipper</h3>
+                        <p style="text-align: center; color: #666; font-size: 0.8rem;">Checks session, account status, profile completion, and verification status, then routes automatically.</p>
+                    </div>
+                </div>
+
+                <!-- Welcome -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Welcome</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Shipper</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">Welcome to CP</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 2rem;">Book reliable trucks and drivers for your shipments.</p>
+
+                        <button class="btn">Create Shipper Account</button>
+                        <button class="btn btn-secondary">Log In</button>
+
+                        <div class="link-text" style="font-size: 0.8rem; margin-top: 1.5rem;">
+                            Terms of Service · Privacy Policy
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Phone Auth -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Phone Number</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Shipper</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">Enter your phone number</h3>
+
+                        <div class="form-group">
+                            <label>Country</label>
+                            <input type="text" value="🇺🇸 +1" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone number</label>
+                            <input type="tel" placeholder="(555) 123-4567" disabled>
+                        </div>
+
+                        <button class="btn">Continue</button>
+
+                        <p style="text-align: center; color: #666; font-size: 0.85rem; margin-top: 1rem;">We'll send you a verification code.</p>
+                    </div>
+                </div>
+
+                <!-- Email Auth -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Email</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Shipper</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">Enter your email</h3>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="name@company.com" disabled>
+                        </div>
+
+                        <button class="btn">Continue</button>
+
+                        <p style="text-align: center; color: #666; font-size: 0.85rem; margin-top: 1rem;">We'll send you a verification code.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Verification Code -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Verify Your Account</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Shipper</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0;">Verify your account</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 1rem;">Enter the 6-digit code we sent to your phone/email.</p>
+
+                        <div class="otp-boxes">
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                            <input type="text" maxlength="1" disabled>
+                        </div>
+
+                        <div class="link-text" style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <a href="#" style="color: var(--primary-color); text-decoration: none;">Resend code</a>
+                            <a href="#" style="color: var(--primary-color); text-decoration: none;">Change phone/email</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verified -->
+                <div class="wireframe">
+                    <div class="wireframe-title">📱 Verified</div>
+                    <div class="mockup">
+                        <div class="mockup-header">CP Shipper</div>
+
+                        <h3 style="text-align: center; margin: 1rem 0; color: var(--success-color);">✓ Verified</h3>
+                        <p style="text-align: center; color: #666;">Continuing automatically…</p>
+                        <p style="text-align: center; color: #999; font-size: 0.8rem; margin-top: 1rem;">
+                            New shipper → Shipper Profile Creation<br>
+                            Existing shipper → Home / Continue Setup
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Flow -->
+        <div class="section">
+            <h2>🔄 Implementation Flow</h2>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6;">
+<strong>CP DRIVER — PHONE FLOW (UI exists, backend stubbed):</strong>
+1. Driver opens Welcome screen, taps "Create Driver Account" or "Log In"
+2. Chooses "Continue with Phone"
+3. Enters US phone number (+1) on PhoneAuthScreen.jsx
+4. API: POST /api/auth/otp/send  { channel: 'phone', phone }
+   - Backend validates US phone format, then always returns
+     501 { success: false, smsAvailable: false, message }
+     (no SMS provider configured yet)
+5. Screen shows "Phone sign-in isn't available yet — please continue with
+   email" and offers a button to switch to the Email flow below
+
+<strong>CP DRIVER — EMAIL FLOW (fully functional):</strong>
+1. Driver opens Welcome screen, taps "Create Driver Account" or "Log In"
+   (both lead to the same next step — the backend auto-detects new vs.
+   existing user by email at verify time)
+2. Chooses "Continue with Email", enters email on EmailAuthScreen.jsx
+3. API: POST /api/auth/otp/send  { channel: 'email', email }
+   - Validate email format, enforce 60s resend cooldown
+   - Generate 6-digit OTP, hash (sha256) + store with 10 min expiry
+   - Send via Resend
+4. Driver enters 6-digit code on VerifyCodeScreen.jsx
+5. API: POST /api/auth/otp/verify  { channel: 'email', email, code }
+   - Compare hashed code, check expiry + attempt count (max 5)
+   - If new email: create User (role: 'driver', authMethod: 'email_otp',
+     emailVerified: true) + Driver (approvalStatus: 'incomplete',
+     onboardingStep: 'driver_info')
+   - If existing driver email: mark emailVerified true if not already
+   - Generate JWT token
+   - Return { success, token, user, isNewUser, driver: { approvalStatus, onboardingStep } }
+6. Navigate based on driver.onboardingStep / approvalStatus:
+   - New driver / incomplete → resume onboarding at that onboardingStep
+     (see workflow-02-profile.html)
+   - approvalStatus 'pending' or 'rejected' → PendingApprovalScreen.jsx
+   - approvalStatus 'approved' → DriverTabs (Home)
+
+<strong>AUTHENTICATION CHECK (app relaunch):</strong>
+1. On app launch, check for stored JWT token
+2. If token exists:
+   - API: GET /api/drivers/me (populates truckId + documents)
+   - Validate token, read fresh approvalStatus / onboardingStep
+   - Route per navigation rules above (src/navigation/MainNavigator.jsx +
+     onboardingSteps.js)
+3. If no token or invalid: show Welcome screen
+            </pre>
+        </div>
+
+        <!-- CP Shipper Implementation Flow -->
+        <div class="section">
+            <h2>🔄 CP Shipper — Implementation Flow</h2>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6;">
+<strong>CP SHIPPER — PHONE FLOW:</strong>
+1. Shipper opens Welcome screen, taps "Create Shipper Account" or "Log In"
+2. Chooses "Continue with Phone"
+3. Enters US phone number (+1)
+4. API: POST /api/auth/shipper/phone/send-code
+   - Validate US phone format (E.164)
+   - Generate 6-digit OTP, hash + store with 5-10 min expiry
+   - Send via SMS provider
+5. Shipper enters 6-digit code on Verify screen
+6. API: POST /api/auth/shipper/phone/verify
+   - Compare hashed code, check expiry + attempt count
+   - Create Shipper record if new (isPhoneVerified = true)
+   - Generate JWT token
+   - Return token + isNewShipper flag
+7. Navigate:
+   - New shipper → Shipper Profile Creation (Personal → Business → Locations)
+   - Existing shipper → Account Check → Home / Continue Setup
+
+<strong>CP SHIPPER — EMAIL FLOW:</strong>
+Same as above, using POST /api/auth/shipper/email/send-code and
+POST /api/auth/shipper/email/verify in place of the phone endpoints.
+
+<strong>ACCOUNT CHECK (existing shipper):</strong>
+1. On successful verification of an existing shipper, API: GET /api/auth/shipper/me
+2. Route based on accountStatus:
+   - profile_incomplete   → resume Shipper Profile Creation
+   - verification_pending → Verification Pending screen
+   - action_required      → Action Required screen (what's missing)
+   - approved             → Home
+   - suspended            → Account Suspended screen
+
+<strong>AUTHENTICATION CHECK (app relaunch):</strong>
+1. On app launch (Splash), check for stored JWT token
+2. If token exists:
+   - API: GET /api/auth/shipper/me
+   - Validate token, get fresh accountStatus
+   - Route per Account Check above
+3. If no token or invalid: show Welcome screen
+            </pre>
+        </div>
+
+        <!-- Account Status -->
+        <div class="section">
+            <h2>🚦 CP Driver / CP Shipper — Account Status States</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 0.75rem;">Both apps route on the same conceptual states, shown below as a single <code>accountStatus</code> enum for readability. For CP Driver specifically, there is no such field in the database — these states are derived from <code>Driver.approvalStatus</code> (incomplete/pending/approved/rejected) and <code>Driver.onboardingStep</code> (driver_info…submitted); see <a href="workflow-02-profile.html">workflow-02-profile.html</a> and <a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a> for the real fields.</p>
+            <div class="status-badges">
+                <span class="status-badge pending">profile_incomplete</span>
+                <span class="status-badge pending">verification_pending</span>
+                <span class="status-badge danger">action_required</span>
+                <span class="status-badge approved">approved</span>
+                <span class="status-badge danger">suspended</span>
+            </div>
+            <p style="color: var(--text-secondary);">
+                For CP Driver, these states are set by the Driver Profile & Verification workflows
+                (<a href="workflow-02-profile.html">workflow-02-profile.html</a>,
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>,
+                <a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>). For CP Shipper, they're set
+                by Shipper Profile Creation (<a href="workflow-02-profile.html">workflow-02-profile.html</a>) — this auth
+                workflow only reads and routes on <code>accountStatus</code>, it does not set it.
+            </p>
+        </div>
+
+        <!-- Security Notes -->
+        <div class="section">
+            <h2>🔒 Security Considerations</h2>
+
+            <h3>CP Driver & CP Shipper (phone/email + OTP)</h3>
+            <ul>
+                <li><strong>OTP Format:</strong> 6-digit numeric code, 5-10 minute expiry, hashed at rest (never stored in plaintext)</li>
+                <li><strong>Rate Limiting:</strong> Limit send-code/resend-code requests per phone/email/IP to prevent SMS pumping fraud and brute force</li>
+                <li><strong>Attempt Limiting:</strong> Lock out after 5 failed verification attempts, require a fresh code</li>
+                <li><strong>Phone Validation:</strong> Validate as a US number (E.164, <code>+1</code>) before sending an OTP</li>
+                <li><strong>JWT Tokens:</strong> Signed with secret key, stored in secure storage (iOS Keychain, Android KeyStore)</li>
+                <li><strong>HTTPS Only:</strong> All authentication endpoints must use HTTPS</li>
+                <li><strong>No Password Storage:</strong> Passwordless design removes password-related attack surface (credential stuffing, reuse) for this flow</li>
+            </ul>
+
+            <h3>TruckAdmin (email + password) — unchanged</h3>
+            <ul>
+                <li><strong>Password Hashing:</strong> Use bcrypt with 10 rounds for password hashing</li>
+                <li><strong>JWT Tokens:</strong> 7-day expiration, signed with secret key</li>
+                <li><strong>Input Validation:</strong> Validate email format, password strength (min 8 chars)</li>
+                <li><strong>Rate Limiting:</strong> Limit login attempts to prevent brute force attacks</li>
+                <li><strong>Secure Storage:</strong> Store JWT tokens in secure storage (iOS Keychain, Android KeyStore)</li>
+                <li><strong>HTTPS Only:</strong> All authentication endpoints must use HTTPS</li>
+            </ul>
+        </div>
+
+        <!-- Legacy Auth -->
+        <div class="section" id="legacy-auth">
+            <h2>🗂️ Legacy Auth Reference — TruckAdmin (Email + Password, Unchanged) / Superseded TruckUser Flow</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                TruckAdmin is kept as-is; not affected by the CP Driver / CP Shipper US redesign above. The screens below
+                labeled "VCG Transport" are the <strong>old TruckUser customer flow</strong> — kept here for historical
+                reference only. It is superseded by the CP Shipper phone/email + OTP flow documented above; do not build new
+                work against it.
+            </p>
 
             <div class="grid-2">
                 <!-- Login Screen -->
@@ -291,7 +990,7 @@
                     <div class="wireframe-title">📱 Login Screen</div>
                     <div class="mockup">
                         <div class="mockup-header">VCG Transport</div>
-                        
+
                         <h3 style="text-align: center; margin: 1rem 0;">Welcome Back!</h3>
                         <p style="text-align: center; color: #666; margin-bottom: 2rem;">Login to continue</p>
 
@@ -322,7 +1021,7 @@
                     <div class="wireframe-title">📱 Registration Screen</div>
                     <div class="mockup">
                         <div class="mockup-header">VCG Transport</div>
-                        
+
                         <h3 style="text-align: center; margin: 1rem 0;">Create Account</h3>
                         <p style="text-align: center; color: #666; margin-bottom: 2rem;">Sign up to get started</p>
 
@@ -353,7 +1052,7 @@
 
                         <div class="form-group">
                             <label>User Type</label>
-                            <input type="text" placeholder="Customer / Driver" disabled>
+                            <input type="text" placeholder="Customer / Admin" disabled>
                         </div>
 
                         <button class="btn">Create Account</button>
@@ -364,12 +1063,8 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Implementation Flow -->
-        <div class="section">
-            <h2>🔄 Implementation Flow</h2>
-            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6;">
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; line-height: 1.6; margin-top: 1.5rem;">
 <strong>REGISTRATION FLOW:</strong>
 1. User opens Registration Screen
 2. Fills in: First Name, Last Name, Email, Phone, Password, Role
@@ -394,7 +1089,6 @@
 5. Store token in secure storage
 6. Navigate to Home Screen based on role
    - Customer → Bookings Screen
-   - Driver → Available Trips Screen
    - Admin → Dashboard
 
 <strong>AUTHENTICATION CHECK:</strong>
@@ -407,19 +1101,6 @@
 3. If no token or invalid:
    - Show Login Screen
             </pre>
-        </div>
-
-        <!-- Security Notes -->
-        <div class="section">
-            <h2>🔒 Security Considerations</h2>
-            <ul>
-                <li><strong>Password Hashing:</strong> Use bcrypt with 10 rounds for password hashing</li>
-                <li><strong>JWT Tokens:</strong> 7-day expiration, signed with secret key</li>
-                <li><strong>Input Validation:</strong> Validate email format, password strength (min 8 chars)</li>
-                <li><strong>Rate Limiting:</strong> Limit login attempts to prevent brute force attacks</li>
-                <li><strong>Secure Storage:</strong> Store JWT tokens in secure storage (iOS Keychain, Android KeyStore)</li>
-                <li><strong>HTTPS Only:</strong> All authentication endpoints must use HTTPS</li>
-            </ul>
         </div>
     </div>
 </body>

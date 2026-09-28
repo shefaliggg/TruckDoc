@@ -363,12 +363,162 @@
         <section class="section">
             <h2>📋 Workflow Goal</h2>
             <p>Allow users and drivers to view and update their profile information, including personal details, contact information, and role-specific data (like driver license information). This workflow ensures data accuracy and enables users to manage their account settings.</p>
+            <div class="api-endpoint" style="border-left-color: var(--success-color);">
+                <strong>Scope note:</strong> The India-market content below (GST numbers, Aadhaar/PAN, +91 numbers) describes the
+                legacy TruckUser/TruckDriver profile. <strong>CP Shipper (US, <code>vcg_user</code>)</strong> uses the lighter,
+                US-market onboarding flow in the next section instead — it runs immediately after CP Shipper auth
+                (<a href="workflow-01-auth.html">workflow-01-auth.html</a>) and is intentionally much shorter than CP Driver
+                onboarding (<a href="workflow-01-auth.html">workflow-01-auth.html</a>,
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>,
+                <a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>): a driver has to prove a
+                person + CDL + truck + compliance before receiving loads; a shipper only needs to establish
+                person/company + contact + basic billing/shipping identity before booking one.
+            </div>
+        </section>
+
+        <!-- CP Shipper Onboarding -->
+        <section class="section">
+            <h2>🇺🇸 CP Shipper — Onboarding (Profile Creation)</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Runs right after CP Shipper phone/email + OTP authentication. Kept deliberately light: only what CP needs to
+                identify the customer, establish the shipping account, and enable booking — not shipment preferences, saved
+                routes, or payment details, which are collected just-in-time at first booking.
+            </p>
+
+            <div class="code-block">
+Create Account (Phone / Email — see workflow-01-auth.html)
+      ↓
+Phone / Email Verification (OTP)
+      ↓
+Your Information            (first name, last name, phone, email)
+      ↓
+Individual / Business       (account type)
+      ↓
+Business Information        (Business accounts only)
+      ↓
+Primary Shipping Location   (optional — can be skipped, set later per shipment)
+      ↓
+Terms &amp; Agreements
+      ↓
+Shipper Home
+            </div>
+
+            <h3>Screens</h3>
+            <ul class="feature-list">
+                <li><strong>Your Information:</strong> First name, last name, phone, email — pre-filled from whichever
+                    method (phone or email) was used to sign up; the other one is entered here.</li>
+                <li><strong>What type of shipper are you?</strong> Two options — <strong>Business</strong> or
+                    <strong>Individual</strong>. Determines whether the Business Information screen is shown.</li>
+                <li><strong>Business Information</strong> (Business accounts only): business/company name, business
+                    address, city, state, ZIP code, business phone/email. No EIN or other tax ID field at signup — see
+                    "What's deliberately deferred" below.</li>
+                <li><strong>Primary Location:</strong> pickup/ship-from address, city, state, ZIP — has a visible
+                    <strong>Skip</strong> action; shipments can specify a different pickup address later per booking.</li>
+                <li><strong>Terms &amp; Agreements:</strong> CP Terms of Service, Privacy Policy, and the shipping/customer
+                    agreement (if applicable) — checkboxes or a single combined acceptance, required to continue.</li>
+            </ul>
+
+            <h3>What's deliberately deferred (not asked during onboarding)</h3>
+            <ul class="feature-list">
+                <li><strong>Payment / billing:</strong> billing name, billing address, and payment method are collected
+                    just-in-time at the shipper's first booking/payment (<a href="workflow-06-create-booking.html">workflow-06-create-booking.html</a>,
+                    <a href="workflow-12-invoice.html">workflow-12-invoice.html</a>), not made mandatory at signup.</li>
+                <li><strong>EIN / business tax information:</strong> only collected later if the payment, billing, or
+                    compliance workflow actually requires it — not a mandatory onboarding field.</li>
+                <li>Shipment preferences, favorite routes, preferred truck types, driver preferences</li>
+                <li>Multiple pickup or delivery locations (one optional primary location only)</li>
+                <li>Marketing preferences, extra company contacts</li>
+                <li>Any document not required for CP's specific operating model</li>
+            </ul>
+            <p style="color: var(--text-secondary);">
+                All of the above can be collected later, typically when the shipper creates their first booking — this keeps
+                Create Account → first booking friction to a minimum.
+            </p>
+
+            <h3>Shipper Profile fields (extends the passwordless Shipper account from workflow-01-auth.html)</h3>
+            <table>
+                <thead>
+                    <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>firstName / lastName</td><td>String</td><td>Required</td></tr>
+                    <tr><td>accountType</td><td>String</td><td>enum: ['individual', 'business']</td></tr>
+                    <tr><td>businessName</td><td>String</td><td>Required if accountType = 'business'</td></tr>
+                    <tr><td>businessAddress</td><td>Object</td><td>{street, city, state, zip} — required if accountType = 'business'</td></tr>
+                    <tr><td>businessPhone / businessEmail</td><td>String</td><td>Optional even for business accounts</td></tr>
+                    <tr><td>einOrTaxId</td><td>String</td><td>Nullable — collected later only when a payment/billing/compliance workflow requires it, never mandatory at signup</td></tr>
+                    <tr><td>primaryLocation</td><td>Object</td><td>{street, city, state, zip} — nullable, skippable, editable per-shipment later</td></tr>
+                    <tr><td>termsAcceptedAt</td><td>Date</td><td>Set when Terms &amp; Agreements is accepted; required before reaching Shipper Home</td></tr>
+                    <tr><td>profileStatus</td><td>String</td><td>enum: ['incomplete', 'complete'] — drives resume-onboarding behavior</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- CP Driver Onboarding -->
+        <section class="section">
+            <h2>🇺🇸 CP Driver — Onboarding (Driver Information + CDL Information)</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Runs right after CP Driver email OTP authentication (<a href="workflow-01-auth.html">workflow-01-auth.html</a>).
+                <code>Driver.onboardingStep</code> drives which screen a driver lands on when relaunching the app
+                mid-onboarding. This section covers the first two steps in detail — <strong>Driver Information</strong> and
+                <strong>CDL Information</strong>. The remaining steps (Qualification, Truck Information, Truck Documents,
+                Agreements) are covered in <a href="workflow-03-documents.html">workflow-03-documents.html</a> and
+                <a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>.
+            </p>
+
+            <div class="code-block">
+Create Account / Log In (Email OTP — see workflow-01-auth.html)
+      ↓
+Driver Information   (name, date of birth, address)                         onboardingStep: driver_info
+      ↓
+CDL Information       (CDL #, state, class, endorsements, expiry, CDL photo) onboardingStep: cdl_info
+      ↓
+Qualification          (experience, medical cert, MVR consent, road test)    onboardingStep: qualification
+      ↓
+Truck Information      (unit #, VIN, plate, make/model/year)                 onboardingStep: truck_info
+      ↓
+Truck Documents        (registration, insurance, inspection, op. authority)  onboardingStep: truck_documents
+      ↓
+Agreements              (ToS, Privacy Policy, Driver Agreement, MVR consent) onboardingStep: agreements
+      ↓
+Submitted → Pending Admin Review  (see workflow-05-driver-approval.html)
+            </div>
+
+            <h3>Screens (this section)</h3>
+            <ul class="feature-list">
+                <li><strong>Driver Information</strong> (<code>onboarding/DriverInformationScreen.jsx</code>): first name,
+                    last name, date of birth, address (line 1, city, state, zip).</li>
+                <li><strong>CDL Information</strong> (<code>onboarding/CdlInformationScreen.jsx</code>): CDL number,
+                    issuing state, class — A/B/C selectable chips, endorsements — H/N/P/S/T/X multi-select chips,
+                    expiration date, and a CDL photo/PDF upload.</li>
+            </ul>
+
+            <h3>Driver profile fields touched by these two steps</h3>
+            <table>
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>firstName / lastName</td><td>String</td><td>Lives on the <code>User</code> model (not Driver) — required</td></tr>
+                    <tr><td>dateOfBirth</td><td>Date</td><td>Required</td></tr>
+                    <tr><td>address</td><td>Object</td><td>{line1, city, state, zip} — all required</td></tr>
+                    <tr><td>licenseNumber</td><td>String</td><td>CDL number — field name kept from the old India-market "license" field, now reinterpreted as CDL #</td></tr>
+                    <tr><td>cdlState</td><td>String</td><td>Issuing state, required</td></tr>
+                    <tr><td>cdlClass</td><td>String</td><td>enum: ['A', 'B', 'C'], required</td></tr>
+                    <tr><td>endorsements</td><td>Array&lt;String&gt;</td><td>enum values: ['H','N','P','S','T','X'], multi-select, optional</td></tr>
+                    <tr><td>licenseExpiry</td><td>Date</td><td>CDL expiration date, required</td></tr>
+                </tbody>
+            </table>
+            <p style="color: var(--text-secondary);">
+                The CDL photo uploaded on the CDL Information screen is stored as a <code>Document</code>
+                (<code>docType: 'cdl'</code>), not as a field on Driver — see
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>. The old <code>licenseImageUrl</code>
+                field on Driver is deprecated/unused for this reason.
+            </p>
         </section>
 
         <!-- Frontend Pages -->
         <section class="section">
             <h2>📱 Frontend Pages</h2>
-            
+
             <h3>Customer Profile (TruckUser App)</h3>
             <ul class="feature-list">
                 <li><strong>View Profile:</strong> Display name, email, phone, company details</li>
@@ -377,13 +527,22 @@
                 <li><strong>Notification Settings:</strong> Configure email/push preferences</li>
             </ul>
 
-            <h3>Driver Profile (TruckDriver App)</h3>
+            <h3>Driver Onboarding — Driver Info + CDL Info (React Native — vcg_driverr)</h3>
             <ul class="feature-list">
-                <li><strong>View Profile:</strong> Display driver info, license details, verification status</li>
-                <li><strong>Edit Profile:</strong> Update contact info, emergency contact</li>
-                <li><strong>License Management:</strong> View/update license number, expiry, category</li>
-                <li><strong>Document Status:</strong> See verification status of uploaded documents</li>
+                <li><strong>Driver Information:</strong> <code>src/screens/onboarding/DriverInformationScreen.jsx</code> —
+                    first/last name, date of birth, address</li>
+                <li><strong>CDL Information:</strong> <code>src/screens/onboarding/CdlInformationScreen.jsx</code> — CDL
+                    number, issuing state, class (A/B/C), endorsements (H/N/P/S/T/X), expiry, CDL photo upload</li>
+                <li style="color: var(--text-secondary);">See <a href="workflow-03-documents.html">workflow-03-documents.html</a>
+                    for the Qualification, Truck Information, Truck Documents, and Agreements screens</li>
+            </ul>
+
+            <h3>Driver Post-Approval Profile (React Native — vcg_driverr)</h3>
+            <ul class="feature-list">
+                <li><strong>View Profile:</strong> Display driver info, CDL details, truck info, verification status</li>
                 <li><strong>Availability Toggle:</strong> Set driver availability for new trips</li>
+                <li><strong>Bank Details:</strong> <code>src/screens/profile/EditBankDetailsScreen.jsx</code> — account
+                    holder name, bank name, account number, Routing Number (US ACH; field renamed from IFSC Code)</li>
             </ul>
 
             <h3>Admin Dashboard (TruckAdmin)</h3>
@@ -398,7 +557,78 @@
         <!-- API Endpoints -->
         <section class="section">
             <h2>🔌 API Endpoints</h2>
-            
+
+            <h3>CP Shipper Onboarding (US)</h3>
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/shipper/profile</code>
+                <p>Get current shipper profile + <code>profileStatus</code> (drives resume-onboarding)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/shipper/profile/basic</code>
+                <p>Save Your Information (first/last name, phone, email)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/shipper/profile/account-type</code>
+                <p>Set <code>accountType</code> ('individual' | 'business')</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/shipper/profile/business</code>
+                <p>Save Business Information — only called when accountType = 'business'</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/shipper/profile/primary-location</code>
+                <p>Save (or skip) the primary shipping location</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>POST</strong> <code>/api/shipper/profile/accept-terms</code>
+                <p>Record <code>termsAcceptedAt</code>; marks <code>profileStatus = 'complete'</code> and unlocks Shipper Home</p>
+            </div>
+
+            <h3>CP Driver Onboarding — Driver Information + CDL Information (actual implementation)</h3>
+            <div class="api-endpoint">
+                <strong>GET</strong> <code>/api/drivers/me</code>
+                <p><code>requireAuth + requireRole('driver')</code>. Returns the current driver, populated with
+                    <code>truckId</code>, plus a <code>documents</code> array pulled from the <code>Document</code> collection.</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/drivers/me/driver-info</code>
+                <p>JSON body. Saves first/last name (on <code>User</code>) and date of birth + address (on
+                    <code>Driver</code>). Advances <code>onboardingStep</code> from <code>'driver_info'</code> to
+                    <code>'cdl_info'</code>.</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/drivers/me/cdl-info</code>
+                <p>Multipart (file field <code>cdlDocument</code> — JPG/PNG/PDF, 8MB max). Saves CDL number, issuing
+                    state, class, endorsements, expiry; uploads the CDL photo as a <code>Document</code>
+                    (<code>docType: 'cdl'</code>). Advances <code>onboardingStep</code> to <code>'qualification'</code>.</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/drivers/:driverId/availability</code>
+                <p>Update driver <code>isOnline</code> status — own profile only (403 if <code>driver.userId</code>
+                    doesn't match the authenticated user)</p>
+            </div>
+
+            <div class="api-endpoint">
+                <strong>PUT</strong> <code>/api/drivers/me/bank</code>
+                <p>Update bank details. Body key is now <code>routingNumber</code> (US ACH) — renamed from the old
+                    <code>ifscCode</code>.</p>
+            </div>
+
+            <p style="color: var(--text-secondary); margin: 0.5rem 0 1.5rem;">
+                The remaining onboarding-step endpoints (<code>/me/qualification</code>, <code>/me/truck-info</code>,
+                <code>/me/truck-documents</code>, <code>/me/agreements</code>) are documented in
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>.
+            </p>
+
+            <h3>Legacy / TruckAdmin &amp; CP Shipper Customer (unchanged — India-market fields still apply here)</h3>
             <div class="api-endpoint">
                 <strong>GET</strong> <code>/api/users/me</code>
                 <p>Get current user profile (Customer)</p>
@@ -407,21 +637,6 @@
             <div class="api-endpoint">
                 <strong>PUT</strong> <code>/api/users/:userId</code>
                 <p>Update user profile information</p>
-            </div>
-
-            <div class="api-endpoint">
-                <strong>GET</strong> <code>/api/drivers/me</code>
-                <p>Get current driver profile</p>
-            </div>
-
-            <div class="api-endpoint">
-                <strong>PUT</strong> <code>/api/drivers/:driverId</code>
-                <p>Update driver profile and license information</p>
-            </div>
-
-            <div class="api-endpoint">
-                <strong>PUT</strong> <code>/api/drivers/:driverId/availability</code>
-                <p>Update driver availability status</p>
             </div>
 
             <div class="api-endpoint">
@@ -469,21 +684,77 @@ Body: {
 }
             </div>
 
-            <h3>Request Example: Update Driver Profile</h3>
+            <h3>Request Example: Driver Information</h3>
             <div class="code-block">
-PUT /api/drivers/507f1f77bcf86cd799439012
+PUT /api/drivers/me/driver-info
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "application/json"
+}
 Body: {
-  "name": "Rajesh Kumar",
-  "phone": "+919988776655",
-  "licenseNumber": "MH12-20220012345",
-  "licenseExpiry": "2028-12-31",
-  "licenseCategory": "Heavy Goods Vehicle",
-  "emergencyContact": {
-    "name": "Sita Kumar",
-    "phone": "+919988776656",
-    "relation": "Spouse"
-  },
-  "isAvailable": true
+  "firstName": "James",
+  "lastName": "Whitfield",
+  "dateOfBirth": "1988-04-12",
+  "address": {
+    "line1": "4821 Maple Ave",
+    "city": "Dallas",
+    "state": "TX",
+    "zip": "75201"
+  }
+}
+            </div>
+
+            <h3>Response Example</h3>
+            <div class="code-block">
+{
+  "success": true,
+  "data": {
+    "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
+    "userId": "66f1a2b3c4d5e6f7a8b9c0d0",
+    "dateOfBirth": "1988-04-12T00:00:00.000Z",
+    "address": {
+      "line1": "4821 Maple Ave",
+      "city": "Dallas",
+      "state": "TX",
+      "zip": "75201"
+    },
+    "onboardingStep": "cdl_info",
+    "approvalStatus": "incomplete"
+  }
+}
+            </div>
+
+            <h3>Request Example: CDL Information</h3>
+            <div class="code-block">
+PUT /api/drivers/me/cdl-info
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "multipart/form-data"
+}
+Form fields: {
+  "licenseNumber": "TX-88213456",
+  "cdlState": "TX",
+  "cdlClass": "A",
+  "endorsements": ["H", "N"],
+  "licenseExpiry": "2029-04-12",
+  "cdlDocument": (file: cdl_front.jpg)
+}
+            </div>
+
+            <h3>Response Example</h3>
+            <div class="code-block">
+{
+  "success": true,
+  "data": {
+    "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
+    "licenseNumber": "TX-88213456",
+    "cdlState": "TX",
+    "cdlClass": "A",
+    "endorsements": ["H", "N"],
+    "licenseExpiry": "2029-04-12T00:00:00.000Z",
+    "onboardingStep": "qualification",
+    "approvalStatus": "incomplete"
+  }
 }
             </div>
         </section>
@@ -560,7 +831,7 @@ Body: {
                 </tbody>
             </table>
 
-            <h3>Driver Model (drivers collection)</h3>
+            <h3>Driver Model (drivers collection) — CP Driver (US) actual schema</h3>
             <table>
                 <thead>
                     <tr>
@@ -578,71 +849,384 @@ Body: {
                     <tr>
                         <td>userId</td>
                         <td>ObjectId</td>
-                        <td>Reference to User model</td>
+                        <td>Reference to User model (name, email, phone live there)</td>
                     </tr>
                     <tr>
-                        <td>name</td>
-                        <td>String</td>
-                        <td>Driver full name</td>
+                        <td>dateOfBirth</td>
+                        <td>Date</td>
+                        <td>Set by Driver Information step</td>
                     </tr>
                     <tr>
-                        <td>phone</td>
-                        <td>String</td>
-                        <td>Contact number</td>
+                        <td>address</td>
+                        <td>Object</td>
+                        <td>{line1, city, state, zip} — set by Driver Information step</td>
                     </tr>
                     <tr>
                         <td>licenseNumber</td>
                         <td>String</td>
-                        <td>Driving license number (unique)</td>
+                        <td>CDL number (field name kept from the old license field; set by CDL Information step)</td>
                     </tr>
                     <tr>
                         <td>licenseExpiry</td>
                         <td>Date</td>
-                        <td>License expiration date</td>
+                        <td>CDL expiration date</td>
                     </tr>
                     <tr>
-                        <td>licenseCategory</td>
+                        <td>cdlState</td>
                         <td>String</td>
-                        <td>License type (e.g., HGV, LMV)</td>
+                        <td>CDL issuing state</td>
                     </tr>
                     <tr>
-                        <td>documents</td>
-                        <td>Object</td>
-                        <td>URLs to uploaded documents</td>
-                    </tr>
-                    <tr>
-                        <td>emergencyContact</td>
-                        <td>Object</td>
-                        <td>{name, phone, relation}</td>
-                    </tr>
-                    <tr>
-                        <td>verificationStatus</td>
+                        <td>cdlClass</td>
                         <td>String</td>
-                        <td>enum: ['pending', 'verified', 'rejected']</td>
+                        <td>enum: ['A', 'B', 'C']</td>
                     </tr>
                     <tr>
-                        <td>isAvailable</td>
+                        <td>endorsements</td>
+                        <td>Array&lt;String&gt;</td>
+                        <td>enum values: ['H', 'N', 'P', 'S', 'T', 'X']</td>
+                    </tr>
+                    <tr>
+                        <td>licenseImageUrl</td>
+                        <td>String</td>
+                        <td style="color: var(--text-secondary);">Deprecated/unused — CDL photo now lives in the <code>Document</code> collection (<code>docType: 'cdl'</code>)</td>
+                    </tr>
+                    <tr>
+                        <td>rcImageUrl</td>
+                        <td>String</td>
+                        <td style="color: var(--text-secondary);">Deprecated/unused — registration doc now lives in <code>Document</code> (<code>docType: 'vehicle_registration'</code>)</td>
+                    </tr>
+                    <tr>
+                        <td>vehicleNumber / vehicleType / vehicleCapacity</td>
+                        <td>String</td>
+                        <td style="color: var(--text-secondary);">Deprecated mirror of the linked <code>Truck</code>, kept only for <code>truck-admin-web</code> compatibility — not source of truth</td>
+                    </tr>
+                    <tr>
+                        <td>qualification</td>
+                        <td>Object</td>
+                        <td>{yearsCdlExperience, medicalCertStatus (valid/expired/pending/exempt), medicalCertExpiry, mvrConsentGiven, mvrConsentAt, roadTestStatus (completed/waived/not_completed), roadTestNotes} — see workflow-03-documents.html</td>
+                    </tr>
+                    <tr>
+                        <td>truckId</td>
+                        <td>ObjectId</td>
+                        <td>Reference to Truck model — see workflow-03-documents.html</td>
+                    </tr>
+                    <tr>
+                        <td>agreements</td>
+                        <td>Object</td>
+                        <td>{tos, privacyPolicy, driverAgreement, mvrConsent} — each {accepted, acceptedAt, version}</td>
+                    </tr>
+                    <tr>
+                        <td>onboardingStep</td>
+                        <td>String</td>
+                        <td>enum: ['driver_info', 'cdl_info', 'qualification', 'truck_info', 'truck_documents', 'agreements', 'submitted']</td>
+                    </tr>
+                    <tr>
+                        <td>approvalStatus</td>
+                        <td>String</td>
+                        <td>enum: ['incomplete', 'pending', 'approved', 'rejected']</td>
+                    </tr>
+                    <tr>
+                        <td>isOnline</td>
                         <td>Boolean</td>
                         <td>Available for new trips</td>
                     </tr>
                     <tr>
-                        <td>rating</td>
+                        <td>averageRating / totalRatings</td>
                         <td>Number</td>
-                        <td>Average rating (0-5)</td>
+                        <td>Rating aggregate</td>
                     </tr>
                     <tr>
-                        <td>tripsCompleted</td>
-                        <td>Number</td>
-                        <td>Total completed trips</td>
+                        <td>bankDetails</td>
+                        <td>Object</td>
+                        <td>{accountHolderName, bankName, accountNumber, routingNumber, isVerified} — <code>routingNumber</code> replaces the old <code>ifscCode</code></td>
                     </tr>
                 </tbody>
             </table>
+            <p style="color: var(--text-secondary);">
+                No Aadhaar/PAN/GST fields on Driver — not applicable to the US market. <code>licenseCategory</code> (e.g.
+                "Heavy Goods Vehicle") no longer exists; it's replaced by <code>cdlClass</code> + <code>endorsements</code>.
+            </p>
+        </section>
+
+        <!-- CP Shipper Onboarding Wireframes -->
+        <section class="section">
+            <h2>🎨 CP Shipper Onboarding Wireframes</h2>
+
+            <div class="wireframe-grid">
+                <!-- Your Information -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Your Information</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Your Information</span>
+                        </div>
+
+                        <form style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-input" placeholder="John" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-input" placeholder="Doe" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-input" placeholder="(555) 123-4567" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-input" placeholder="name@company.com" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                                Continue
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Account Type -->
+                <div class="wireframe">
+                    <div class="wireframe-header">What type of shipper are you?</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Account Type</span>
+                        </div>
+
+                        <div class="info-card" style="border: 2px solid var(--primary-color); margin-bottom: 1rem;">
+                            <div>
+                                <div class="info-value">🏢 Business</div>
+                                <div class="info-label">Shipping on behalf of a company</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-value">👤 Individual</div>
+                                <div class="info-label">Shipping for personal use</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top: 1.5rem;">
+                            Continue
+                        </button>
+                        <p style="color: var(--text-secondary); font-size: 0.8rem; text-align: center; margin-top: 0.75rem;">
+                            Determines whether business information is required.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Business Information -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Business Information (Business accounts only)</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Business Information</span>
+                        </div>
+
+                        <form style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Business / Company Name</label>
+                                <input type="text" class="form-input" placeholder="ABC Logistics LLC" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Business Address</label>
+                                <input type="text" class="form-input" placeholder="123 Main St" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">City / State / ZIP</label>
+                                <input type="text" class="form-input" placeholder="Dallas, TX 75201" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Business Phone / Email (optional)</label>
+                                <input type="text" class="form-input" placeholder="Optional" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                                Continue
+                            </button>
+                        </form>
+                        <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.75rem;">
+                            No EIN/tax ID field here — only collected later if billing or compliance requires it.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Primary Shipping Location -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Primary Location (skippable)</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Primary Location</span>
+                        </div>
+
+                        <form style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Pickup / Ship-From Address</label>
+                                <input type="text" class="form-input" placeholder="123 Warehouse Rd" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">City / State / ZIP</label>
+                                <input type="text" class="form-input" placeholder="Dallas, TX 75201" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                                Continue
+                            </button>
+                            <button type="button" class="btn btn-secondary">
+                                Skip for now
+                            </button>
+                        </form>
+                        <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.75rem;">
+                            A different pickup address can be set per shipment later.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Terms & Agreements -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Terms &amp; Agreements</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Terms &amp; Agreements</span>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-value">☑ CP Terms of Service</div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div>
+                                <div class="info-value">☑ Privacy Policy</div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div>
+                                <div class="info-value">☑ Shipping / Customer Agreement</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top: 1.5rem;">
+                            Agree &amp; Continue
+                        </button>
+                        <p style="color: var(--text-secondary); font-size: 0.8rem; text-align: center; margin-top: 0.75rem;">
+                            Continuing goes straight to Shipper Home — no payment setup required yet.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CP Driver Onboarding Wireframes -->
+        <section class="section">
+            <h2>🎨 CP Driver Onboarding Wireframes</h2>
+
+            <div class="wireframe-grid">
+                <!-- Driver Information -->
+                <div class="wireframe">
+                    <div class="wireframe-header">Driver Information</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>Driver Information</span>
+                        </div>
+
+                        <form style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-input" placeholder="James" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-input" placeholder="Whitfield" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="text" class="form-input" placeholder="04/12/1988" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Address</label>
+                                <input type="text" class="form-input" placeholder="4821 Maple Ave" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">City / State / ZIP</label>
+                                <input type="text" class="form-input" placeholder="Dallas, TX 75201" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                                Continue
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- CDL Information -->
+                <div class="wireframe">
+                    <div class="wireframe-header">CDL Information</div>
+                    <div class="phone-mockup">
+                        <div class="app-header">
+                            <span class="back-btn">←</span>
+                            <span>CDL Information</span>
+                        </div>
+
+                        <form style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">CDL Number</label>
+                                <input type="text" class="form-input" placeholder="TX-88213456" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Issuing State</label>
+                                <input type="text" class="form-input" placeholder="TX" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Class</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <span class="badge badge-success">A ✓</span>
+                                    <span class="badge" style="background: var(--light-bg); color: var(--text-secondary);">B</span>
+                                    <span class="badge" style="background: var(--light-bg); color: var(--text-secondary);">C</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Endorsements</label>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <span class="badge badge-success">H ✓</span>
+                                    <span class="badge badge-success">N ✓</span>
+                                    <span class="badge" style="background: var(--light-bg); color: var(--text-secondary);">P</span>
+                                    <span class="badge" style="background: var(--light-bg); color: var(--text-secondary);">S</span>
+                                    <span class="badge" style="background: var(--light-bg); color: var(--text-secondary);">T</span>
+                                    <span class="badge" style="background: var(--light-bg); color: var(--text-secondary);">X</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Expiration Date</label>
+                                <input type="text" class="form-input" placeholder="04/12/2029" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CDL Photo</label>
+                                <div class="info-card" style="justify-content: center; color: var(--text-secondary);">📷 Upload CDL photo (JPG/PNG/PDF)</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                                Continue
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Screen Wireframes -->
         <section class="section">
             <h2>🎨 Screen Wireframes</h2>
-            
+
             <div class="wireframe-grid">
                 <!-- Customer Profile View -->
                 <div class="wireframe">
@@ -761,27 +1345,34 @@ Body: {
                         </div>
 
                         <div class="profile-avatar">
-                            RK
+                            JW
                         </div>
 
                         <div style="text-align: center; margin-bottom: 1.5rem;">
-                            <h3 style="margin-bottom: 0.25rem;">Rajesh Kumar</h3>
-                            <p style="color: var(--text-secondary); font-size: 0.875rem;">Professional Driver</p>
+                            <h3 style="margin-bottom: 0.25rem;">James Whitfield</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem;">CDL Class A Driver</p>
                             <div style="margin-top: 0.5rem;">
-                                <span class="badge badge-success">Verified</span>
+                                <span class="badge badge-success">Approved</span>
                                 <span class="badge badge-success" style="margin-left: 0.5rem;">Available</span>
                             </div>
                         </div>
 
                         <div class="tab-group">
                             <button class="tab active">Personal</button>
-                            <button class="tab">License</button>
+                            <button class="tab">CDL</button>
                         </div>
 
                         <div class="info-card">
                             <div>
-                                <div class="info-label">Phone</div>
-                                <div class="info-value">+91 99887 76655</div>
+                                <div class="info-label">Date of Birth</div>
+                                <div class="info-value">04/12/1988</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Address</div>
+                                <div class="info-value">4821 Maple Ave<br><small>Dallas, TX 75201</small></div>
                             </div>
                         </div>
 
@@ -792,73 +1383,65 @@ Body: {
                             </div>
                         </div>
 
-                        <div class="info-card">
-                            <div>
-                                <div class="info-label">Emergency Contact</div>
-                                <div class="info-value">Sita Kumar<br><small>+91 99887 76656</small></div>
-                            </div>
-                        </div>
-
                         <button class="btn btn-primary" style="margin-top: 1rem;">
                             Edit Profile
                         </button>
                     </div>
                 </div>
 
-                <!-- Driver License Info -->
+                <!-- Driver CDL Info -->
                 <div class="wireframe">
-                    <div class="wireframe-header">Driver Profile - License Info</div>
+                    <div class="wireframe-header">Driver Profile - CDL Info</div>
                     <div class="phone-mockup">
                         <div class="app-header">
                             <span class="back-btn">←</span>
-                            <span>License Information</span>
+                            <span>CDL Information</span>
                         </div>
 
                         <div class="tab-group">
                             <button class="tab">Personal</button>
-                            <button class="tab active">License</button>
+                            <button class="tab active">CDL</button>
                         </div>
 
                         <div class="info-card">
                             <div>
-                                <div class="info-label">License Number</div>
-                                <div class="info-value">MH12-20220012345</div>
+                                <div class="info-label">CDL Number</div>
+                                <div class="info-value">TX-88213456</div>
                             </div>
                         </div>
 
                         <div class="info-card">
                             <div>
-                                <div class="info-label">Category</div>
-                                <div class="info-value">Heavy Goods Vehicle</div>
+                                <div class="info-label">Issuing State / Class</div>
+                                <div class="info-value">TX &middot; Class A</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div>
+                                <div class="info-label">Endorsements</div>
+                                <div class="info-value">H, N</div>
                             </div>
                         </div>
 
                         <div class="info-card">
                             <div>
                                 <div class="info-label">Expiry Date</div>
-                                <div class="info-value">31 Dec 2028</div>
+                                <div class="info-value">12 Apr 2029</div>
                             </div>
                         </div>
 
                         <div class="info-card">
                             <div>
-                                <div class="info-label">Documents Status</div>
+                                <div class="info-label">Document Status</div>
                                 <div>
-                                    <div class="info-value">License: <span class="badge badge-success">Verified</span></div>
-                                    <div class="info-value">Aadhaar: <span class="badge badge-success">Verified</span></div>
-                                    <div class="info-value">PAN: <span class="badge badge-success">Verified</span></div>
+                                    <div class="info-value">CDL Photo: <span class="badge badge-success">Approved</span></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 8px;">
-                            <p style="font-size: 0.875rem; color: #92400e;">
-                                ⚠️ Your license will expire in 1,057 days. Update before expiry to continue receiving trips.
-                            </p>
-                        </div>
-
                         <button class="btn btn-primary" style="margin-top: 1rem;">
-                            Update License Info
+                            Update CDL Info
                         </button>
                     </div>
                 </div>
@@ -893,8 +1476,8 @@ Body: {
             <h3>Availability Toggle (Drivers)</h3>
             <ol style="line-height: 2;">
                 <li>Driver toggles availability switch</li>
-                <li>App sends PUT to <code>/api/drivers/:id/availability</code></li>
-                <li>Backend updates <code>isAvailable</code> field</li>
+                <li>App sends PUT to <code>/api/drivers/:driverId/availability</code> with <code>{ isOnline }</code></li>
+                <li>Backend updates the <code>isOnline</code> field (own profile only — 403 otherwise)</li>
                 <li>If unavailable, driver excluded from trip assignments</li>
                 <li>Status reflected in admin dashboard</li>
             </ol>

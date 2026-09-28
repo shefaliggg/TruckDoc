@@ -405,34 +405,57 @@
         <header>
             <a href="../index.html" class="back-link">← Back to Index</a>
             <h1>📄 Document Upload & Verification</h1>
-            <p>Driver uploads required documents for identity and license verification</p>
+            <p>CP Driver uploads required CDL, medical, and truck-compliance documents during onboarding</p>
         </header>
 
         <!-- Workflow Goal -->
         <section class="section">
             <h2>📋 Workflow Goal</h2>
-            <p>Enable drivers to upload required documents (Driving License, Aadhaar Card, PAN Card, Photo) during the onboarding process. Documents are uploaded to secure cloud storage and tagged for AI verification. This workflow ensures all necessary documentation is collected before driver approval.</p>
+            <p>Enable CP Driver drivers to upload required documents — CDL, Medical Certificate, Vehicle Registration, Insurance, Inspection/Safety, and Operating Authority — as part of the driver onboarding step flow (<code>Driver.onboardingStep</code>). Documents are stored in a dedicated <code>Document</code> collection, one current document per <code>{driverId, docType}</code> pair — re-uploading a document type replaces the previous file rather than keeping version history. This workflow ensures all applicable documentation is collected before a driver can be submitted for admin approval (<a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>).</p>
+            <div class="api-endpoint" style="border-left-color: var(--warning-color); background: #fef3c7;">
+                <strong>⚠ No AI/OCR verification is wired up yet.</strong> Documents are stored with
+                <code>status: 'pending'</code> and sit there until an admin reviews the driver as a whole
+                (<code>approveDriver</code>/<code>rejectDriver</code>) — there is currently no automated OCR/AI
+                verification pipeline and no per-document approve/reject endpoint. See
+                <a href="workflow-04-ai-verification.html">workflow-04-ai-verification.html</a> for the intended future
+                state of automated verification.
+            </div>
         </section>
 
         <!-- Frontend Pages -->
         <section class="section">
             <h2>📱 Frontend Pages</h2>
             
-            <h3>TruckDriver Mobile App</h3>
+            <h3>CP Driver Mobile App (React Native — vcg_driverr)</h3>
             <ul class="feature-list">
-                <li><strong>Document Upload Screen:</strong> List of required documents with upload status</li>
-                <li><strong>Camera/Gallery Selection:</strong> Option to capture photo or select from gallery</li>
-                <li><strong>Document Preview:</strong> Preview uploaded image before submission</li>
-                <li><strong>Upload Progress:</strong> Visual indicator during file upload</li>
-                <li><strong>Verification Status:</strong> Real-time status of document verification</li>
-                <li><strong>Re-upload Option:</strong> Ability to re-upload rejected documents</li>
+                <li><strong>CDL Information:</strong> <code>onboarding/CdlInformationScreen.jsx</code> — CDL fields
+                    plus a required CDL photo/PDF upload (file field <code>cdlDocument</code>)</li>
+                <li><strong>Driver Qualification:</strong> <code>onboarding/DriverQualificationScreen.jsx</code> — years
+                    of CDL experience, medical cert status/expiry, an <em>optional</em> medical cert photo upload (file
+                    field <code>medicalCertDocument</code>), MVR consent checkbox (required to continue), road test
+                    status/notes</li>
+                <li><strong>Truck Documents:</strong> <code>onboarding/TruckDocumentsScreen.jsx</code> — registration
+                    and insurance uploads (required), inspection upload (optional), operating authority upload with a
+                    "Not applicable" toggle (optional/conditional)</li>
+                <li><strong>Document Status:</strong> documents come back on <code>GET /api/drivers/me</code> /
+                    <code>GET /api/drivers/me/documents</code> with a <code>status</code> per document (pending / approved
+                    / rejected), shown on the relevant onboarding screen and on
+                    <code>onboarding/PendingApprovalScreen.jsx</code></li>
+                <li><strong>Re-upload:</strong> re-submitting the same onboarding step's file field simply overwrites the
+                    prior document (no separate delete/re-upload screen — it's the same upload control)</li>
             </ul>
 
             <h3>TruckAdmin Dashboard</h3>
             <ul class="feature-list">
-                <li><strong>Document Review Page:</strong> View all uploaded driver documents</li>
-                <li><strong>Document Preview Modal:</strong> Full-screen document viewer with zoom</li>
-                <li><strong>Verification Actions:</strong> Approve or reject documents with comments</li>
+                <li><strong>Driver Detail View:</strong> pending/incomplete/approved/rejected driver lists are populated
+                    with each driver's <code>documents</code> array (see
+                    <a href="workflow-05-driver-approval.html">workflow-05-driver-approval.html</a>) so an admin can open
+                    a driver and view their uploaded CDL / Medical Cert / Registration / Insurance / Inspection /
+                    Operating Authority files</li>
+                <li style="color: var(--text-secondary);"><strong>Not yet built:</strong> there is no dedicated
+                    per-document review page, preview modal, or per-document approve/reject action today — verification
+                    is currently all-or-nothing at the driver level via
+                    <code>PUT /api/admin/drivers/:id/approve</code> / <code>/reject</code></li>
             </ul>
         </section>
 
@@ -441,41 +464,67 @@
             <h2>🔌 API Endpoints</h2>
             
             <div class="api-endpoint">
-                <strong>POST</strong> <code>/api/drivers/:driverId/documents/upload</code>
-                <p>Upload a single document (multipart/form-data)</p>
+                <strong>GET</strong> <code>/api/drivers/me/documents</code>
+                <p><code>requireAuth + requireRole('driver')</code>. Returns <code>{ success: true, data: Document[] }</code> — every document currently on file for this driver.</p>
             </div>
 
             <div class="api-endpoint">
-                <strong>GET</strong> <code>/api/drivers/:driverId/documents</code>
-                <p>Get list of all uploaded documents with status</p>
+                <strong>GET</strong> <code>/api/drivers/me</code>
+                <p>Also returns a <code>documents</code> array alongside the driver profile (and populates <code>truckId</code>).</p>
             </div>
 
             <div class="api-endpoint">
-                <strong>GET</strong> <code>/api/drivers/:driverId/documents/:documentId</code>
-                <p>Get specific document details and URL</p>
+                <strong>PUT</strong> <code>/api/drivers/me/cdl-info</code>
+                <p>Multipart, file field <code>cdlDocument</code>. Upserts the driver's <code>cdl</code> document (JPG/PNG/PDF, 8MB max) alongside the CDL info fields; sets <code>expiresAt</code> to the CDL expiry.</p>
             </div>
 
             <div class="api-endpoint">
-                <strong>DELETE</strong> <code>/api/drivers/:driverId/documents/:documentId</code>
-                <p>Delete a document (before verification only)</p>
+                <strong>PUT</strong> <code>/api/drivers/me/qualification</code>
+                <p>Multipart, file field <code>medicalCertDocument</code> (optional). Upserts the driver's <code>medical_cert</code> document if a file is included; sets <code>expiresAt</code> to the medical cert expiry.</p>
             </div>
 
             <div class="api-endpoint">
-                <strong>PUT</strong> <code>/api/drivers/:driverId/documents/:documentId/verify</code>
-                <p>Admin: Verify or reject document</p>
+                <strong>PUT</strong> <code>/api/drivers/me/truck-documents</code>
+                <p>Multipart, file fields <code>registration</code> / <code>insurance</code> / <code>inspection</code> / <code>operatingAuthority</code> — only the fields actually present in the request are uploaded/upserted, mapping to <code>docType</code> values <code>vehicle_registration</code> / <code>insurance</code> / <code>inspection</code> / <code>operating_authority</code> respectively. Advances <code>onboardingStep</code> to <code>'agreements'</code>.</p>
             </div>
 
-            <h3>Request Example: Upload Document</h3>
+            <div class="api-endpoint" style="border-left-color: var(--warning-color);">
+                <strong>Not implemented:</strong> there is no <code>DELETE</code> endpoint and no per-document
+                <code>verify</code> endpoint. "Re-upload" is just calling the same step endpoint again with a new file —
+                <code>upsertDocument</code> overwrites the existing <code>{driverId, docType}</code> record, resets
+                <code>status</code> to <code>'pending'</code>, and clears <code>rejectionReason</code> /
+                <code>reviewedAt</code> / <code>reviewedBy</code>.
+            </div>
+
+            <h3>Request Example: CDL Information (info + document in one call)</h3>
             <div class="code-block">
-POST /api/drivers/507f1f77bcf86cd799439012/documents/upload
+PUT /api/drivers/me/cdl-info
 Headers: {
   "Authorization": "Bearer eyJhbGc...",
   "Content-Type": "multipart/form-data"
 }
-FormData: {
-  "documentType": "drivingLicense",
-  "file": [Binary File Data],
-  "description": "Front side of driving license"
+Form fields: {
+  "licenseNumber": "TX-88213456",
+  "cdlState": "TX",
+  "cdlClass": "A",
+  "endorsements": ["H", "N"],
+  "licenseExpiry": "2029-04-12",
+  "cdlDocument": (file: cdl_front.jpg)
+}
+            </div>
+
+            <h3>Request Example: Truck Documents</h3>
+            <div class="code-block">
+PUT /api/drivers/me/truck-documents
+Headers: {
+  "Authorization": "Bearer eyJhbGc...",
+  "Content-Type": "multipart/form-data"
+}
+Form fields: {
+  "registration": (file: registration.pdf),
+  "insurance": (file: insurance_cert.pdf),
+  "inspection": (file: annual_inspection.jpg)
+  // "operatingAuthority" omitted — driver marked "Not applicable" in-app
 }
             </div>
 
@@ -483,53 +532,34 @@ FormData: {
             <div class="code-block">
 {
   "success": true,
-  "message": "Document uploaded successfully",
   "data": {
-    "_id": "65a1b2c3d4e5f6789012345",
-    "driverId": "507f1f77bcf86cd799439012",
-    "documentType": "drivingLicense",
-    "fileName": "DL_507f1f77_1704715200000.jpg",
-    "fileUrl": "https://vcg-docs.s3.amazonaws.com/drivers/...",
-    "fileSize": 2048576,
-    "mimeType": "image/jpeg",
-    "uploadedAt": "2026-01-08T10:00:00Z",
-    "verificationStatus": "pending",
-    "aiVerificationResults": null
+    "driver": {
+      "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
+      "onboardingStep": "agreements",
+      "approvalStatus": "incomplete"
+    },
+    "documents": [
+      { "_id": "66f...", "docType": "cdl", "status": "pending", "fileUrl": "uploads/drivers/1735689600000_cdlDocument.jpg" },
+      { "_id": "66f...", "docType": "vehicle_registration", "status": "pending", "fileUrl": "uploads/drivers/1735689610000_registration.pdf" },
+      { "_id": "66f...", "docType": "insurance", "status": "pending", "fileUrl": "uploads/drivers/1735689620000_insurance.pdf" },
+      { "_id": "66f...", "docType": "inspection", "status": "pending", "fileUrl": "uploads/drivers/1735689630000_inspection.jpg" }
+    ]
   }
 }
             </div>
 
             <h3>Request Example: Get Documents List</h3>
             <div class="code-block">
-GET /api/drivers/507f1f77bcf86cd799439012/documents
+GET /api/drivers/me/documents
+Headers: { "Authorization": "Bearer eyJhbGc..." }
 
 Response: {
   "success": true,
-  "data": {
-    "documents": [
-      {
-        "_id": "65a1b2c3d4e5f6789012345",
-        "documentType": "drivingLicense",
-        "fileName": "DL_507f1f77_1704715200000.jpg",
-        "verificationStatus": "verified",
-        "uploadedAt": "2026-01-08T10:00:00Z"
-      },
-      {
-        "_id": "65a1b2c3d4e5f6789012346",
-        "documentType": "aadhaar",
-        "fileName": "Aadhaar_507f1f77_1704715300000.jpg",
-        "verificationStatus": "pending",
-        "uploadedAt": "2026-01-08T10:05:00Z"
-      }
-    ],
-    "completionStatus": {
-      "required": 4,
-      "uploaded": 2,
-      "verified": 1,
-      "pending": 1,
-      "rejected": 0
-    }
-  }
+  "data": [
+    { "_id": "66f...", "docType": "cdl", "status": "approved", "fileUrl": "uploads/drivers/....jpg", "expiresAt": "2029-04-12T00:00:00.000Z" },
+    { "_id": "66f...", "docType": "vehicle_registration", "status": "pending", "fileUrl": "uploads/drivers/....pdf" },
+    { "_id": "66f...", "docType": "insurance", "status": "pending", "fileUrl": "uploads/drivers/....pdf" }
+  ]
 }
             </div>
         </section>
@@ -538,7 +568,7 @@ Response: {
         <section class="section">
             <h2>💾 Database Models</h2>
             
-            <h3>Driver Model (Extended)</h3>
+            <h3>Document Model (documents collection) — actual implementation</h3>
             <table>
                 <thead>
                     <tr>
@@ -549,110 +579,118 @@ Response: {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>documents</td>
-                        <td>Array</td>
-                        <td>Array of document objects</td>
-                    </tr>
-                    <tr>
-                        <td>documents._id</td>
+                        <td>driverId</td>
                         <td>ObjectId</td>
-                        <td>Document unique identifier</td>
+                        <td>Reference to Driver, required, indexed</td>
                     </tr>
                     <tr>
-                        <td>documents.documentType</td>
+                        <td>ownerType</td>
                         <td>String</td>
-                        <td>enum: ['drivingLicense', 'aadhaar', 'pan', 'photo']</td>
+                        <td>enum: ['driver', 'truck'] — which entity the document belongs to</td>
                     </tr>
                     <tr>
-                        <td>documents.fileName</td>
+                        <td>docType</td>
                         <td>String</td>
-                        <td>Original filename with timestamp</td>
+                        <td>enum: ['cdl', 'medical_cert', 'vehicle_registration', 'insurance', 'inspection', 'operating_authority']</td>
                     </tr>
                     <tr>
-                        <td>documents.fileUrl</td>
+                        <td>fileUrl</td>
                         <td>String</td>
-                        <td>S3 or cloud storage URL</td>
+                        <td>Required. Relative path, e.g. <code>uploads/drivers/1735689600000_cdlDocument.jpg</code> (local disk, served via <code>/uploads</code> static route — not S3)</td>
                     </tr>
                     <tr>
-                        <td>documents.fileSize</td>
-                        <td>Number</td>
-                        <td>File size in bytes</td>
-                    </tr>
-                    <tr>
-                        <td>documents.mimeType</td>
+                        <td>fileName</td>
                         <td>String</td>
-                        <td>File MIME type (image/jpeg, image/png, application/pdf)</td>
+                        <td>Original uploaded filename</td>
                     </tr>
                     <tr>
-                        <td>documents.uploadedAt</td>
+                        <td>status</td>
+                        <td>String</td>
+                        <td>enum: ['pending', 'approved', 'rejected'] (default 'pending') — no automated process sets this today; see caveat above</td>
+                    </tr>
+                    <tr>
+                        <td>rejectionReason</td>
+                        <td>String</td>
+                        <td>Schema field exists, not currently set by any controller</td>
+                    </tr>
+                    <tr>
+                        <td>expiresAt</td>
                         <td>Date</td>
-                        <td>Upload timestamp</td>
+                        <td>Set from CDL expiry / medical cert expiry on upload; not set for truck documents</td>
                     </tr>
                     <tr>
-                        <td>documents.verificationStatus</td>
-                        <td>String</td>
-                        <td>enum: ['pending', 'processing', 'verified', 'rejected']</td>
+                        <td>reviewedAt / reviewedBy</td>
+                        <td>Date / ObjectId</td>
+                        <td>Schema fields exist (reviewedBy refs User), not currently set by any controller</td>
                     </tr>
                     <tr>
-                        <td>documents.rejectionReason</td>
-                        <td>String</td>
-                        <td>Reason if rejected</td>
-                    </tr>
-                    <tr>
-                        <td>documents.aiVerificationResults</td>
-                        <td>Object</td>
-                        <td>OCR and face recognition results</td>
-                    </tr>
-                    <tr>
-                        <td>documents.verifiedBy</td>
-                        <td>ObjectId</td>
-                        <td>Admin who verified (ref: User)</td>
-                    </tr>
-                    <tr>
-                        <td>documents.verifiedAt</td>
+                        <td>createdAt / updatedAt</td>
                         <td>Date</td>
-                        <td>Verification timestamp</td>
+                        <td>Timestamps</td>
                     </tr>
                 </tbody>
             </table>
+            <p style="color: var(--text-secondary);">
+                Unique compound index on <code>{driverId, docType}</code> — there is at most <strong>one current
+                document per type</strong> per driver. Uploading again for the same <code>docType</code> replaces the
+                existing record (no version history is kept).
+            </p>
 
-            <h3>Required Documents</h3>
+            <h3>Required Documents (by onboarding step)</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Document Type</th>
-                        <th>Required</th>
-                        <th>Format</th>
-                        <th>Max Size</th>
+                        <th>Document Type (docType)</th>
+                        <th>Required to submit?</th>
+                        <th>Uploaded during</th>
+                        <th>Format / Max Size</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Driving License</td>
+                        <td>CDL (<code>cdl</code>)</td>
                         <td>Yes</td>
-                        <td>JPG, PNG, PDF</td>
-                        <td>5 MB</td>
+                        <td>CDL Information step</td>
+                        <td>JPG, PNG, PDF — 8 MB</td>
                     </tr>
                     <tr>
-                        <td>Aadhaar Card</td>
-                        <td>Yes</td>
-                        <td>JPG, PNG, PDF</td>
-                        <td>5 MB</td>
+                        <td>Medical Certificate (<code>medical_cert</code>)</td>
+                        <td>No — optional at the API level, even though the screen prompts for it</td>
+                        <td>Qualification step</td>
+                        <td>JPG, PNG, PDF — 8 MB</td>
                     </tr>
                     <tr>
-                        <td>PAN Card</td>
+                        <td>Vehicle Registration (<code>vehicle_registration</code>)</td>
                         <td>Yes</td>
-                        <td>JPG, PNG, PDF</td>
-                        <td>5 MB</td>
+                        <td>Truck Documents step</td>
+                        <td>JPG, PNG, PDF — 8 MB</td>
                     </tr>
                     <tr>
-                        <td>Driver Photo</td>
+                        <td>Insurance (<code>insurance</code>)</td>
                         <td>Yes</td>
-                        <td>JPG, PNG</td>
-                        <td>2 MB</td>
+                        <td>Truck Documents step</td>
+                        <td>JPG, PNG, PDF — 8 MB</td>
+                    </tr>
+                    <tr>
+                        <td>Inspection / Safety (<code>inspection</code>)</td>
+                        <td>Optional</td>
+                        <td>Truck Documents step</td>
+                        <td>JPG, PNG, PDF — 8 MB</td>
+                    </tr>
+                    <tr>
+                        <td>Operating Authority (<code>operating_authority</code>)</td>
+                        <td>Conditional — the app offers a "Not applicable" toggle for drivers who don't operate under their own DOT authority</td>
+                        <td>Truck Documents step</td>
+                        <td>JPG, PNG, PDF — 8 MB</td>
                     </tr>
                 </tbody>
             </table>
+            <p style="color: var(--text-secondary);">
+                Submission gate (<code>PUT /api/drivers/me/agreements</code>) only hard-requires the CDL info fields +
+                CDL document, a linked truck, and the registration + insurance documents — missing any of those returns
+                <code>400 { message: 'Onboarding is incomplete', missing: [...] }</code>. There's no such hard check for
+                the medical certificate, inspection, or operating authority documents.
+            </p>
         </section>
 
         <!-- Screen Wireframes -->
@@ -660,75 +698,59 @@ Response: {
             <h2>🎨 Screen Wireframes</h2>
             
             <div class="wireframe-grid">
-                <!-- Document List Screen -->
+                <!-- Truck Documents Screen -->
                 <div class="wireframe">
-                    <div class="wireframe-header">Driver App - Document List</div>
+                    <div class="wireframe-header">Driver App - Truck Documents</div>
                     <div class="phone-mockup">
                         <div class="app-header">
                             <span class="back-btn">←</span>
-                            <span>Upload Documents</span>
+                            <span>Truck Documents</span>
                         </div>
 
                         <div class="step-indicator">
                             <div class="step completed">
-                                <div class="step-number">1</div>
-                                <div class="step-label">Register</div>
+                                <div class="step-number">✓</div>
+                                <div class="step-label">Truck Info</div>
                             </div>
                             <div class="step active">
-                                <div class="step-number">2</div>
+                                <div class="step-number">5</div>
                                 <div class="step-label">Documents</div>
                             </div>
                             <div class="step">
-                                <div class="step-number">3</div>
-                                <div class="step-label">Verify</div>
+                                <div class="step-number">6</div>
+                                <div class="step-label">Agreements</div>
                             </div>
                             <div class="step">
-                                <div class="step-number">4</div>
-                                <div class="step-label">Approved</div>
+                                <div class="step-number">7</div>
+                                <div class="step-label">Submitted</div>
                             </div>
                         </div>
 
                         <div style="padding: 0 0.5rem;">
                             <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.875rem;">
-                                Upload all required documents to complete your profile. Ensure images are clear and readable.
+                                Registration and insurance are required. Upload inspection and operating authority if applicable.
                             </p>
 
-                            <!-- Document 1 -->
+                            <!-- Registration -->
                             <div class="document-card">
                                 <div class="document-header">
-                                    <span class="document-title">📋 Driving License</span>
-                                    <span class="badge badge-success">Verified</span>
+                                    <span class="document-title">📋 Vehicle Registration</span>
+                                    <span class="badge badge-warning">Pending Review</span>
                                 </div>
                                 <div class="file-preview">
-                                    <div class="file-icon">🖼️</div>
+                                    <div class="file-icon">📄</div>
                                     <div class="file-info">
-                                        <div class="file-name">DL_front.jpg</div>
+                                        <div class="file-name">registration.pdf</div>
                                         <div class="file-size">1.2 MB</div>
                                     </div>
                                     <button style="padding: 0.5rem 1rem; border: none; background: var(--light-bg); border-radius: 4px; cursor: pointer;">View</button>
                                 </div>
                             </div>
 
-                            <!-- Document 2 -->
+                            <!-- Insurance -->
                             <div class="document-card">
                                 <div class="document-header">
-                                    <span class="document-title">🆔 Aadhaar Card</span>
-                                    <span class="badge badge-warning">Pending</span>
-                                </div>
-                                <div class="file-preview">
-                                    <div class="file-icon">🖼️</div>
-                                    <div class="file-info">
-                                        <div class="file-name">Aadhaar.jpg</div>
-                                        <div class="file-size">1.5 MB</div>
-                                    </div>
-                                    <button style="padding: 0.5rem 1rem; border: none; background: var(--light-bg); border-radius: 4px; cursor: pointer;">View</button>
-                                </div>
-                            </div>
-
-                            <!-- Document 3 -->
-                            <div class="document-card">
-                                <div class="document-header">
-                                    <span class="document-title">💳 PAN Card</span>
+                                    <span class="document-title">🛡️ Insurance</span>
                                     <span class="badge badge-info">Required</span>
                                 </div>
                                 <div class="upload-area" style="padding: 1.5rem; margin-top: 0.5rem;">
@@ -737,69 +759,80 @@ Response: {
                                 </div>
                             </div>
 
-                            <!-- Document 4 -->
+                            <!-- Inspection -->
                             <div class="document-card">
                                 <div class="document-header">
-                                    <span class="document-title">📸 Driver Photo</span>
-                                    <span class="badge badge-danger">Rejected</span>
+                                    <span class="document-title">🔧 Inspection / Safety</span>
+                                    <span class="badge badge-info">Optional</span>
                                 </div>
-                                <div style="background: #fee2e2; padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem;">
-                                    <p style="color: #991b1b; font-size: 0.875rem;">⚠️ Photo is blurry. Please upload a clearer image.</p>
+                                <div class="upload-area" style="padding: 1.5rem; margin-top: 0.5rem;">
+                                    <div class="upload-icon">📤</div>
+                                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Tap to upload</p>
                                 </div>
-                                <button class="btn btn-primary">Re-upload Photo</button>
+                            </div>
+
+                            <!-- Operating Authority -->
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <span class="document-title">🪪 Operating Authority</span>
+                                    <span class="badge badge-info">Optional</span>
+                                </div>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                    <input type="checkbox" checked disabled /> Not applicable — I don't operate under my own DOT authority
+                                </label>
                             </div>
                         </div>
 
-                        <div style="padding: 0 0.5rem; margin-top: 1.5rem;">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 50%;"></div>
-                            </div>
-                            <p style="text-align: center; color: var(--text-secondary); font-size: 0.875rem;">2 of 4 documents verified</p>
-                        </div>
+                        <button class="btn btn-primary" style="margin: 1rem 0.5rem 0;">Continue</button>
                     </div>
                 </div>
 
-                <!-- Upload Screen -->
+                <!-- Medical Certificate Upload -->
                 <div class="wireframe">
-                    <div class="wireframe-header">Driver App - Upload Document</div>
+                    <div class="wireframe-header">Driver App - Medical Certificate</div>
                     <div class="phone-mockup">
                         <div class="app-header">
                             <span class="back-btn">←</span>
-                            <span>Upload PAN Card</span>
+                            <span>Driver Qualification</span>
                         </div>
 
                         <div style="padding: 0 0.5rem;">
-                            <div style="background: #dbeafe; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                                <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">📋 Upload Guidelines</h4>
-                                <ul style="color: var(--text-primary); font-size: 0.875rem; padding-left: 1.5rem; line-height: 1.8;">
-                                    <li>Clear, readable image</li>
-                                    <li>All corners visible</li>
-                                    <li>No glare or shadows</li>
-                                    <li>JPG, PNG or PDF format</li>
-                                    <li>Maximum size: 5 MB</li>
-                                </ul>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label class="document-title" style="display:block; margin-bottom: 0.4rem;">Years of CDL Experience</label>
+                                <input type="text" style="width:100%; padding:0.6rem; border:2px solid var(--border-color); border-radius:6px;" value="6" disabled />
                             </div>
 
-                            <div class="upload-area">
-                                <div class="upload-icon">📤</div>
-                                <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">Choose Upload Method</h3>
-                                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">Select from camera or gallery</p>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label class="document-title" style="display:block; margin-bottom: 0.4rem;">Medical Cert Status</label>
+                                <span class="badge badge-success">Valid</span>
+                                <span class="badge" style="background: var(--light-bg); color: var(--text-secondary); margin-left: 0.4rem;">Expired</span>
+                                <span class="badge" style="background: var(--light-bg); color: var(--text-secondary); margin-left: 0.4rem;">Pending</span>
+                                <span class="badge" style="background: var(--light-bg); color: var(--text-secondary); margin-left: 0.4rem;">Exempt</span>
                             </div>
 
-                            <button class="btn btn-primary">
-                                📷 Take Photo
-                            </button>
-                            <button class="btn btn-outline">
-                                🖼️ Choose from Gallery
-                            </button>
-
-                            <div style="margin-top: 2rem; padding: 1rem; background: var(--light-bg); border-radius: 8px;">
-                                <h4 style="margin-bottom: 0.5rem;">Why we need this:</h4>
-                                <p style="font-size: 0.875rem; color: var(--text-secondary);">
-                                    PAN card is required for tax purposes and payment processing. Your information is securely stored and encrypted.
-                                </p>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label class="document-title" style="display:block; margin-bottom: 0.4rem;">Medical Cert Expiry</label>
+                                <input type="text" style="width:100%; padding:0.6rem; border:2px solid var(--border-color); border-radius:6px;" value="09/30/2027" disabled />
                             </div>
+
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <span class="document-title">🩺 Medical Cert Photo</span>
+                                    <span class="badge badge-info">Optional</span>
+                                </div>
+                                <div class="upload-area" style="padding: 1.5rem; margin-top: 0.5rem;">
+                                    <div class="upload-icon">📤</div>
+                                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Tap to upload (optional)</p>
+                                </div>
+                            </div>
+
+                            <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.875rem; margin: 1rem 0;">
+                                <input type="checkbox" checked disabled />
+                                I authorize CP to obtain my Motor Vehicle Record (MVR) — required to continue
+                            </label>
                         </div>
+
+                        <button class="btn btn-primary" style="margin: 0 0.5rem;">Continue</button>
                     </div>
                 </div>
 
@@ -816,11 +849,11 @@ Response: {
                             <div style="background: white; border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem;">
                                 <div style="aspect-ratio: 16/10; background: linear-gradient(135deg, #e0e7ff 0%, #fce7f3 100%); display: flex; align-items: center; justify-content: center; position: relative;">
                                     <div style="text-align: center;">
-                                        <div style="font-size: 4rem; margin-bottom: 0.5rem;">🖼️</div>
+                                        <div style="font-size: 4rem; margin-bottom: 0.5rem;">📄</div>
                                         <p style="color: var(--text-secondary);">Document Preview</p>
                                     </div>
                                     <div style="position: absolute; top: 1rem; right: 1rem; background: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem;">
-                                        📋 PAN Card
+                                        🛡️ Insurance
                                     </div>
                                 </div>
                             </div>
@@ -828,18 +861,16 @@ Response: {
                             <div class="file-preview">
                                 <div class="file-icon">📄</div>
                                 <div class="file-info">
-                                    <div class="file-name">PAN_20260108_143052.jpg</div>
-                                    <div class="file-size">1.8 MB • JPG</div>
+                                    <div class="file-name">insurance_cert.pdf</div>
+                                    <div class="file-size">1.8 MB • PDF</div>
                                 </div>
                             </div>
 
                             <div style="background: #d1fae5; padding: 1rem; border-radius: 8px; margin: 1.5rem 0;">
-                                <h4 style="color: #065f46; margin-bottom: 0.5rem;">✓ Quality Check Passed</h4>
+                                <h4 style="color: #065f46; margin-bottom: 0.5rem;">✓ Ready to upload</h4>
                                 <ul style="font-size: 0.875rem; color: #065f46; padding-left: 1.5rem; line-height: 1.8;">
-                                    <li>Image is clear and readable</li>
-                                    <li>All corners visible</li>
-                                    <li>No blur or glare detected</li>
-                                    <li>File size within limit</li>
+                                    <li>File format supported (JPG/PNG/PDF)</li>
+                                    <li>File size within 8 MB limit</li>
                                 </ul>
                             </div>
 
@@ -847,45 +878,73 @@ Response: {
                                 ✓ Confirm & Upload
                             </button>
                             <button class="btn btn-outline">
-                                ↺ Retake Photo
+                                ↺ Choose a different file
                             </button>
 
                             <p style="text-align: center; color: var(--text-secondary); font-size: 0.75rem; margin-top: 1rem;">
-                                Your document will be securely uploaded and verified within 24 hours
+                                No automated quality check runs client-side today — the file is uploaded as-is on confirm.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Uploading Progress -->
+                <!-- Document Status Overview -->
                 <div class="wireframe">
-                    <div class="wireframe-header">Driver App - Upload Progress</div>
+                    <div class="wireframe-header">Driver App - Document Status</div>
                     <div class="phone-mockup">
                         <div class="app-header">
                             <span class="back-btn">←</span>
-                            <span>Uploading...</span>
+                            <span>My Documents</span>
                         </div>
 
-                        <div style="padding: 2rem 1rem; text-align: center;">
-                            <div style="width: 120px; height: 120px; margin: 2rem auto; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; animation: pulse 2s infinite;">
-                                📤
+                        <div style="padding: 0 0.5rem;">
+                            <div class="document-card" style="margin-bottom: 0.75rem;">
+                                <div class="document-header">
+                                    <span class="document-title">📋 CDL</span>
+                                    <span class="badge badge-success">Approved</span>
+                                </div>
                             </div>
-
-                            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Uploading PAN Card</h3>
-                            
-                            <div class="progress-bar" style="margin: 2rem 0;">
-                                <div class="progress-fill" style="width: 75%;"></div>
+                            <div class="document-card" style="margin-bottom: 0.75rem;">
+                                <div class="document-header">
+                                    <span class="document-title">🩺 Medical Certificate</span>
+                                    <span class="badge badge-warning">Pending</span>
+                                </div>
                             </div>
-                            
-                            <p style="color: var(--text-secondary); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">75%</p>
-                            <p style="color: var(--text-secondary); font-size: 0.875rem;">Uploading... Please wait</p>
-
-                            <div style="margin-top: 3rem; padding: 1rem; background: var(--light-bg); border-radius: 8px;">
-                                <p style="font-size: 0.875rem; color: var(--text-secondary);">
-                                    💡 Tip: Keep your documents ready for faster verification
-                                </p>
+                            <div class="document-card" style="margin-bottom: 0.75rem;">
+                                <div class="document-header">
+                                    <span class="document-title">🚚 Vehicle Registration</span>
+                                    <span class="badge badge-warning">Pending</span>
+                                </div>
+                            </div>
+                            <div class="document-card" style="margin-bottom: 0.75rem;">
+                                <div class="document-header">
+                                    <span class="document-title">🛡️ Insurance</span>
+                                    <span class="badge badge-danger">Rejected</span>
+                                </div>
+                                <div style="background: #fee2e2; padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem;">
+                                    <p style="color: #991b1b; font-size: 0.875rem;">⚠️ Document illegible. Please re-upload a clearer copy.</p>
+                                </div>
+                                <button class="btn btn-primary">Re-upload Insurance</button>
+                            </div>
+                            <div class="document-card" style="margin-bottom: 0.75rem;">
+                                <div class="document-header">
+                                    <span class="document-title">🔧 Inspection / Safety</span>
+                                    <span class="badge badge-warning">Pending</span>
+                                </div>
+                            </div>
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <span class="document-title">🪪 Operating Authority</span>
+                                    <span class="badge" style="background: var(--light-bg); color: var(--text-secondary);">Not applicable</span>
+                                </div>
                             </div>
                         </div>
+
+                        <p style="text-align: center; color: var(--text-secondary); font-size: 0.75rem; margin-top: 1rem; padding: 0 0.5rem;">
+                            Per-document status shown here reflects <code>Document.status</code>, but nothing in the
+                            backend currently transitions it away from "pending" automatically — see the caveat in
+                            Workflow Goal above.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -895,111 +954,133 @@ Response: {
         <section class="section">
             <h2>⚙️ Implementation Flow</h2>
             
-            <h3>Document Upload Flow</h3>
+            <h3>Document Upload Flow (Truck Documents example)</h3>
             <ol style="line-height: 2;">
-                <li>Driver navigates to Documents screen from profile setup</li>
-                <li>App fetches current document status via GET <code>/api/drivers/:id/documents</code></li>
-                <li>Driver selects document type to upload</li>
-                <li>App opens camera or gallery picker</li>
-                <li>Driver captures/selects image</li>
-                <li>App performs local quality check (resolution, size, format)</li>
-                <li>Preview screen shows selected image</li>
-                <li>On confirm, app uploads via POST <code>/api/drivers/:id/documents/upload</code></li>
-                <li>Backend stores file in AWS S3 or cloud storage</li>
-                <li>Document record created in database with status "pending"</li>
-                <li>Success response with document details returned</li>
-                <li>AI verification automatically triggered (next workflow)</li>
-                <li>Driver sees updated document list with new status</li>
+                <li>Driver reaches the Truck Documents screen (<code>onboardingStep: 'truck_documents'</code>)</li>
+                <li>App fetches current status via GET <code>/api/drivers/me</code> or <code>/api/drivers/me/documents</code></li>
+                <li>Driver picks files for Registration and Insurance (required); optionally Inspection and Operating
+                    Authority, or toggles "Not applicable" for Operating Authority</li>
+                <li>App opens camera or gallery picker per field</li>
+                <li>On confirm, app submits one multipart PUT to
+                    <code>/api/drivers/me/truck-documents</code> with whichever file fields were filled in</li>
+                <li>Backend saves each file to local disk (multer), then upserts one <code>Document</code> per field
+                    present with <code>status: 'pending'</code></li>
+                <li>Backend advances <code>Driver.onboardingStep</code> from <code>'truck_documents'</code> to
+                    <code>'agreements'</code></li>
+                <li>Response returns the updated driver + full <code>documents</code> array</li>
+                <li>Driver proceeds to Agreements; no automated verification runs at this point (see caveat above)</li>
             </ol>
 
-            <h3>File Upload Process (Backend)</h3>
+            <h3>File Upload Process (Backend, actual)</h3>
             <ol style="line-height: 2;">
                 <li>Receive multipart/form-data request</li>
-                <li>Validate JWT token and driver authorization</li>
-                <li>Validate file type (JPG, PNG, PDF only)</li>
-                <li>Validate file size (max 5MB for documents, 2MB for photo)</li>
-                <li>Generate unique filename with timestamp and driver ID</li>
-                <li>Upload to S3 bucket: <code>vcg-transport/drivers/{driverId}/{documentType}/</code></li>
-                <li>Get signed URL from S3</li>
-                <li>Create document record in Driver.documents array</li>
-                <li>Trigger AI verification job (AWS Lambda or queue)</li>
-                <li>Return document details to client</li>
+                <li><code>requireAuth + requireRole('driver')</code> validates the JWT and role</li>
+                <li>Multer <code>fileFilter</code> validates MIME type — only <code>image/jpeg</code>,
+                    <code>image/png</code>, <code>application/pdf</code> accepted</li>
+                <li>Multer <code>limits.fileSize</code> enforces an 8 MB cap (same limit for every document type — there is
+                    no smaller limit for any particular doc)</li>
+                <li>Multer diskStorage writes the file to <code>uploads/drivers/</code>, filename
+                    <code>{Date.now()}_{fieldname}{ext}</code> (e.g. <code>1735689600000_cdlDocument.jpg</code>)</li>
+                <li><code>upsertDocument()</code> runs <code>Document.findOneAndUpdate({ driverId, docType }, {...}, { upsert: true })</code> —
+                    creates the record on first upload, overwrites it (and resets status to pending, clears any prior
+                    rejection) on re-upload</li>
+                <li>No AI/OCR verification job is queued — the "next workflow" trigger described in the old India-market
+                    version of this doc does not exist yet (see <a href="workflow-04-ai-verification.html">workflow-04-ai-verification.html</a>)</li>
+                <li>Return document/driver details to client</li>
             </ol>
 
-            <h3>Document Re-upload Flow</h3>
+            <h3>Document Re-upload Flow (actual)</h3>
             <ol style="line-height: 2;">
-                <li>Driver sees rejected document with reason</li>
-                <li>Taps "Re-upload" button</li>
-                <li>Previous document deleted via DELETE endpoint (optional)</li>
-                <li>New upload process initiated</li>
-                <li>Old document marked as replaced, new one uploaded</li>
+                <li>Driver revisits the relevant onboarding step screen (CDL Info / Qualification / Truck Documents)</li>
+                <li>Picks a new file for the same field and re-submits the same PUT endpoint</li>
+                <li><code>upsertDocument()</code> overwrites the existing <code>{driverId, docType}</code> record in
+                    place — old file on disk is not deleted, just orphaned; there's no explicit delete step and no
+                    separate "old document" bookkeeping</li>
             </ol>
         </section>
 
         <!-- Business Rules -->
         <section class="section">
             <h2>📐 Business Rules & Validation</h2>
-            
+
             <ul class="feature-list">
-                <li><strong>Required Documents:</strong> All 4 documents must be uploaded before approval</li>
-                <li><strong>File Format:</strong> JPG, PNG for images; PDF accepted for documents only</li>
-                <li><strong>File Size:</strong> Max 5MB for documents, 2MB for driver photo</li>
-                <li><strong>Image Quality:</strong> Minimum 1024x768 resolution, clear and readable</li>
-                <li><strong>Document Type:</strong> Only one document per type (cannot upload duplicate DL)</li>
-                <li><strong>Re-upload Limit:</strong> Maximum 3 re-upload attempts per document</li>
-                <li><strong>Edit Restriction:</strong> Documents cannot be changed after verification</li>
-                <li><strong>Expiry Check:</strong> License expiry date must be future date</li>
-                <li><strong>Storage Duration:</strong> Documents retained for 7 years per compliance</li>
-                <li><strong>Access Control:</strong> Only driver and admins can view documents</li>
+                <li><strong>Required at submission:</strong> CDL info + CDL document, a linked truck, vehicle
+                    registration document, and insurance document — enforced server-side by
+                    <code>PUT /api/drivers/me/agreements</code> (returns <code>400</code> with a <code>missing[]</code>
+                    list otherwise)</li>
+                <li><strong>Not hard-required:</strong> medical certificate document, inspection document, operating
+                    authority document — the app prompts for them but the server doesn't block submission if they're
+                    absent</li>
+                <li><strong>File Format:</strong> JPG, PNG, or PDF — same rule for every document type</li>
+                <li><strong>File Size:</strong> 8 MB max — same limit for every document type</li>
+                <li><strong>One document per type:</strong> unique <code>{driverId, docType}</code> index — re-uploading
+                    replaces the prior document, no version history kept</li>
+                <li><strong>Re-upload Limit:</strong> none enforced — a driver can re-upload a given document type any
+                    number of times</li>
+                <li><strong>Edit Restriction:</strong> none enforced — a document can be re-uploaded even after
+                    <code>status: 'approved'</code>, since nothing currently sets that status anyway (see caveat above)</li>
+                <li><strong>Expiry Check:</strong> <code>expiresAt</code> is stored for CDL and medical cert documents,
+                    but nothing currently blocks trips or re-triggers review when a document is expired</li>
+                <li style="color: var(--text-secondary);"><strong>Not implemented:</strong> minimum image resolution
+                    check, storage-duration/retention policy, and any access-control layer beyond standard JWT auth</li>
             </ul>
         </section>
 
         <!-- Security Considerations -->
         <section class="section">
             <h2>🔒 Security Considerations</h2>
-            
+
+            <div class="api-endpoint" style="border-left-color: var(--danger-color); background: #fee2e2;">
+                <strong>⚠ Storage is local disk, not encrypted cloud storage.</strong> The India-market version of this
+                doc described AWS S3 with AES-256 encryption, signed URLs, antivirus scanning, and EXIF stripping — none
+                of that exists in the current implementation. Files are written to a local <code>uploads/drivers/</code>
+                directory on the server and served back via <code>app.use('/uploads', express.static(...))</code> — a
+                plain, unauthenticated static file route. Anyone with a document's <code>fileUrl</code> path can fetch it
+                without a JWT. This should be treated as a known gap, not a documented feature.
+            </div>
+
             <ul class="feature-list">
-                <li><strong>Encrypted Storage:</strong> Files encrypted at rest in S3 using AES-256</li>
-                <li><strong>Signed URLs:</strong> Temporary pre-signed URLs with 15-minute expiry</li>
-                <li><strong>Access Control:</strong> S3 bucket not publicly accessible</li>
-                <li><strong>File Scanning:</strong> Antivirus scan on all uploaded files</li>
-                <li><strong>Metadata Stripping:</strong> Remove EXIF data from images (location, device info)</li>
-                <li><strong>Authorization:</strong> JWT token required, driver can only upload own documents</li>
-                <li><strong>Rate Limiting:</strong> Max 10 uploads per hour per driver</li>
-                <li><strong>Audit Trail:</strong> All uploads logged with IP, timestamp, and device info</li>
-                <li><strong>Backup:</strong> S3 versioning enabled for document recovery</li>
-                <li><strong>GDPR Compliance:</strong> Right to deletion after 7 years or account closure</li>
+                <li><strong>Authorization to upload:</strong> JWT + <code>requireRole('driver')</code> required; a driver
+                    can only write to their own <code>Driver</code> record (looked up via <code>req.user._id</code>)</li>
+                <li><strong>Authorization to read a file:</strong> none — <code>/uploads</code> is a public static route,
+                    not gated by auth or ownership</li>
+                <li><strong>File type validation:</strong> multer <code>fileFilter</code> restricts to JPG/PNG/PDF</li>
+                <li><strong>File size validation:</strong> multer enforces an 8 MB cap</li>
+                <li style="color: var(--text-secondary);"><strong>Not implemented:</strong> encryption at rest, signed/expiring
+                    URLs, antivirus scanning, EXIF stripping, upload rate limiting, audit logging of uploads, backups/versioning,
+                    and any data-retention/deletion policy</li>
             </ul>
         </section>
 
         <!-- File Storage Structure -->
         <section class="section">
             <h2>📂 File Storage Structure</h2>
-            
-            <h3>AWS S3 Bucket Organization</h3>
+
+            <h3>Local Disk Layout (actual)</h3>
             <div class="code-block">
-vcg-transport-documents/
-├── drivers/
-│   ├── {driverId}/
-│   │   ├── drivingLicense/
-│   │   │   ├── DL_507f1f77_1704715200000.jpg
-│   │   │   └── DL_507f1f77_1704715200000_thumb.jpg
-│   │   ├── aadhaar/
-│   │   │   └── Aadhaar_507f1f77_1704715300000.jpg
-│   │   ├── pan/
-│   │   │   └── PAN_507f1f77_1704715400000.jpg
-│   │   └── photo/
-│   │       └── Photo_507f1f77_1704715500000.jpg
-│   └── ...
-└── backup/
-    └── {date}/
-        └── ...
+vcg_backend/
+└── uploads/
+    └── drivers/
+        ├── 1735689600000_cdlDocument.jpg
+        ├── 1735689610000_medicalCertDocument.pdf
+        ├── 1735689620000_registration.pdf
+        ├── 1735689630000_insurance.pdf
+        ├── 1735689640000_inspection.jpg
+        └── 1735689650000_operatingAuthority.pdf
             </div>
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                All drivers' files sit in one flat <code>uploads/drivers/</code> directory (no per-driver or
+                per-docType subfolders) — the <code>Document.driverId</code> + <code>docType</code> fields in the
+                database are what associate a file back to a specific driver, not the file path.
+            </p>
 
             <h3>Naming Convention</h3>
-            <p><code>{DocumentType}_{DriverId}_{Timestamp}.{ext}</code></p>
+            <p><code>{Date.now()}_{multerFieldName}{ext}</code></p>
             <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
-                Example: <code>DrivingLicense_507f1f77bcf86cd799439012_1704715200000.jpg</code>
+                Example: <code>1735689600000_cdlDocument.jpg</code>. The field name is the multipart form field
+                (<code>cdlDocument</code>, <code>medicalCertDocument</code>, <code>registration</code>,
+                <code>insurance</code>, <code>inspection</code>, <code>operatingAuthority</code>) — not the
+                <code>docType</code> enum value, and not tied to the driver's name or ID.
             </p>
         </section>
 

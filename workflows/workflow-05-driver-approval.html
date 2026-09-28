@@ -266,7 +266,16 @@
 
         <section class="section">
             <h2> Workflow Goal</h2>
-            <p>Enable admin users to review pending driver applications, verify uploaded documents, review AI verification results, and make final approval/rejection decisions. Admins can view all driver information, document images, and provide feedback for rejections. This is the final step before drivers can start accepting trips.</p>
+            <p>Enable admin users to review pending CP Driver applications, verify uploaded documents (CDL, Medical Certificate, Vehicle Registration, Insurance, Inspection/Safety, Operating Authority), review AI verification results, and make final approval/rejection decisions. Admins can view all driver information, document images, and provide feedback for rejections. This is the final step before drivers can start accepting trips.</p>
+            <div class="api-endpoint" style="border-left-color: var(--warning-color); background: #fef3c7;">
+                <strong>New gate: onboarding must be fully submitted first.</strong> <code>PUT /api/admin/drivers/:id/approve</code>
+                now checks <code>driver.onboardingStep === 'submitted'</code> and returns
+                <code>400 { message: 'Driver has not completed onboarding yet' }</code> if the driver hasn't finished
+                every onboarding step (Driver Info → CDL Info → Qualification → Truck Info → Truck Documents →
+                Agreements, see <a href="workflow-02-profile.html">workflow-02-profile.html</a>,
+                <a href="workflow-03-documents.html">workflow-03-documents.html</a>). This prevents an admin from
+                approving a driver who is still mid-onboarding.
+            </div>
         </section>
 
         <section class="section">
@@ -299,7 +308,7 @@
 
             <div class="api-endpoint">
                 <strong>PUT</strong> <code>/api/admin/drivers/:driverId/approve</code>
-                <p>Approve driver application</p>
+                <p>Approve driver application. Requires <code>onboardingStep === 'submitted'</code> — see the gate note above.</p>
             </div>
 
             <div class="api-endpoint">
@@ -321,7 +330,7 @@ Headers: {
 }
 Body: {
   "approvedBy": "507f1f77bcf86cd799439013",
-  "notes": "All documents verified. AI confidence scores acceptable."
+  "notes": "CDL, registration, and insurance all verified."
 }
             </div>
 
@@ -332,7 +341,7 @@ Body: {
   "message": "Driver approved successfully",
   "data": {
     "_id": "507f1f77bcf86cd799439012",
-    "name": "Rajesh Kumar",
+    "name": "James Whitfield",
     "verificationStatus": "verified",
     "approvedBy": "507f1f77bcf86cd799439013",
     "approvedAt": "2026-01-08T14:30:00Z",
@@ -341,14 +350,23 @@ Body: {
 }
             </div>
 
+            <h3>Error Example: Approve Attempted Before Onboarding Is Submitted</h3>
+            <div class="code-block">
+PUT /api/admin/drivers/507f1f77bcf86cd799439012/approve
+
+Response (400): {
+  "message": "Driver has not completed onboarding yet"
+}
+            </div>
+
             <h3>Request Example: Reject Driver</h3>
             <div class="code-block">
 PUT /api/admin/drivers/507f1f77bcf86cd799439012/reject
 Body: {
   "rejectedBy": "507f1f77bcf86cd799439013",
-  "rejectionReason": "License expired",
-  "notes": "Driving license expiry date is 2024-06-15. Please upload valid license.",
-  "rejectedDocuments": ["drivingLicense"]
+  "rejectionReason": "CDL expired",
+  "notes": "CDL expiry date is 2025-06-15. Please upload a valid, unexpired CDL.",
+  "rejectedDocuments": ["cdl"]
 }
 
 Response: {
@@ -356,7 +374,7 @@ Response: {
   "message": "Driver application rejected",
   "data": {
     "verificationStatus": "rejected",
-    "rejectionReason": "License expired",
+    "rejectionReason": "CDL expired",
     "notificationSent": true
   }
 }
@@ -446,8 +464,8 @@ Response: {
                                     <th><input type="checkbox" /></th>
                                     <th>Driver Name</th>
                                     <th>Phone</th>
-                                    <th>License No.</th>
-                                    <th>AI Status</th>
+                                    <th>CDL No.</th>
+                                    <th>Onboarding Step</th>
                                     <th>Submitted</th>
                                     <th>Actions</th>
                                 </tr>
@@ -455,10 +473,10 @@ Response: {
                             <tbody>
                                 <tr>
                                     <td><input type="checkbox" /></td>
-                                    <td><strong>Rajesh Kumar</strong></td>
-                                    <td>+91 99887 76655</td>
-                                    <td>MH12-20220012345</td>
-                                    <td><span class="badge badge-success">AI Passed 95%</span></td>
+                                    <td><strong>James Whitfield</strong></td>
+                                    <td>+1 (214) 555-0142</td>
+                                    <td>TX-88213456</td>
+                                    <td><span class="badge badge-success">submitted</span></td>
                                     <td>2 hours ago</td>
                                     <td>
                                         <button class="btn btn-outline" style="padding: 0.5rem 1rem;">Review</button>
@@ -466,10 +484,10 @@ Response: {
                                 </tr>
                                 <tr>
                                     <td><input type="checkbox" /></td>
-                                    <td><strong>Amit Sharma</strong></td>
-                                    <td>+91 98765 43210</td>
-                                    <td>DL07-20210098765</td>
-                                    <td><span class="badge badge-warning">Manual Review 68%</span></td>
+                                    <td><strong>Marcus Reed</strong></td>
+                                    <td>+1 (312) 555-0198</td>
+                                    <td>IL-20219876</td>
+                                    <td><span class="badge badge-success">submitted</span></td>
                                     <td>5 hours ago</td>
                                     <td>
                                         <button class="btn btn-outline" style="padding: 0.5rem 1rem;">Review</button>
@@ -477,10 +495,10 @@ Response: {
                                 </tr>
                                 <tr>
                                     <td><input type="checkbox" /></td>
-                                    <td><strong>Vikram Singh</strong></td>
-                                    <td>+91 97654 32109</td>
-                                    <td>UP14-20220087654</td>
-                                    <td><span class="badge badge-success">AI Passed 88%</span></td>
+                                    <td><strong>David Okafor</strong></td>
+                                    <td>+1 (602) 555-0176</td>
+                                    <td>AZ-20228765</td>
+                                    <td><span class="badge badge-success">submitted</span></td>
                                     <td>1 day ago</td>
                                     <td>
                                         <button class="btn btn-outline" style="padding: 0.5rem 1rem;">Review</button>
@@ -488,6 +506,11 @@ Response: {
                                 </tr>
                             </tbody>
                         </table>
+                        <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.75rem;">
+                            Every row here already has <code>onboardingStep: 'submitted'</code> — a driver can't reach
+                            this "pending" list otherwise (see the approve-gate note above), so the column is really a
+                            sanity check rather than a filter.
+                        </p>
 
                         <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
                             <button class="btn btn-success">Approve Selected (0)</button>
@@ -502,7 +525,7 @@ Response: {
                         <div class="dashboard-header">
                             <div>
                                 <h3>Driver Application Review</h3>
-                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Rajesh Kumar  Submitted 2 hours ago</p>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">James Whitfield  Submitted 2 hours ago</p>
                             </div>
                             <div style="display: flex; gap: 1rem;">
                                 <button class="btn btn-success"> Approve</button>
@@ -515,53 +538,57 @@ Response: {
                                 <h4 style="margin-bottom: 1rem;">Personal Information</h4>
                                 <div class="info-row">
                                     <span class="info-label">Full Name</span>
-                                    <span class="info-value">Rajesh Kumar</span>
+                                    <span class="info-value">James Whitfield</span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">Phone</span>
-                                    <span class="info-value">+91 99887 76655</span>
+                                    <span class="info-value">+1 (214) 555-0142</span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">Email</span>
-                                    <span class="info-value">rajesh.k@email.com</span>
+                                    <span class="info-value">james.whitfield@email.com</span>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-label">License No.</span>
-                                    <span class="info-value">MH12-20220012345</span>
+                                    <span class="info-label">CDL No. / State</span>
+                                    <span class="info-value">TX-88213456 &middot; TX</span>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-label">License Expiry</span>
-                                    <span class="info-value">31-12-2028</span>
+                                    <span class="info-label">CDL Expiry</span>
+                                    <span class="info-value">04/12/2029</span>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-label">Category</span>
-                                    <span class="info-value">Heavy Goods Vehicle</span>
+                                    <span class="info-label">Class / Endorsements</span>
+                                    <span class="info-value">A &middot; H, N</span>
                                 </div>
                             </div>
 
                             <div class="driver-card">
                                 <h4 style="margin-bottom: 1rem;">AI Verification Results</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.75rem;">
+                                    Not implemented today — shown here for design reference only, see
+                                    <a href="workflow-04-ai-verification.html">workflow-04-ai-verification.html</a>.
+                                </p>
                                 <div style="background: #d1fae5; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                         <span style="font-weight: 600; color: #065f46;">OCR Confidence</span>
                                         <span style="font-weight: 600; color: #065f46;">95%</span>
                                     </div>
-                                    <div style="display: flex; justify-content: space-between;">
+                                    <div style="display: flex; justify-content: space-between; opacity: 0.5;">
                                         <span style="font-weight: 600; color: #065f46;">Face Match</span>
-                                        <span style="font-weight: 600; color: #065f46;">92%</span>
+                                        <span style="font-weight: 600; color: #065f46;">N/A (deferred)</span>
                                     </div>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">Extracted Name</span>
-                                    <span class="info-value">Rajesh Kumar </span>
+                                    <span class="info-value">James Whitfield </span>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-label">Extracted License</span>
-                                    <span class="info-value">MH12-20220012345 </span>
+                                    <span class="info-label">Extracted CDL No.</span>
+                                    <span class="info-value">TX-88213456 </span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">Extracted Expiry</span>
-                                    <span class="info-value">31-12-2028 </span>
+                                    <span class="info-value">04/12/2029 </span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">AI Recommendation</span>
@@ -575,27 +602,40 @@ Response: {
                             <div class="document-grid">
                                 <div class="document-thumbnail">
                                     <div style="font-size: 3rem;"></div>
-                                    <div class="doc-label">Driving License</div>
-                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Verified</span>
+                                    <div class="doc-label">CDL</div>
+                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Pending</span>
                                 </div>
                                 <div class="document-thumbnail">
                                     <div style="font-size: 3rem;"></div>
-                                    <div class="doc-label">Aadhaar Card</div>
-                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Verified</span>
+                                    <div class="doc-label">Medical Certificate</div>
+                                    <span class="badge badge-warning" style="position: absolute; top: 0.5rem; right: 0.5rem;">Pending</span>
                                 </div>
                                 <div class="document-thumbnail">
                                     <div style="font-size: 3rem;"></div>
-                                    <div class="doc-label">PAN Card</div>
-                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Verified</span>
+                                    <div class="doc-label">Vehicle Registration</div>
+                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Pending</span>
                                 </div>
                                 <div class="document-thumbnail">
                                     <div style="font-size: 3rem;"></div>
-                                    <div class="doc-label">Driver Photo</div>
-                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Verified</span>
+                                    <div class="doc-label">Insurance</div>
+                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Pending</span>
+                                </div>
+                                <div class="document-thumbnail">
+                                    <div style="font-size: 3rem;"></div>
+                                    <div class="doc-label">Inspection / Safety</div>
+                                    <span class="badge badge-success" style="position: absolute; top: 0.5rem; right: 0.5rem;">Pending</span>
+                                </div>
+                                <div class="document-thumbnail">
+                                    <div style="font-size: 3rem;"></div>
+                                    <div class="doc-label">Operating Authority</div>
+                                    <span class="badge" style="background: var(--light-bg); color: var(--text-secondary); position: absolute; top: 0.5rem; right: 0.5rem;">Not applicable</span>
                                 </div>
                             </div>
                             <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 1rem;">
-                                Click on any document to view full size
+                                Click on any document to view full size. Badges shown are <code>Document.status</code>
+                                values — all default to "Pending" until an admin approves/rejects the driver overall;
+                                there's no per-document review action today (see
+                                <a href="workflow-03-documents.html">workflow-03-documents.html</a>).
                             </p>
                         </div>
                     </div>
@@ -607,22 +647,22 @@ Response: {
                         <div class="modal">
                             <h3 style="color: var(--success-color); margin-bottom: 1rem;">Approve Driver Application?</h3>
                             <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                                You are about to approve <strong>Rajesh Kumar</strong>. The driver will be notified and can start accepting trips immediately.
+                                You are about to approve <strong>James Whitfield</strong>. The driver will be notified and can start accepting trips immediately.
                             </p>
-                            
+
                             <div class="driver-card">
                                 <h4 style="margin-bottom: 0.5rem;">Driver Summary</h4>
                                 <div class="info-row">
                                     <span class="info-label">Name</span>
-                                    <span class="info-value">Rajesh Kumar</span>
+                                    <span class="info-value">James Whitfield</span>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-label">License</span>
-                                    <span class="info-value">MH12-20220012345</span>
+                                    <span class="info-label">CDL</span>
+                                    <span class="info-value">TX-88213456</span>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-label">AI Confidence</span>
-                                    <span class="info-value" style="color: var(--success-color);">95%</span>
+                                    <span class="info-label">Onboarding Step</span>
+                                    <span class="info-value" style="color: var(--success-color);">submitted</span>
                                 </div>
                             </div>
 
@@ -645,14 +685,14 @@ Response: {
                         <div class="modal">
                             <h3 style="color: var(--danger-color); margin-bottom: 1rem;">Reject Driver Application</h3>
                             <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                                Provide a reason for rejecting <strong>Rajesh Kumar</strong>'s application. The driver will receive this feedback.
+                                Provide a reason for rejecting <strong>James Whitfield</strong>'s application. The driver will receive this feedback.
                             </p>
-                            
+
                             <div style="margin: 1.5rem 0;">
                                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Rejection Reason *</label>
                                 <select style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px;">
                                     <option>Select a reason...</option>
-                                    <option>License expired</option>
+                                    <option>CDL expired</option>
                                     <option>Documents not clear</option>
                                     <option>Information mismatch</option>
                                     <option>Failed AI verification</option>
@@ -671,21 +711,33 @@ Response: {
                                 <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                                     <label style="display: flex; align-items: center; gap: 0.5rem;">
                                         <input type="checkbox" />
-                                        <span>Driving License</span>
+                                        <span>CDL</span>
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 0.5rem;">
                                         <input type="checkbox" />
-                                        <span>Aadhaar Card</span>
+                                        <span>Medical Certificate</span>
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 0.5rem;">
                                         <input type="checkbox" />
-                                        <span>PAN Card</span>
+                                        <span>Vehicle Registration</span>
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 0.5rem;">
                                         <input type="checkbox" />
-                                        <span>Photo</span>
+                                        <span>Insurance</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" />
+                                        <span>Inspection / Safety</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" />
+                                        <span>Operating Authority</span>
                                     </label>
                                 </div>
+                                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;">
+                                    Mockup only — there's no "mark for re-upload" mechanism in the API today; a driver
+                                    simply re-submits the relevant onboarding step's file field to replace a document.
+                                </p>
                             </div>
 
                             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
@@ -714,6 +766,8 @@ Response: {
                 <li>Confirmation modal appears with driver summary</li>
                 <li>Admin adds optional notes and confirms</li>
                 <li>System sends PUT request to /api/admin/drivers/:id/approve</li>
+                <li>Backend first checks <code>onboardingStep === 'submitted'</code> — rejects with 400 if the driver
+                    hasn't finished onboarding (see gate note above)</li>
                 <li>Backend updates verificationStatus to 'verified', sets approvedBy and approvedAt</li>
                 <li>Driver isActive flag set to true</li>
                 <li>Notification sent to driver via email and push notification</li>
@@ -747,9 +801,15 @@ Response: {
                 <li><strong>Review Deadline:</strong> Drivers should be reviewed within 24 hours of submission</li>
                 <li><strong>SLA Monitoring:</strong> System flags applications pending over 48 hours</li>
                 <li><strong>Rejection Requires Reason:</strong> Rejection reason and detailed feedback are mandatory</li>
-                <li><strong>Document Verification:</strong> All 4 required documents must be uploaded</li>
-                <li><strong>AI Threshold:</strong> If AI confidence < 70%, manual review required</li>
-                <li><strong>License Validity:</strong> License expiry date must be at least 30 days in future</li>
+                <li><strong>Document Verification:</strong> CDL, Vehicle Registration, and Insurance are required before
+                    a driver can even reach "submitted" (enforced server-side, see
+                    <a href="workflow-03-documents.html">workflow-03-documents.html</a>); Medical Certificate,
+                    Inspection, and Operating Authority are optional/conditional</li>
+                <li><strong>Onboarding Gate:</strong> <code>approveDriver</code> requires
+                    <code>onboardingStep === 'submitted'</code>, returns 400 otherwise (see gate note above)</li>
+                <li><strong>AI Threshold:</strong> If AI confidence < 70%, manual review required (not implemented — see
+                    <a href="workflow-04-ai-verification.html">workflow-04-ai-verification.html</a>)</li>
+                <li><strong>CDL Validity:</strong> CDL expiry date must be at least 30 days in future</li>
                 <li><strong>Resubmission Limit:</strong> Drivers can resubmit up to 3 times after rejection</li>
                 <li><strong>Approval Notifications:</strong> Driver receives instant notification on approval</li>
                 <li><strong>Audit Trail:</strong> All approval/rejection decisions logged with admin ID and timestamp</li>
