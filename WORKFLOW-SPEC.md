@@ -17,7 +17,7 @@ Source of truth for app development (Shipper, Driver, Admin/Broker apps + backen
 
 1. **Can this person use the platform?** Admin verifies shipper/driver.
 2. **Can this load go live?** Admin reviews shipper's load.
-3. **Is there a binding agreement?** Shipper accepts quote → Rate Confirmation → Driver signs.
+3. **Is there a binding agreement?** Shipper accepts quote → Rate Confirmation generated → Admin reviews & approves → Driver signs.
 4. **Can money be settled?** Delivery → POD → Document verification → Settlement → Payout.
 
 ## 3. Stages
@@ -58,12 +58,15 @@ My Loads → Load → View Quotes. Can view driver profile/qualifications/doc st
 ### 7. Quote acceptance
 System records shipper charge, driver gross, gross margin (e.g. $2,000 / $1,900 / $100). Admin sees all three. Other quotes → `Not Selected` + drivers notified.
 
-### 8. Assignment (system confirmation, admin exception gate)
-Normal: Shipper accepts → System assigns → Rate Confirmation generated. Admin intervenes only if: driver qualification changed, insurance/doc expired, load info changed, pricing outside permitted parameters, operational exception. Admin is NOT a per-quote bottleneck.
+### 8. Assignment (mandatory Admin RC review gate)
+Shipper accepts → System generates Rate Confirmation → **Admin reviews & approves every Rate Confirmation** before it reaches the driver (not exception-only — every load passes through this gate).
+Admin checks: driver qualification/doc status current, insurance not expired, load info correct, pricing within permitted parameters, no operational exception.
+Actions: **Approve & Send to Driver** (→ Rate Con released) · **Request Changes** (edit RC, re-review) · **Reject Assignment** (back to bidding or reassign).
+Status: `Rate Con Pending Admin Review` → `Rate Con Approved`.
 
 ### 9. Rate Confirmation
 Contains: load no., shipper, driver/carrier, pickup/delivery, dates/times, equipment, commodity, weight, special instructions, agreed driver rate, terms, accessorial terms, cancellation terms.
-Driver accepts/signs, timestamp recorded (shipper/broker acknowledgment configurable). Status `Rate Confirmed`; load → `Assigned`.
+Driver receives the admin-approved Rate Con, taps **Acknowledge & Accept**; accepts/signs, timestamp recorded (shipper/broker acknowledgment configurable). Status `Rate Confirmed`; load → `Assigned`. Driver can then proceed to pickup.
 
 ### 10. Pre-pickup
 Driver receives load details, rate con, pickup instructions, BOL/docs. Confirms **Ready for Pickup** (electronic acknowledgment, not a formal signature). → `En Route to Pickup`.
@@ -89,6 +92,18 @@ Driver uploads signed POD, delivery receipt, receiver signature, photos, excepti
 Checklist: Rate Confirmation, pickup docs, BOL, POD, required signatures, exception docs, invoice docs (if required).
 Outcomes: **Documents Verified** / **Documents Missing** (driver notified, uploads, admin re-reviews) / **Correction Required**.
 Load moves to settlement only after required docs are accepted.
+
+**POD rejection/correction loop:**
+```
+Admin rejects POD
+      ↓
+Driver gets notification (reason attached)
+      ↓
+Driver uploads corrected POD
+      ↓
+Admin verifies again
+```
+Applies the same way to any rejected delivery/pickup document, not just POD. Status while looping: `POD Submitted — Correction Required` (does not advance to Documents Verified until admin accepts).
 
 ### 17. Customer billing
 Separate from driver payout. Invoice: freight charge + approved additional charges = total. Payment `Pending → Authorized/Captured or Invoiced → Paid` (timing per payment terms).
@@ -129,7 +144,7 @@ Delivery done, POD verified, docs complete, customer billing recorded, driver se
 ## 4. Status flow
 ```
 DRAFT → PENDING ADMIN REVIEW ⇄ CHANGES REQUESTED
-→ APPROVED → OPEN FOR BIDS → BIDDING → QUOTE ACCEPTED → ASSIGNED → RATE CONFIRMED
+→ APPROVED → OPEN FOR BIDS → BIDDING → QUOTE ACCEPTED → RATE CON PENDING ADMIN REVIEW → RATE CON APPROVED → RATE CONFIRMED (ASSIGNED)
 → EN ROUTE TO PICKUP → AT PICKUP → LOADING → PICKED UP → IN TRANSIT
 → AT DELIVERY → UNLOADING → DELIVERED → POD SUBMITTED → DOCUMENTS VERIFIED
 → SETTLEMENT → PAYOUT / PAYMENT → COMPLETED
@@ -139,6 +154,8 @@ DRAFT → PENDING ADMIN REVIEW ⇄ CHANGES REQUESTED
 ## 5. Document lifecycle
 Formal documents vs. electronic acknowledgments — do not force e-signature on every status change.
 
+**Key principle: don't make every status require a document.** Attach documents only where they naturally occur — Assignment → Rate Confirmation, Pickup → BOL, Delivery → POD, Settlement → statement, Payout → payment record. Status changes like En Route, Arrived, In Transit, Unloading normally carry no document requirement; this keeps the Driver App simple.
+
 | Stage | Document | Signature/Approval |
 |---|---|---|
 | Shipper onboarding | Shipper Agreement | Shipper |
@@ -147,7 +164,7 @@ Formal documents vs. electronic acknowledgments — do not force e-signature on 
 | Admin review | Load approval record | Admin |
 | Quote | Driver quote | Driver submission |
 | Quote acceptance | Acceptance record | Shipper |
-| Assignment | Rate Confirmation | Driver + applicable parties |
+| Assignment | Rate Confirmation | **Admin approval (mandatory, every load)**, then Driver signs |
 | Pickup | BOL / pickup receipt | Applicable parties |
 | Loading | Pickup documentation | Driver/shipper |
 | Transit | Exception documents | Driver/admin |
@@ -157,8 +174,8 @@ Formal documents vs. electronic acknowledgments — do not force e-signature on 
 | Payout | Settlement statement | Driver ack if required |
 
 ## 6. Admin approval matrix
-**Mandatory review:** user onboarding, driver onboarding/qualification, new load before publish, pricing exceptions, additional charges, cancellations, document exceptions, settlement exceptions. Rate confirmation = system-generated + required acceptance.
-**No manual approval for:** every driver quote, normal status updates, navigation, routine messages, normal POD uploads.
+**Mandatory review:** user onboarding, driver onboarding/qualification, new load before publish, **every Rate Confirmation before it reaches the driver**, additional charges, cancellations, document exceptions, settlement exceptions.
+**No manual approval for:** every driver quote (pre-acceptance), normal status updates, navigation, routine messages, normal POD uploads.
 
 ## 7. What each app shows
 - **Shipper:** load detail (route, status, pickup/delivery, equipment, weight, quote count → View Quotes, documents, messages); after acceptance: driver, rate, status, ETA, doc checklist; financials: invoice + payment status.
@@ -174,5 +191,5 @@ Every operational event, document, approval and money movement is logged with ac
 
 ## 10. Open implementation decisions
 - Snapshot the driver's fee % on the load at quote acceptance (plan changes must not alter in-flight loads).
-- Define concrete exception rules for the assignment gate (expired insurance, price threshold, etc.).
+- Admin reviews every Rate Confirmation, but flag rules (expired insurance, price threshold, etc.) should still auto-surface risk items to prioritize the admin's review queue.
 - Payment timing / who collects from shipper; broker vs. carrier contracting structure; legally required signatures — finalize with US transportation counsel, accountant, payment provider. Do not hard-code legal assumptions.
